@@ -1,0 +1,58 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace "com.yalantis.ucrop"
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 19
+        targetSdk 34
+        vectorDrawables.useSupportLibrary = true
+        
+        buildConfigField "String", "LIBRARY_PACKAGE_NAME", "\"com.yalantis.ucrop\""
+    }
+    
+    buildFeatures {
+        buildConfig = true
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    
+    lint {
+        abortOnError false
+    }
+
+    resourcePrefix 'ucrop_'
+}
+
+ext {
+    PUBLISH_ARTIFACT_ID = "ucrop"
+}
+
+apply from: '../publish.gradle'
+
+dependencies {
+    implementation "androidx.appcompat:appcompat:${cfgs.version_appcompat}"
+    implementation "androidx.exifinterface:exifinterface:${cfgs.exifinterface_version}"
+    implementation "androidx.transition:transition:${cfgs.transition}"
+    implementation "com.squareup.okhttp3:okhttp:${cfgs.okhttp}"
+    implementation "androidx.recyclerview:recyclerview:${cfgs.version_recyclerview}"
+    implementation "com.google.code.gson:gson:${cfgs.gson}"
+}

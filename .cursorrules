@@ -1,0 +1,43 @@
+# PictureSelector 项目规则
+
+## 项目概述
+Android 图片选择器库，支持图片、视频、音频选择，以及裁剪、压缩等功能。
+
+## 技术栈
+- **语言**: Kotlin
+- **构建工具**: Gradle
+- **Android SDK**: 支持 Android 5.0+
+- **主要模块**: selector（核心）、camerax（相机）、compress（压缩）、ucrop（裁剪）、ijkplayer-java（视频播放）
+
+## 编码规范
+- 遵循 Kotlin 官方编码规范
+- 类名使用大驼峰（PascalCase），方法名和变量名使用小驼峰（camelCase）
+- 常量使用全大写下划线分隔（UPPER_SNAKE_CASE）
+- 公共 API 必须添加 KDoc 注释，复杂逻辑添加行内注释
+- 注释使用中文
+
+## 代码质量
+- 避免硬编码字符串，使用资源文件
+- 注意 Context 和生命周期管理，避免内存泄漏
+- 耗时操作使用协程或异步处理，避免 ANR
+- 利用 Kotlin 空安全特性，避免空指针异常
+
+## Android 开发实践
+- 使用 ViewBinding 或 DataBinding
+- 动态申请权限，适配 Android 6.0+
+- 图片加载使用 Glide 或 Coil
+- 列表使用 RecyclerView，实现 ViewHolder 模式
+
+## 模块化
+- 各模块保持独立，减少耦合
+- 模块间通信使用接口或回调
+
+## 版本管理
+- 版本号在 config.gradle 中统一管理
+- 遵循语义化版本规范
+
+## 其他
+- 所有回复和注释使用中文
+- Git 提交格式：`类型: 简短描述`（feat/fix/docs/refactor/test/chore）
+- 保持向后兼容性，注意混淆配置和内存管理
+
