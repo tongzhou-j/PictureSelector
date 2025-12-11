@@ -1,120 +1,107 @@
-package com.luck.picture.lib.adapter.holder;
+package com.luck.picture.lib.adapter.holder
 
-import android.content.Context;
-import android.graphics.ColorFilter;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.luck.picture.lib.R;
-import com.luck.picture.lib.adapter.PictureImageGridAdapter;
-import com.luck.picture.lib.config.PictureMimeType;
-import com.luck.picture.lib.config.SelectModeConfig;
-import com.luck.picture.lib.config.SelectorConfig;
-import com.luck.picture.lib.entity.LocalMedia;
-import com.luck.picture.lib.manager.SelectedManager;
-import com.luck.picture.lib.style.SelectMainStyle;
-import com.luck.picture.lib.utils.AnimUtils;
-import com.luck.picture.lib.utils.StyleUtils;
-import com.luck.picture.lib.utils.ValueOf;
-
-import java.util.List;
+import android.content.Context
+import android.graphics.ColorFilter
+import android.text.TextUtils
+import android.view.LayoutInflater
+import android.view.View
+import android.view.View.OnLongClickListener
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.luck.picture.lib.R
+import com.luck.picture.lib.adapter.PictureImageGridAdapter
+import com.luck.picture.lib.config.PictureMimeType
+import com.luck.picture.lib.config.SelectModeConfig
+import com.luck.picture.lib.config.SelectorConfig
+import com.luck.picture.lib.entity.LocalMedia
+import com.luck.picture.lib.manager.SelectedManager
+import com.luck.picture.lib.utils.AnimUtils
+import com.luck.picture.lib.utils.StyleUtils
+import com.luck.picture.lib.utils.ValueOf.toString
 
 /**
  * @author：luck
  * @date：2021/11/20 3:17 下午
  * @describe：BaseRecyclerMediaHolder
  */
-public class BaseRecyclerMediaHolder extends RecyclerView.ViewHolder {
-    public ImageView ivPicture;
-    public TextView tvCheck;
-    public View btnCheck;
-    public Context mContext;
-    public SelectorConfig selectorConfig;
-    public boolean isSelectNumberStyle;
-    public boolean isHandleMask;
-    private ColorFilter defaultColorFilter, selectColorFilter, maskWhiteColorFilter;
+open class BaseRecyclerMediaHolder : RecyclerView.ViewHolder {
+    var ivPicture: ImageView? = null
+    var tvCheck: TextView? = null
+    var btnCheck: View? = null
+    var mContext: Context? = null
+    var selectorConfig: SelectorConfig? = null
+    var isSelectNumberStyle: Boolean = false
+    var isHandleMask: Boolean = false
+    private var defaultColorFilter: ColorFilter? = null
+    private var selectColorFilter: ColorFilter? = null
+    private var maskWhiteColorFilter: ColorFilter? = null
 
-    public static BaseRecyclerMediaHolder generate(ViewGroup parent, int viewType, int resource, SelectorConfig config) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(resource, parent, false);
-        switch (viewType) {
-            case PictureImageGridAdapter.ADAPTER_TYPE_CAMERA:
-                return new CameraViewHolder(itemView);
-            case PictureImageGridAdapter.ADAPTER_TYPE_VIDEO:
-                return new VideoViewHolder(itemView, config);
-            case PictureImageGridAdapter.ADAPTER_TYPE_AUDIO:
-                return new AudioViewHolder(itemView, config);
-            default:
-                return new ImageViewHolder(itemView, config);
+    constructor(itemView: View) : super(itemView)
+
+    constructor(itemView: View, config: SelectorConfig) : super(itemView) {
+        this.selectorConfig = config
+        this.mContext = itemView.context
+        val context = mContext
+        if (context != null) {
+            defaultColorFilter = StyleUtils.getColorFilter(context, R.color.ps_color_20)
+            selectColorFilter = StyleUtils.getColorFilter(context, R.color.ps_color_80)
+            maskWhiteColorFilter = StyleUtils.getColorFilter(context, R.color.ps_color_half_white)
         }
-    }
-
-    public BaseRecyclerMediaHolder(@NonNull View itemView) {
-        super(itemView);
-    }
-
-    public BaseRecyclerMediaHolder(@NonNull View itemView, SelectorConfig config) {
-        super(itemView);
-        this.selectorConfig = config;
-        this.mContext = itemView.getContext();
-        defaultColorFilter = StyleUtils.getColorFilter(mContext, R.color.ps_color_20);
-        selectColorFilter = StyleUtils.getColorFilter(mContext, R.color.ps_color_80);
-        maskWhiteColorFilter = StyleUtils.getColorFilter(mContext, R.color.ps_color_half_white);
-        SelectMainStyle selectMainStyle = selectorConfig.selectorStyle.getSelectMainStyle();
-        isSelectNumberStyle = selectMainStyle.isSelectNumberStyle();
-        ivPicture = itemView.findViewById(R.id.ivPicture);
-        tvCheck = itemView.findViewById(R.id.tvCheck);
-        btnCheck = itemView.findViewById(R.id.btnCheck);
+        val selectMainStyle = selectorConfig!!.selectorStyle?.selectMainStyle
+        isSelectNumberStyle = selectMainStyle?.isSelectNumberStyle ?: false
+        ivPicture = itemView.findViewById<ImageView>(R.id.ivPicture)
+        tvCheck = itemView.findViewById<TextView>(R.id.tvCheck)
+        btnCheck = itemView.findViewById<View>(R.id.btnCheck)
         if (config.selectionMode == SelectModeConfig.SINGLE && config.isDirectReturnSingle) {
-            tvCheck.setVisibility(View.GONE);
-            btnCheck.setVisibility(View.GONE);
+            tvCheck!!.visibility = View.GONE
+            btnCheck!!.visibility = View.GONE
         } else {
-            tvCheck.setVisibility(View.VISIBLE);
-            btnCheck.setVisibility(View.VISIBLE);
+            tvCheck!!.visibility = View.VISIBLE
+            btnCheck!!.visibility = View.VISIBLE
         }
 
         isHandleMask = !config.isDirectReturnSingle
-                && (config.selectionMode == SelectModeConfig.SINGLE || config.selectionMode == SelectModeConfig.MULTIPLE);
+                && (config.selectionMode == SelectModeConfig.SINGLE || config.selectionMode == SelectModeConfig.MULTIPLE)
 
-        int textSize = selectMainStyle.getAdapterSelectTextSize();
+        val textSize = selectMainStyle?.adapterSelectTextSize ?: 0
         if (StyleUtils.checkSizeValidity(textSize)) {
-            tvCheck.setTextSize(textSize);
+            tvCheck!!.setTextSize(textSize.toFloat())
         }
-        int textColor = selectMainStyle.getAdapterSelectTextColor();
+        val textColor = selectMainStyle?.adapterSelectTextColor ?: 0
         if (StyleUtils.checkStyleValidity(textColor)) {
-            tvCheck.setTextColor(textColor);
+            tvCheck!!.setTextColor(textColor)
         }
-        int adapterSelectBackground = selectMainStyle.getSelectBackground();
+        val adapterSelectBackground = selectMainStyle?.selectBackground ?: 0
         if (StyleUtils.checkStyleValidity(adapterSelectBackground)) {
-            tvCheck.setBackgroundResource(adapterSelectBackground);
+            tvCheck!!.setBackgroundResource(adapterSelectBackground)
         }
-        int[] selectStyleGravity = selectMainStyle.getAdapterSelectStyleGravity();
+        val selectStyleGravity = selectMainStyle?.adapterSelectStyleGravity
         if (StyleUtils.checkArrayValidity(selectStyleGravity)) {
-            if (tvCheck.getLayoutParams() instanceof RelativeLayout.LayoutParams) {
-                ((RelativeLayout.LayoutParams) tvCheck.getLayoutParams()).removeRule(RelativeLayout.ALIGN_PARENT_END);
-                for (int i : selectStyleGravity) {
-                    ((RelativeLayout.LayoutParams) tvCheck.getLayoutParams()).addRule(i);
+            if (tvCheck!!.layoutParams is RelativeLayout.LayoutParams) {
+                (tvCheck!!.layoutParams as RelativeLayout.LayoutParams).removeRule(
+                    RelativeLayout.ALIGN_PARENT_END
+                )
+                for (i in selectStyleGravity!!) {
+                    (tvCheck!!.layoutParams as RelativeLayout.LayoutParams).addRule(i)
                 }
             }
-            if (btnCheck.getLayoutParams() instanceof RelativeLayout.LayoutParams) {
-                ((RelativeLayout.LayoutParams) btnCheck.getLayoutParams()).removeRule(RelativeLayout.ALIGN_PARENT_END);
-                for (int i : selectStyleGravity) {
-                    ((RelativeLayout.LayoutParams) btnCheck.getLayoutParams()).addRule(i);
+            if (btnCheck!!.layoutParams is RelativeLayout.LayoutParams) {
+                (btnCheck!!.layoutParams as RelativeLayout.LayoutParams).removeRule(
+                    RelativeLayout.ALIGN_PARENT_END
+                )
+                for (i in selectStyleGravity!!) {
+                    (btnCheck!!.layoutParams as RelativeLayout.LayoutParams).addRule(i)
                 }
             }
 
-            int clickArea = selectMainStyle.getAdapterSelectClickArea();
+            val clickArea = selectMainStyle?.adapterSelectClickArea ?: 0
             if (StyleUtils.checkSizeValidity(clickArea)) {
-                ViewGroup.LayoutParams clickAreaParams = btnCheck.getLayoutParams();
-                clickAreaParams.width = clickArea;
-                clickAreaParams.height = clickArea;
+                val clickAreaParams = btnCheck!!.layoutParams
+                clickAreaParams.width = clickArea
+                clickAreaParams.height = clickArea
             }
         }
     }
@@ -125,102 +112,108 @@ public class BaseRecyclerMediaHolder extends RecyclerView.ViewHolder {
      * @param media
      * @param position
      */
-    public void bindData(LocalMedia media, int position) {
-        media.position = getAbsoluteAdapterPosition();
+    open fun bindData(media: LocalMedia, position: Int) {
+        media.position = absoluteAdapterPosition
 
-        selectedMedia(isSelected(media));
+        selectedMedia(isSelected(media))
 
         if (isSelectNumberStyle) {
-            notifySelectNumberStyle(media);
+            notifySelectNumberStyle(media)
         }
 
-        if (isHandleMask && selectorConfig.isMaxSelectEnabledMask) {
-            dispatchHandleMask(media);
+        if (isHandleMask && selectorConfig!!.isMaxSelectEnabledMask) {
+            dispatchHandleMask(media)
         }
 
-        String path = media.getPath();
+        var path = media.path
         if (media.isEditorImage()) {
-            path = media.getCutPath();
+            path = media.cutPath
         }
 
-        loadCover(path);
+        loadCover(path)
 
-        tvCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                btnCheck.performClick();
+        tvCheck!!.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(view: View?) {
+                btnCheck!!.performClick()
             }
-        });
+        })
 
-        btnCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        btnCheck!!.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(view: View?) {
                 if (listener == null) {
-                    return;
+                    return
                 }
-                int resultCode = listener.onSelected(tvCheck, position, media);
+                val resultCode = listener!!.onSelected(tvCheck, position, media)
                 if (resultCode == SelectedManager.INVALID) {
-                    return;
+                    return
                 }
                 if (resultCode == SelectedManager.ADD_SUCCESS) {
-                    if (selectorConfig.isSelectZoomAnim) {
-                        if (selectorConfig.onItemSelectAnimListener != null) {
-                            selectorConfig.onItemSelectAnimListener.onSelectItemAnim(ivPicture, true);
+                    if (selectorConfig!!.isSelectZoomAnim) {
+                        val animListener = selectorConfig!!.onItemSelectAnimListener
+                        if (animListener != null) {
+                            animListener.onSelectItemAnim(
+                                ivPicture,
+                                true
+                            )
                         } else {
-                            AnimUtils.selectZoom(ivPicture);
+                            AnimUtils.selectZoom(ivPicture)
                         }
                     }
                 } else if (resultCode == SelectedManager.REMOVE) {
-                    if (selectorConfig.isSelectZoomAnim) {
-                        if (selectorConfig.onItemSelectAnimListener != null) {
-                            selectorConfig.onItemSelectAnimListener.onSelectItemAnim(ivPicture, false);
+                    if (selectorConfig!!.isSelectZoomAnim) {
+                        val animListener = selectorConfig!!.onItemSelectAnimListener
+                        if (animListener != null) {
+                            animListener.onSelectItemAnim(
+                                ivPicture,
+                                false
+                            )
                         }
                     }
                 }
-                selectedMedia(isSelected(media));
+                selectedMedia(isSelected(media))
             }
-        });
+        })
 
-        itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
+        itemView.setOnLongClickListener(object : OnLongClickListener {
+            override fun onLongClick(v: View?): Boolean {
                 if (listener != null) {
-                    listener.onItemLongClick(v, position);
+                    listener!!.onItemLongClick(v, position)
                 }
-                return false;
+                return false
             }
-        });
+        })
 
-        itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        itemView.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(view: View?) {
                 if (listener == null) {
-                    return;
+                    return
                 }
-                boolean isPreview = PictureMimeType.isHasImage(media.getMimeType()) && selectorConfig.isEnablePreviewImage
-                        || selectorConfig.isDirectReturnSingle
-                        || PictureMimeType.isHasVideo(media.getMimeType()) && (selectorConfig.isEnablePreviewVideo
-                        || selectorConfig.selectionMode == SelectModeConfig.SINGLE)
-                        || PictureMimeType.isHasAudio(media.getMimeType()) && (selectorConfig.isEnablePreviewAudio
-                        || selectorConfig.selectionMode == SelectModeConfig.SINGLE);
+                val isPreview =
+                    PictureMimeType.isHasImage(media.mimeType) && selectorConfig!!.isEnablePreviewImage || selectorConfig!!.isDirectReturnSingle
+                            || PictureMimeType.isHasVideo(media.mimeType) && (selectorConfig!!.isEnablePreviewVideo
+                            || selectorConfig!!.selectionMode == SelectModeConfig.SINGLE) || PictureMimeType.isHasAudio(
+                        media.mimeType
+                    ) && (selectorConfig!!.isEnablePreviewAudio
+                            || selectorConfig!!.selectionMode == SelectModeConfig.SINGLE)
                 if (isPreview) {
-                    if (media.isMaxSelectEnabledMask()) {
-                        return;
+                    if (media.isMaxSelectEnabledMask) {
+                        return
                     }
-                    listener.onItemClick(tvCheck, position, media);
+                    listener!!.onItemClick(tvCheck, position, media)
                 } else {
-                    btnCheck.performClick();
+                    btnCheck!!.performClick()
                 }
             }
-        });
+        })
     }
 
     /**
      * 加载资源封面
      */
-    protected void loadCover(String path) {
-        if (selectorConfig.imageEngine != null) {
-            selectorConfig.imageEngine.loadGridImage(ivPicture.getContext(), path, ivPicture);
+    protected open fun loadCover(path: String?) {
+        val imageEngine = selectorConfig?.imageEngine
+        if (imageEngine != null && ivPicture != null) {
+            imageEngine.loadGridImage(ivPicture!!.context, path, ivPicture)
         }
     }
 
@@ -228,43 +221,47 @@ public class BaseRecyclerMediaHolder extends RecyclerView.ViewHolder {
     /**
      * 处理到达选择条件后的蒙层效果
      */
-    private void dispatchHandleMask(LocalMedia media) {
-        boolean isEnabledMask = false;
-        if (selectorConfig.getSelectCount() > 0 && !selectorConfig.getSelectedResult().contains(media)) {
-            if (selectorConfig.isWithVideoImage) {
-                if (selectorConfig.selectionMode == SelectModeConfig.SINGLE) {
-                    isEnabledMask = selectorConfig.getSelectCount() == Integer.MAX_VALUE;
+    private fun dispatchHandleMask(media: LocalMedia) {
+        var isEnabledMask = false
+        val config = selectorConfig!!
+        if (config.selectCount > 0 && !config.selectedResult.contains(media)) {
+            if (config.isWithVideoImage) {
+                if (config.selectionMode == SelectModeConfig.SINGLE) {
+                    isEnabledMask = config.selectCount == Int.MAX_VALUE
                 } else {
-                    isEnabledMask = selectorConfig.getSelectCount() == selectorConfig.maxSelectNum;
+                    isEnabledMask =
+                        config.selectCount == config.maxSelectNum
                 }
             } else {
-                if (PictureMimeType.isHasVideo(selectorConfig.getResultFirstMimeType())) {
-                    int maxSelectNum;
-                    if (selectorConfig.selectionMode == SelectModeConfig.SINGLE) {
-                        maxSelectNum = Integer.MAX_VALUE;
+                if (PictureMimeType.isHasVideo(config.resultFirstMimeType)) {
+                    val maxSelectNum: Int
+                    if (config.selectionMode == SelectModeConfig.SINGLE) {
+                        maxSelectNum = Int.MAX_VALUE
                     } else {
-                        maxSelectNum = selectorConfig.maxVideoSelectNum > 0
-                                ? selectorConfig.maxVideoSelectNum : selectorConfig.maxSelectNum;
+                        maxSelectNum = if (config.maxVideoSelectNum > 0)
+                            config.maxVideoSelectNum
+                        else
+                            config.maxSelectNum
                     }
-                    isEnabledMask = selectorConfig.getSelectCount() == maxSelectNum
-                            || PictureMimeType.isHasImage(media.getMimeType());
+                    isEnabledMask = config.selectCount == maxSelectNum
+                            || PictureMimeType.isHasImage(media.mimeType)
                 } else {
-                    int maxSelectNum;
-                    if (selectorConfig.selectionMode == SelectModeConfig.SINGLE) {
-                        maxSelectNum = Integer.MAX_VALUE;
+                    val maxSelectNum: Int
+                    if (config.selectionMode == SelectModeConfig.SINGLE) {
+                        maxSelectNum = Int.MAX_VALUE
                     } else {
-                        maxSelectNum = selectorConfig.maxSelectNum;
+                        maxSelectNum = config.maxSelectNum
                     }
-                    isEnabledMask = selectorConfig.getSelectCount() == maxSelectNum
-                            || PictureMimeType.isHasVideo(media.getMimeType());
+                    isEnabledMask = config.selectCount == maxSelectNum
+                            || PictureMimeType.isHasVideo(media.mimeType)
                 }
             }
         }
         if (isEnabledMask) {
-            ivPicture.setColorFilter(maskWhiteColorFilter);
-            media.setMaxSelectEnabledMask(true);
+            ivPicture!!.setColorFilter(maskWhiteColorFilter)
+            media.isMaxSelectEnabledMask = true
         } else {
-            media.setMaxSelectEnabledMask(false);
+            media.isMaxSelectEnabledMask = false
         }
     }
 
@@ -273,14 +270,14 @@ public class BaseRecyclerMediaHolder extends RecyclerView.ViewHolder {
      *
      * @param isChecked
      */
-    private void selectedMedia(boolean isChecked) {
-        if (tvCheck.isSelected() != isChecked) {
-            tvCheck.setSelected(isChecked);
+    private fun selectedMedia(isChecked: Boolean) {
+        if (tvCheck!!.isSelected != isChecked) {
+            tvCheck!!.setSelected(isChecked)
         }
-        if (selectorConfig.isDirectReturnSingle) {
-            ivPicture.setColorFilter(defaultColorFilter);
+        if (selectorConfig!!.isDirectReturnSingle) {
+            ivPicture!!.setColorFilter(defaultColorFilter)
         } else {
-            ivPicture.setColorFilter(isChecked ? selectColorFilter : defaultColorFilter);
+            ivPicture!!.setColorFilter(if (isChecked) selectColorFilter else defaultColorFilter)
         }
     }
 
@@ -290,39 +287,71 @@ public class BaseRecyclerMediaHolder extends RecyclerView.ViewHolder {
      * @param currentMedia
      * @return
      */
-    private boolean isSelected(LocalMedia currentMedia) {
-        List<LocalMedia> selectedResult = selectorConfig.getSelectedResult();
-        boolean isSelected = selectedResult.contains(currentMedia);
+    private fun isSelected(currentMedia: LocalMedia): Boolean {
+        val selectedResult = selectorConfig!!.selectedResult
+        val isSelected = selectedResult.contains(currentMedia)
         if (isSelected) {
-            LocalMedia compare = currentMedia.getCompareLocalMedia();
+            val compare = currentMedia.compareLocalMedia
             if (compare != null && compare.isEditorImage()) {
-                currentMedia.setCutPath(compare.getCutPath());
-                currentMedia.setCut(!TextUtils.isEmpty(compare.getCutPath()));
-                currentMedia.setEditorImage(compare.isEditorImage());
+                currentMedia.cutPath = compare.cutPath
+                currentMedia.setCut(!TextUtils.isEmpty(compare.cutPath))
+                currentMedia.setEditorImage(compare.isEditorImage())
             }
         }
-        return isSelected;
+        return isSelected
     }
 
     /**
      * 对选择数量进行编号排序
      */
-    private void notifySelectNumberStyle(LocalMedia currentMedia) {
-        tvCheck.setText("");
-        for (int i = 0; i < selectorConfig.getSelectCount(); i++) {
-            LocalMedia media = selectorConfig.getSelectedResult().get(i);
-            if (TextUtils.equals(media.getPath(), currentMedia.getPath())
-                    || media.getId() == currentMedia.getId()) {
-                currentMedia.setNum(media.getNum());
-                media.setPosition(currentMedia.getPosition());
-                tvCheck.setText(ValueOf.toString(currentMedia.getNum()));
+    private fun notifySelectNumberStyle(currentMedia: LocalMedia) {
+        tvCheck!!.text = ""
+        for (i in 0 until selectorConfig!!.selectCount) {
+            val media = selectorConfig!!.selectedResult[i]
+            if (media != null) {
+                if (TextUtils.equals(media.path, currentMedia.path)
+                    || media.id == currentMedia.id
+                ) {
+                    currentMedia.num = media.num
+                    media.position = currentMedia.position
+                    tvCheck!!.text = toString(currentMedia.num)
+                }
             }
         }
     }
 
-    private PictureImageGridAdapter.OnItemClickListener listener;
+    private var listener: PictureImageGridAdapter.OnItemClickListener? = null
 
-    public void setOnItemClickListener(PictureImageGridAdapter.OnItemClickListener listener) {
-        this.listener = listener;
+    fun setOnItemClickListener(listener: PictureImageGridAdapter.OnItemClickListener?) {
+        this.listener = listener
+    }
+
+    companion object {
+        fun generate(
+            parent: ViewGroup,
+            viewType: Int,
+            resource: Int,
+            config: SelectorConfig?
+        ): BaseRecyclerMediaHolder {
+            val itemView = LayoutInflater.from(parent.context).inflate(resource, parent, false)
+            val nonNullConfig = config ?: throw IllegalArgumentException("SelectorConfig cannot be null")
+            when (viewType) {
+                PictureImageGridAdapter.Companion.ADAPTER_TYPE_CAMERA -> return CameraViewHolder(
+                    itemView
+                )
+
+                PictureImageGridAdapter.Companion.ADAPTER_TYPE_VIDEO -> return VideoViewHolder(
+                    itemView,
+                    nonNullConfig
+                )
+
+                PictureImageGridAdapter.Companion.ADAPTER_TYPE_AUDIO -> return AudioViewHolder(
+                    itemView,
+                    nonNullConfig
+                )
+
+                else -> return ImageViewHolder(itemView, nonNullConfig)
+            }
+        }
     }
 }

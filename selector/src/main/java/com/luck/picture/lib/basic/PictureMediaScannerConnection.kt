@@ -1,49 +1,48 @@
-package com.luck.picture.lib.basic;
+package com.luck.picture.lib.basic
 
-import android.content.Context;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.text.TextUtils;
+import android.content.Context
+import android.media.MediaScannerConnection
+import android.media.MediaScannerConnection.MediaScannerConnectionClient
+import android.net.Uri
+import android.text.TextUtils
 
 /**
  * @author：luck
  * @date：2019-12-03 10:41
  * @describe：刷新相册
  */
-public class PictureMediaScannerConnection implements MediaScannerConnection.MediaScannerConnectionClient {
-    public interface ScanListener {
-        void onScanFinish();
+class PictureMediaScannerConnection : MediaScannerConnectionClient {
+    interface ScanListener {
+        fun onScanFinish()
     }
 
-    private final MediaScannerConnection mMs;
-    private final String mPath;
-    private ScanListener mListener;
+    private val mMs: MediaScannerConnection
+    private val mPath: String?
+    private var mListener: ScanListener? = null
 
-    public PictureMediaScannerConnection(Context context, String path, ScanListener l) {
-        this.mListener = l;
-        this.mPath = path;
-        this.mMs = new MediaScannerConnection(context.getApplicationContext(), this);
-        this.mMs.connect();
+    constructor(context: Context, path: String?, l: ScanListener?) {
+        this.mListener = l
+        this.mPath = path
+        this.mMs = MediaScannerConnection(context.getApplicationContext(), this)
+        this.mMs.connect()
     }
 
-    public PictureMediaScannerConnection(Context context, String path) {
-        this.mPath = path;
-        this.mMs = new MediaScannerConnection(context.getApplicationContext(), this);
-        this.mMs.connect();
+    constructor(context: Context, path: String?) {
+        this.mPath = path
+        this.mMs = MediaScannerConnection(context.getApplicationContext(), this)
+        this.mMs.connect()
     }
 
-    @Override
-    public void onMediaScannerConnected() {
+    override fun onMediaScannerConnected() {
         if (!TextUtils.isEmpty(mPath)) {
-            mMs.scanFile(mPath, null);
+            mMs.scanFile(mPath, null)
         }
     }
 
-    @Override
-    public void onScanCompleted(String path, Uri uri) {
-        mMs.disconnect();
+    override fun onScanCompleted(path: String?, uri: Uri?) {
+        mMs.disconnect()
         if (mListener != null) {
-            mListener.onScanFinish();
+            mListener!!.onScanFinish()
         }
     }
 }

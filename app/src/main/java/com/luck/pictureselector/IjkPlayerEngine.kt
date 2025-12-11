@@ -22,35 +22,35 @@ class IjkPlayerEngine : VideoPlayerEngine<IjkPlayerView> {
      */
     private val listeners = CopyOnWriteArrayList<OnPlayerListener>()
 
-    override fun onCreateVideoPlayer(context: Context): View {
+    override fun onCreateVideoPlayer(context: Context?): View? {
+        if (context == null) return null
         return IjkPlayerView(context)
     }
 
-    override fun onStarPlayer(player: IjkPlayerView, media: LocalMedia) {
-        val mediaPlayer = player.mediaPlayer
-        val config = SelectorProviders.getInstance().selectorConfig
-        mediaPlayer?.let {
-            it.isLooping = config.isLoopAutoPlay
-        }
-        player.start(media.availablePath)
+    override fun onStarPlayer(player: IjkPlayerView?, media: LocalMedia?) {
+        val mediaPlayer = player?.mediaPlayer ?: return
+        val path = media?.availablePath ?: return
+        val config = SelectorProviders.instance?.selectorConfig
+        mediaPlayer.isLooping = config?.isLoopAutoPlay ?: false
+        player.start(path)
     }
 
-    override fun onResume(player: IjkPlayerView) {
-        val mediaPlayer = player.mediaPlayer
+    override fun onResume(player: IjkPlayerView?) {
+        val mediaPlayer = player?.mediaPlayer
         mediaPlayer?.start()
     }
 
-    override fun onPause(player: IjkPlayerView) {
-        val mediaPlayer = player.mediaPlayer
+    override fun onPause(player: IjkPlayerView?) {
+        val mediaPlayer = player?.mediaPlayer
         mediaPlayer?.pause()
     }
 
-    override fun isPlaying(player: IjkPlayerView): Boolean {
-        val mediaPlayer = player.mediaPlayer
+    override fun isPlaying(player: IjkPlayerView?): Boolean {
+        val mediaPlayer = player?.mediaPlayer
         return mediaPlayer != null && mediaPlayer.isPlaying
     }
 
-    override fun addPlayListener(playerListener: OnPlayerListener) {
+    override fun addPlayListener(playerListener: OnPlayerListener?) {
         if (!listeners.contains(playerListener)) {
             listeners.add(playerListener)
         }
@@ -64,8 +64,8 @@ class IjkPlayerEngine : VideoPlayerEngine<IjkPlayerView> {
         }
     }
 
-    override fun onPlayerAttachedToWindow(player: IjkPlayerView) {
-        val mediaPlayer = player.initMediaPlayer()
+    override fun onPlayerAttachedToWindow(player: IjkPlayerView?) {
+        val mediaPlayer = player?.initMediaPlayer() ?: return
         mediaPlayer.setOnPreparedListener { mp ->
             mp.start()
             for (i in listeners.indices) {
@@ -91,12 +91,12 @@ class IjkPlayerEngine : VideoPlayerEngine<IjkPlayerView> {
         }
     }
 
-    override fun onPlayerDetachedFromWindow(player: IjkPlayerView) {
-        player.release()
+    override fun onPlayerDetachedFromWindow(player: IjkPlayerView?) {
+        player?.release()
     }
 
-    override fun destroy(player: IjkPlayerView) {
-        player.release()
+    override fun destroy(player: IjkPlayerView?) {
+        player?.release()
     }
 }
 

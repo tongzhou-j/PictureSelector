@@ -63,7 +63,7 @@ import com.luck.picture.lib.animators.AnimationType
 import com.luck.picture.lib.basic.FragmentInjectManager
 import com.luck.picture.lib.basic.IBridgePictureBehavior
 import com.luck.picture.lib.basic.IBridgeViewLifecycle
-import com.luck.picture.lib.basic.PictureCommonFragment.SelectorResult
+import com.luck.picture.lib.basic.SelectorResult
 import com.luck.picture.lib.basic.PictureSelectionCameraModel
 import com.luck.picture.lib.basic.PictureSelectionModel
 import com.luck.picture.lib.basic.PictureSelectionSystemModel
@@ -507,7 +507,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                             return if (cb_custom_preview!!.isChecked()) newInstance() else null
                         }
                     })
-                    .startActivityPreview(position, true, mAdapter!!.getData())
+                    .startActivityPreview(position, true, mAdapter!!.getData().map { it as LocalMedia? }.toMutableList() as ArrayList<LocalMedia?>)
             }
 
             override fun openPicture() {
@@ -626,12 +626,12 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                                 } else null)
                                 .setSelectAnimListener(if (cb_selected_anim!!.isChecked()) object :
                                     OnSelectAnimListener {
-                                    override fun onSelectAnim(view: View): Long {
+                                    override fun onSelectAnim(view: View?): Long {
                                         val animation = AnimationUtils.loadAnimation(
                                             this@MainActivity,
                                             com.luck.picture.lib.R.anim.ps_anim_modal_in
                                         )
-                                        view.startAnimation(animation)
+                                        view?.startAnimation(animation)
                                         return animation.getDuration()
                                     }
                                 } else null) //.setQueryOnlyMimeType(PictureMimeType.ofGIF())
@@ -641,7 +641,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                                 .setMaxVideoSelectNum(maxSelectVideoNum)
                                 .setRecyclerAnimationMode(animationMode)
                                 .isGif(cb_isGif!!.isChecked())
-                                .setSelectedData(mAdapter!!.getData())
+                                .setSelectedData(mAdapter!!.getData().map { it as LocalMedia? }.toMutableList())
                         forSelectResult(selectionModel)
                     }
                 } else {
@@ -662,7 +662,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                             .isOriginalControl(cb_original!!.isChecked())
                             .setPermissionDescriptionListener(getPermissionDescriptionListener())
                             .setOutputAudioDir(getSandboxAudioOutputPath())
-                            .setSelectedData(mAdapter!!.getData())
+                            .setSelectedData(mAdapter!!.getData().map { it as LocalMedia? }.toMutableList())
                     forOnlyCameraResult(cameraModel)
                 }
             }
@@ -906,7 +906,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             when (resultMode) {
                 ACTIVITY_RESULT -> model.forSystemResultActivity(PictureConfig.REQUEST_CAMERA)
                 CALLBACK_RESULT -> model.forSystemResultActivity(MeOnResultCallbackListener())
-                else -> model.forSystemResultActivity(launcherResult)
+                else -> launcherResult?.let { model.forSystemResultActivity(it as ActivityResultLauncher<Intent?>) }
             }
         } else {
             if (resultMode == CALLBACK_RESULT) {
@@ -921,7 +921,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         when (resultMode) {
             ACTIVITY_RESULT -> model.forResult(PictureConfig.CHOOSE_REQUEST)
             CALLBACK_RESULT -> model.forResult(MeOnResultCallbackListener())
-            else -> model.forResult(launcherResult)
+            else -> launcherResult?.let { model.forResult(it as ActivityResultLauncher<Intent?>) }
         }
     }
 
@@ -930,7 +930,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             when (resultMode) {
                 ACTIVITY_RESULT -> model.forResultActivity(PictureConfig.REQUEST_CAMERA)
                 CALLBACK_RESULT -> model.forResultActivity(MeOnResultCallbackListener())
-                else -> model.forResultActivity(launcherResult)
+                else -> launcherResult?.let { model.forResultActivity(it as ActivityResultLauncher<Intent?>) }
             }
         } else {
             if (resultMode == CALLBACK_RESULT) {
@@ -1037,10 +1037,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
     private class MeOnVideoThumbnailEventListener(private val targetPath: String?) :
         OnVideoThumbnailEventListener {
         override fun onVideoThumbnail(
-            context: Context,
+            context: Context?,
             videoPath: String?,
             call: OnKeyValueResultCallbackListener?
         ) {
+            if (context == null) return
             Glide.with(context).asBitmap().sizeMultiplier(0.6f).load(videoPath)
                 .into(object : CustomTarget<Bitmap?>() {
                     override fun onResourceReady(
@@ -1101,11 +1102,12 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
     private class MeBitmapWatermarkEventListener(private val targetPath: String?) :
         OnBitmapWatermarkEventListener {
         override fun onAddBitmapWatermark(
-            context: Context,
+            context: Context?,
             srcPath: String?,
             mimeType: String?,
             call: OnKeyValueResultCallbackListener?
         ) {
+            if (context == null) return
             if (PictureMimeType.isHasHttp(srcPath) || PictureMimeType.isHasVideo(mimeType)) {
                 // 网络图片和视频忽略，有需求的可自行扩展
                 call!!.onCallback(srcPath, "")
@@ -1167,8 +1169,8 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      */
     private class MeOnPermissionDeniedListener : OnPermissionDeniedListener {
         override fun onDenied(
-            fragment: Fragment, permissionArray: Array<String?>,
-            requestCode: Int, call: OnCallbackListener<Boolean?>?
+            fragment: Fragment, permissionArray: Array<String>,
+            requestCode: Int, call: OnCallbackListener<Boolean>
         ) {
             val tips: String?
             if (TextUtils.equals(permissionArray[0], PermissionConfig.CAMERA[0])) {
@@ -1178,7 +1180,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             } else {
                 tips = "缺少存储权限\n访问您设备上的照片、媒体内容和文件"
             }
-            val dialog = RemindDialog.buildDialog(fragment.getContext(), tips)
+            val dialog = RemindDialog.buildDialog(fragment.context ?: return, tips)
             dialog.setButtonText("去设置")
             dialog.setButtonTextColor(-0x828201)
             dialog.setContentTextColor(-0xcccccd)
@@ -1207,7 +1209,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             } else {
                 tips = "缺少相机权限\n可能会导致不能使用摄像头功能"
             }
-            val dialog = RemindDialog.buildDialog(context, tips)
+            val dialog = RemindDialog.buildDialog(context ?: return, tips)
             dialog.setButtonText("去设置")
             dialog.setButtonTextColor(-0x828201)
             dialog.setContentTextColor(-0xcccccd)
@@ -1252,10 +1254,10 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      * 添加权限说明
      */
     private class MeOnPermissionDescriptionListener : OnPermissionDescriptionListener {
-        override fun onPermissionDescription(fragment: Fragment, permissionArray: Array<String?>) {
+        override fun onPermissionDescription(fragment: Fragment, permissionArray: Array<String>) {
             val rootView = fragment.requireView()
             if (rootView is ViewGroup) {
-                addPermissionDescription(false, rootView, permissionArray)
+                addPermissionDescription(false, rootView, permissionArray.map { it as String? }.toTypedArray())
             }
         }
 
@@ -1286,13 +1288,15 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             isBottomPreview: Boolean
         ) {
             val previewFragment = newInstance()
+            val previewData = data?.mapNotNull { it as? LocalMedia }?.toMutableList() as? ArrayList<LocalMedia>
             previewFragment.setInternalPreviewData(
                 isBottomPreview, currentAlbumName, isShowCamera,
-                position, totalNum, page, currentBucketId, data
+                position, totalNum, page, currentBucketId, previewData
             )
+            val fragmentActivity = context as? FragmentActivity ?: return
             FragmentInjectManager.injectFragment(
-                context as FragmentActivity?,
-                previewFragment.getFragmentTag(),
+                fragmentActivity,
+                CustomPreviewFragment.TAG,
                 previewFragment
             )
         }
@@ -1305,17 +1309,18 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         override fun onSelectLimitTips(
             context: Context?,
             media: LocalMedia?,
-            config: SelectorConfig,
+            config: SelectorConfig?,
             limitType: Int
         ): Boolean {
+            if (config == null) return false
             if (limitType == SelectLimitType.SELECT_MIN_SELECT_LIMIT) {
-                ToastUtils.showToast(context, "图片最少不能低于" + config.minSelectNum + "张")
+                ToastUtils.showToast(context ?: return false, "图片最少不能低于" + config.minSelectNum + "张")
                 return true
             } else if (limitType == SelectLimitType.SELECT_MIN_VIDEO_SELECT_LIMIT) {
-                ToastUtils.showToast(context, "视频最少不能低于" + config.minVideoSelectNum + "个")
+                ToastUtils.showToast(context ?: return false, "视频最少不能低于" + config.minVideoSelectNum + "个")
                 return true
             } else if (limitType == SelectLimitType.SELECT_MIN_AUDIO_SELECT_LIMIT) {
-                ToastUtils.showToast(context, "音频最少不能低于" + config.minAudioSelectNum + "个")
+                ToastUtils.showToast(context ?: return false, "音频最少不能低于" + config.minAudioSelectNum + "个")
                 return true
             }
             return false
@@ -1348,22 +1353,22 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
     private inner class MeExtendLoaderEngine : ExtendLoaderEngine {
         override fun loadAllAlbumData(
             context: Context?,
-            query: OnQueryAllAlbumListener<LocalMediaFolder?>
+            query: OnQueryAllAlbumListener<LocalMediaFolder?>?
         ) {
             val folder = SandboxFileLoader
                 .loadInAppSandboxFolderFile(context, this@MainActivity.getSandboxPath())
             val folders: MutableList<LocalMediaFolder?> = ArrayList<LocalMediaFolder?>()
             folders.add(folder)
-            query.onComplete(folders)
+            query?.onComplete(folders)
         }
 
         override fun loadOnlyInAppDirAllMediaData(
             context: Context?,
-            query: OnQueryAlbumListener<LocalMediaFolder?>
+            query: OnQueryAlbumListener<LocalMediaFolder?>?
         ) {
             val folder = SandboxFileLoader
                 .loadInAppSandboxFolderFile(context, this@MainActivity.getSandboxPath())
-            query.onComplete(folder)
+            query?.onComplete(folder)
         }
 
         override fun loadFirstPageMediaData(
@@ -1371,11 +1376,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             bucketId: Long,
             page: Int,
             pageSize: Int,
-            query: OnQueryDataResultListener<LocalMedia?>
+            query: OnQueryDataResultListener<LocalMedia?>?
         ) {
             val folder = SandboxFileLoader
                 .loadInAppSandboxFolderFile(context, this@MainActivity.getSandboxPath())
-            query.onComplete(folder.getData(), false)
+            query?.onComplete(folder?.getData(), false)
         }
 
         override fun loadMoreMediaData(
@@ -1405,11 +1410,12 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         private val options: UCrop.Options
     ) : OnMediaEditInterceptListener {
         override fun onStartMediaEdit(
-            fragment: Fragment,
-            currentLocalMedia: LocalMedia,
+            fragment: Fragment?,
+            currentLocalMedia: LocalMedia?,
             requestCode: Int
         ) {
-            val currentEditPath = currentLocalMedia.getAvailablePath()
+            if (fragment == null || currentLocalMedia == null) return
+            val currentEditPath = currentLocalMedia.availablePath
             val inputUri = if (PictureMimeType.isContent(currentEditPath))
                 Uri.parse(currentEditPath)
             else
@@ -1462,15 +1468,16 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      * 录音回调事件
      */
     private class MeOnRecordAudioInterceptListener : OnRecordAudioInterceptListener {
-        override fun onRecordAudio(fragment: Fragment, requestCode: Int) {
-            val recordAudio = arrayOf<String?>(Manifest.permission.RECORD_AUDIO)
-            if (PermissionChecker.isCheckSelfPermission(fragment.getContext(), recordAudio)) {
+        override fun onRecordAudio(fragment: Fragment?, requestCode: Int) {
+            if (fragment == null) return
+            val recordAudio = arrayOf(Manifest.permission.RECORD_AUDIO)
+            if (PermissionChecker.isCheckSelfPermission(fragment.context ?: return, recordAudio)) {
                 startRecordSoundAction(fragment, requestCode)
             } else {
-                addPermissionDescription(false, fragment.requireView() as ViewGroup, recordAudio)
-                PermissionChecker.getInstance().requestPermissions(
+                addPermissionDescription(false, fragment.requireView() as ViewGroup, recordAudio.map { it as String? }.toTypedArray())
+                PermissionChecker.instance?.requestPermissions(
                     fragment,
-                    arrayOf<String>(Manifest.permission.RECORD_AUDIO),
+                    arrayOf(Manifest.permission.RECORD_AUDIO),
                     object : PermissionResultCallback {
                         override fun onGranted() {
                             removePermissionDescription(fragment.requireView() as ViewGroup)
@@ -1534,12 +1541,13 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      */
     private inner class ImageFileCropEngine : CropFileEngine {
         override fun onStartCrop(
-            fragment: Fragment,
-            srcUri: Uri,
-            destinationUri: Uri,
+            fragment: Fragment?,
+            srcUri: Uri?,
+            destinationUri: Uri?,
             dataSource: ArrayList<String?>?,
             requestCode: Int
         ) {
+            if (fragment == null || srcUri == null || destinationUri == null) return
             val options = buildOptions()
             val uCrop = UCrop.of(srcUri, destinationUri, dataSource)
             uCrop.withOptions(options)
@@ -1586,10 +1594,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      */
     private inner class ImageCropEngine : CropEngine {
         override fun onStartCrop(
-            fragment: Fragment, currentLocalMedia: LocalMedia,
-            dataSource: ArrayList<LocalMedia>, requestCode: Int
+            fragment: Fragment?, currentLocalMedia: LocalMedia?,
+            dataSource: ArrayList<LocalMedia?>?, requestCode: Int
         ) {
-            val currentCropPath = currentLocalMedia.getAvailablePath()
+            if (fragment == null || currentLocalMedia == null || dataSource == null) return
+            val currentCropPath = currentLocalMedia.availablePath
             val inputUri: Uri
             if (PictureMimeType.isContent(currentCropPath) || PictureMimeType.isHasHttp(
                     currentCropPath
@@ -1604,8 +1613,10 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             val options = buildOptions()
             val dataCropSource = ArrayList<String?>()
             for (i in dataSource.indices) {
-                val media = dataSource.get(i)
-                dataCropSource.add(media.getAvailablePath())
+                val media = dataSource[i]
+                if (media != null) {
+                    dataCropSource.add(media.availablePath)
+                }
             }
             val uCrop = UCrop.of(inputUri, destinationUri, dataCropSource)
             //options.setMultipleCropAspectRatio(buildAspectRatios(dataSource.size()));
@@ -1671,12 +1682,12 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         options.isForbidCropGifWebp(cb_not_gif!!.isChecked())
         options.isForbidSkipMultipleCrop(true)
         options.setMaxScaleMultiplier(100f)
-        if (selectorStyle != null && selectorStyle!!.getSelectMainStyle()
-                .getStatusBarColor() != 0
+        if (selectorStyle != null && selectorStyle!!.selectMainStyle
+                ?.statusBarColor != 0
         ) {
-            val mainStyle = selectorStyle!!.getSelectMainStyle()
-            val isDarkStatusBarBlack = mainStyle.isDarkStatusBarBlack()
-            val statusBarColor = mainStyle.getStatusBarColor()
+            val mainStyle = selectorStyle!!.selectMainStyle ?: return options
+            val isDarkStatusBarBlack = mainStyle.isDarkStatusBarBlack
+            val statusBarColor = mainStyle.statusBarColor
             options.isDarkStatusBarBlack(isDarkStatusBarBlack)
             if (StyleUtils.checkStyleValidity(statusBarColor)) {
                 options.setStatusBarColor(statusBarColor)
@@ -1695,9 +1706,9 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                     )
                 )
             }
-            val titleBarStyle = selectorStyle!!.getTitleBarStyle()
-            if (StyleUtils.checkStyleValidity(titleBarStyle.getTitleTextColor())) {
-                options.setToolbarWidgetColor(titleBarStyle.getTitleTextColor())
+            val titleBarStyle = selectorStyle!!.titleBarStyle ?: return options
+            if (StyleUtils.checkStyleValidity(titleBarStyle.titleTextColor)) {
+                options.setToolbarWidgetColor(titleBarStyle.titleTextColor)
             } else {
                 options.setToolbarWidgetColor(
                     ContextCompat.getColor(
@@ -1734,10 +1745,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      */
     private class ImageFileCompressEngine : CompressFileEngine {
         override fun onStartCompress(
-            context: Context,
-            source: ArrayList<Uri?>,
+            context: Context?,
+            source: ArrayList<Uri?>?,
             call: OnKeyValueResultCallbackListener?
         ) {
+            if (context == null || source == null) return
             with(context).load<Uri?>(source).ignoreBy(100)
                 .setRenameListener(object : OnRenameListener {
                     override fun rename(filePath: String): String {
@@ -1774,14 +1786,16 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
     @Deprecated("")
     private class ImageCompressEngine : CompressEngine {
         override fun onStartCompress(
-            context: Context, list: ArrayList<LocalMedia>,
-            listener: OnCallbackListener<ArrayList<LocalMedia>>
+            context: Context?, list: ArrayList<LocalMedia?>?,
+            listener: OnCallbackListener<ArrayList<LocalMedia?>?>?
         ) {
+            if (context == null || list == null || listener == null) return
             // 自定义压缩
             val compress: MutableList<Uri?> = ArrayList<Uri?>()
             for (i in list.indices) {
-                val media = list.get(i)
-                val availablePath = media.getAvailablePath()
+                val media = list[i]
+                if (media == null) continue
+                val availablePath = media.availablePath
                 val uri = if (PictureMimeType.isContent(availablePath) || PictureMimeType.isHasHttp(
                         availablePath
                     )
@@ -1817,11 +1831,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                     }
 
                     override fun onSuccess(index: Int, compressFile: File) {
-                        val media = list.get(index)
+                        val media = list.get(index) ?: return
                         if (compressFile.exists() && !TextUtils.isEmpty(compressFile.getAbsolutePath())) {
                             media.setCompressed(true)
-                            media.setCompressPath(compressFile.getAbsolutePath())
-                            media.setSandboxPath(if (SdkVersionUtils.isQ()) media.getCompressPath() else null)
+                            media.compressPath = compressFile.getAbsolutePath()
+                            media.sandboxPath = if (SdkVersionUtils.isQ) media.compressPath else null
                         }
                         if (index == list.size - 1) {
                             listener.onCall(list)
@@ -1830,10 +1844,10 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
 
                     override fun onError(index: Int, e: Throwable) {
                         if (index != -1) {
-                            val media = list.get(index)
+                            val media = list.get(index) ?: return
                             media.setCompressed(false)
-                            media.setCompressPath(null)
-                            media.setSandboxPath(null)
+                            media.compressPath = null
+                            media.sandboxPath = null
                             if (index == list.size - 1) {
                                 listener.onCall(list)
                             }
@@ -2038,254 +2052,192 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             resultMode = 2
         } else if (checkedId == R.id.rb_photo_default_animation) {
             val defaultAnimationStyle = PictureWindowAnimationStyle()
-            defaultAnimationStyle.setActivityEnterAnimation(com.luck.picture.lib.R.anim.ps_anim_enter)
-            defaultAnimationStyle.setActivityExitAnimation(com.luck.picture.lib.R.anim.ps_anim_exit)
-            selectorStyle!!.setWindowAnimationStyle(defaultAnimationStyle)
+            defaultAnimationStyle.activityEnterAnimation = com.luck.picture.lib.R.anim.ps_anim_enter
+            defaultAnimationStyle.activityExitAnimation = com.luck.picture.lib.R.anim.ps_anim_exit
+            selectorStyle!!.windowAnimationStyle = defaultAnimationStyle
         } else if (checkedId == R.id.rb_photo_up_animation) {
             val animationStyle = PictureWindowAnimationStyle()
-            animationStyle.setActivityEnterAnimation(com.luck.picture.lib.R.anim.ps_anim_up_in)
-            animationStyle.setActivityExitAnimation(com.luck.picture.lib.R.anim.ps_anim_down_out)
-            selectorStyle!!.setWindowAnimationStyle(animationStyle)
+            animationStyle.activityEnterAnimation = com.luck.picture.lib.R.anim.ps_anim_up_in
+            animationStyle.activityExitAnimation = com.luck.picture.lib.R.anim.ps_anim_down_out
+            selectorStyle!!.windowAnimationStyle = animationStyle
         } else if (checkedId == R.id.rb_default_style) {
             selectorStyle = PictureSelectorStyle()
         } else if (checkedId == R.id.rb_white_style) {
             val whiteTitleBarStyle = TitleBarStyle()
-            whiteTitleBarStyle.setTitleBackgroundColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_white
-                )
+            whiteTitleBarStyle.titleBackgroundColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_white
             )
-            whiteTitleBarStyle.setTitleDrawableRightResource(R.drawable.ic_orange_arrow_down)
-            whiteTitleBarStyle.setTitleLeftBackResource(com.luck.picture.lib.R.drawable.ps_ic_black_back)
-            whiteTitleBarStyle.setTitleTextColor(
-                ContextCompat.getColor(
-                    this.context,
-                    com.luck.picture.lib.R.color.ps_color_black
-                )
+            whiteTitleBarStyle.titleDrawableRightResource = R.drawable.ic_orange_arrow_down
+            whiteTitleBarStyle.titleLeftBackResource = com.luck.picture.lib.R.drawable.ps_ic_black_back
+            whiteTitleBarStyle.titleTextColor = ContextCompat.getColor(
+                this.context,
+                com.luck.picture.lib.R.color.ps_color_black
             )
-            whiteTitleBarStyle.setTitleCancelTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_53575e
-                )
+            whiteTitleBarStyle.titleCancelTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_53575e
             )
-            whiteTitleBarStyle.setDisplayTitleBarLine(true)
+            whiteTitleBarStyle.isDisplayTitleBarLine = true
 
             val whiteBottomNavBarStyle = BottomNavBarStyle()
-            whiteBottomNavBarStyle.setBottomNarBarBackgroundColor(Color.parseColor("#EEEEEE"))
-            whiteBottomNavBarStyle.setBottomPreviewSelectTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_53575e
-                )
+            whiteBottomNavBarStyle.bottomNarBarBackgroundColor = Color.parseColor("#EEEEEE")
+            whiteBottomNavBarStyle.bottomPreviewSelectTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_53575e
             )
 
-            whiteBottomNavBarStyle.setBottomPreviewNormalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_9b
-                )
+            whiteBottomNavBarStyle.bottomPreviewNormalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_9b
             )
-            whiteBottomNavBarStyle.setBottomPreviewSelectTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_fa632d
-                )
+            whiteBottomNavBarStyle.bottomPreviewSelectTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_fa632d
             )
-            whiteBottomNavBarStyle.setCompleteCountTips(false)
-            whiteBottomNavBarStyle.setBottomEditorTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_53575e
-                )
+            whiteBottomNavBarStyle.isCompleteCountTips = false
+            whiteBottomNavBarStyle.bottomEditorTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_53575e
             )
-            whiteBottomNavBarStyle.setBottomOriginalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_53575e
-                )
+            whiteBottomNavBarStyle.bottomOriginalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_53575e
             )
 
             val selectMainStyle = SelectMainStyle()
-            selectMainStyle.setStatusBarColor(
-                ContextCompat.getColor(
-                    this.context,
-                    com.luck.picture.lib.R.color.ps_color_white
-                )
+            selectMainStyle.statusBarColor = ContextCompat.getColor(
+                this.context,
+                com.luck.picture.lib.R.color.ps_color_white
             )
-            selectMainStyle.setDarkStatusBarBlack(true)
-            selectMainStyle.setSelectNormalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_9b
-                )
+            selectMainStyle.isDarkStatusBarBlack = true
+            selectMainStyle.selectNormalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_9b
             )
-            selectMainStyle.setSelectTextColor(
-                ContextCompat.getColor(
-                    this.context,
-                    com.luck.picture.lib.R.color.ps_color_fa632d
-                )
+            selectMainStyle.selectTextColor = ContextCompat.getColor(
+                this.context,
+                com.luck.picture.lib.R.color.ps_color_fa632d
             )
-            selectMainStyle.setPreviewSelectBackground(R.drawable.ps_demo_white_preview_selector)
-            selectMainStyle.setSelectBackground(com.luck.picture.lib.R.drawable.ps_checkbox_selector)
+            selectMainStyle.previewSelectBackground = R.drawable.ps_demo_white_preview_selector
+            selectMainStyle.selectBackground = com.luck.picture.lib.R.drawable.ps_checkbox_selector
             selectMainStyle.setSelectText(com.luck.picture.lib.R.string.ps_done_front_num)
-            selectMainStyle.setMainListBackgroundColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_white
-                )
+            selectMainStyle.mainListBackgroundColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_white
             )
 
-            selectorStyle!!.setTitleBarStyle(whiteTitleBarStyle)
-            selectorStyle!!.setBottomBarStyle(whiteBottomNavBarStyle)
-            selectorStyle!!.setSelectMainStyle(selectMainStyle)
+            selectorStyle!!.titleBarStyle = whiteTitleBarStyle
+            selectorStyle!!.bottomBarStyle = whiteBottomNavBarStyle
+            selectorStyle!!.selectMainStyle = selectMainStyle
         } else if (checkedId == R.id.rb_num_style) {
             val blueTitleBarStyle = TitleBarStyle()
-            blueTitleBarStyle.setTitleBackgroundColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_blue
-                )
+            blueTitleBarStyle.titleBackgroundColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_blue
             )
 
             val numberBlueBottomNavBarStyle = BottomNavBarStyle()
-            numberBlueBottomNavBarStyle.setBottomPreviewNormalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_9b
-                )
+            numberBlueBottomNavBarStyle.bottomPreviewNormalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_9b
             )
-            numberBlueBottomNavBarStyle.setBottomPreviewSelectTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_blue
-                )
+            numberBlueBottomNavBarStyle.bottomPreviewSelectTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_blue
             )
-            numberBlueBottomNavBarStyle.setBottomNarBarBackgroundColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_white
-                )
+            numberBlueBottomNavBarStyle.bottomNarBarBackgroundColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_white
             )
-            numberBlueBottomNavBarStyle.setBottomSelectNumResources(R.drawable.ps_demo_blue_num_selected)
-            numberBlueBottomNavBarStyle.setBottomEditorTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_53575e
-                )
+            numberBlueBottomNavBarStyle.bottomSelectNumResources = R.drawable.ps_demo_blue_num_selected
+            numberBlueBottomNavBarStyle.bottomEditorTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_53575e
             )
-            numberBlueBottomNavBarStyle.setBottomOriginalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_53575e
-                )
+            numberBlueBottomNavBarStyle.bottomOriginalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_53575e
             )
 
 
             val numberBlueSelectMainStyle = SelectMainStyle()
-            numberBlueSelectMainStyle.setStatusBarColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_blue
-                )
+            numberBlueSelectMainStyle.statusBarColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_blue
             )
-            numberBlueSelectMainStyle.setSelectNumberStyle(true)
-            numberBlueSelectMainStyle.setPreviewSelectNumberStyle(true)
-            numberBlueSelectMainStyle.setSelectBackground(R.drawable.ps_demo_blue_num_selector)
-            numberBlueSelectMainStyle.setMainListBackgroundColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_white
-                )
+            numberBlueSelectMainStyle.isSelectNumberStyle = true
+            numberBlueSelectMainStyle.isPreviewSelectNumberStyle = true
+            numberBlueSelectMainStyle.selectBackground = R.drawable.ps_demo_blue_num_selector
+            numberBlueSelectMainStyle.mainListBackgroundColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_white
             )
-            numberBlueSelectMainStyle.setPreviewSelectBackground(R.drawable.ps_demo_preview_blue_num_selector)
+            numberBlueSelectMainStyle.previewSelectBackground = R.drawable.ps_demo_preview_blue_num_selector
 
-            numberBlueSelectMainStyle.setSelectNormalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_9b
-                )
+            numberBlueSelectMainStyle.selectNormalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_9b
             )
-            numberBlueSelectMainStyle.setSelectTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_blue
-                )
+            numberBlueSelectMainStyle.selectTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_blue
             )
             numberBlueSelectMainStyle.setSelectText(com.luck.picture.lib.R.string.ps_completed)
 
-            selectorStyle!!.setTitleBarStyle(blueTitleBarStyle)
-            selectorStyle!!.setBottomBarStyle(numberBlueBottomNavBarStyle)
-            selectorStyle!!.setSelectMainStyle(numberBlueSelectMainStyle)
+            selectorStyle!!.titleBarStyle = blueTitleBarStyle
+            selectorStyle!!.bottomBarStyle = numberBlueBottomNavBarStyle
+            selectorStyle!!.selectMainStyle = numberBlueSelectMainStyle
         } else if (checkedId == R.id.rb_we_chat_style) {
             // 主体风格
             val numberSelectMainStyle = SelectMainStyle()
-            numberSelectMainStyle.setSelectNumberStyle(true)
-            numberSelectMainStyle.setPreviewSelectNumberStyle(false)
-            numberSelectMainStyle.setPreviewDisplaySelectGallery(true)
-            numberSelectMainStyle.setSelectBackground(com.luck.picture.lib.R.drawable.ps_default_num_selector)
-            numberSelectMainStyle.setPreviewSelectBackground(com.luck.picture.lib.R.drawable.ps_preview_checkbox_selector)
-            numberSelectMainStyle.setSelectNormalBackgroundResources(com.luck.picture.lib.R.drawable.ps_select_complete_normal_bg)
-            numberSelectMainStyle.setSelectNormalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_53575e
-                )
+            numberSelectMainStyle.isSelectNumberStyle = true
+            numberSelectMainStyle.isPreviewSelectNumberStyle = false
+            numberSelectMainStyle.isPreviewDisplaySelectGallery = true
+            numberSelectMainStyle.selectBackground = com.luck.picture.lib.R.drawable.ps_default_num_selector
+            numberSelectMainStyle.previewSelectBackground = com.luck.picture.lib.R.drawable.ps_preview_checkbox_selector
+            numberSelectMainStyle.selectNormalBackgroundResources = com.luck.picture.lib.R.drawable.ps_select_complete_normal_bg
+            numberSelectMainStyle.selectNormalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_53575e
             )
             numberSelectMainStyle.setSelectNormalText(com.luck.picture.lib.R.string.ps_send)
-            numberSelectMainStyle.setAdapterPreviewGalleryBackgroundResource(com.luck.picture.lib.R.drawable.ps_preview_gallery_bg)
-            numberSelectMainStyle.setAdapterPreviewGalleryItemSize(
-                DensityUtil.dip2px(
-                    this.context, 52f
-                )
+            numberSelectMainStyle.adapterPreviewGalleryBackgroundResource = com.luck.picture.lib.R.drawable.ps_preview_gallery_bg
+            numberSelectMainStyle.adapterPreviewGalleryItemSize = DensityUtil.dip2px(
+                this.context, 52f
             )
             numberSelectMainStyle.setPreviewSelectText(com.luck.picture.lib.R.string.ps_select)
-            numberSelectMainStyle.setPreviewSelectTextSize(14)
-            numberSelectMainStyle.setPreviewSelectTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_white
-                )
+            numberSelectMainStyle.previewSelectTextSize = 14
+            numberSelectMainStyle.previewSelectTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_white
             )
-            numberSelectMainStyle.setPreviewSelectMarginRight(
-                DensityUtil.dip2px(
-                    this.context, 6f
-                )
+            numberSelectMainStyle.previewSelectMarginRight = DensityUtil.dip2px(
+                this.context, 6f
             )
-            numberSelectMainStyle.setSelectBackgroundResources(com.luck.picture.lib.R.drawable.ps_select_complete_bg)
+            numberSelectMainStyle.selectBackgroundResources = com.luck.picture.lib.R.drawable.ps_select_complete_bg
             numberSelectMainStyle.setSelectText(com.luck.picture.lib.R.string.ps_send_num)
-            numberSelectMainStyle.setSelectTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_white
-                )
+            numberSelectMainStyle.selectTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_white
             )
-            numberSelectMainStyle.setMainListBackgroundColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_black
-                )
+            numberSelectMainStyle.mainListBackgroundColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_black
             )
-            numberSelectMainStyle.setCompleteSelectRelativeTop(true)
-            numberSelectMainStyle.setPreviewSelectRelativeBottom(true)
-            numberSelectMainStyle.setAdapterItemIncludeEdge(false)
+            numberSelectMainStyle.isCompleteSelectRelativeTop = true
+            numberSelectMainStyle.isPreviewSelectRelativeBottom = true
+            numberSelectMainStyle.isAdapterItemIncludeEdge = false
 
             // 头部TitleBar 风格
             val numberTitleBarStyle = TitleBarStyle()
-            numberTitleBarStyle.setHideCancelButton(true)
-            numberTitleBarStyle.setAlbumTitleRelativeLeft(true)
+            numberTitleBarStyle.isHideCancelButton = true
+            numberTitleBarStyle.isAlbumTitleRelativeLeft = true
             if (cb_only_dir!!.isChecked()) {
-                numberTitleBarStyle.setTitleAlbumBackgroundResource(R.drawable.ps_demo_only_album_bg)
+                numberTitleBarStyle.titleAlbumBackgroundResource = R.drawable.ps_demo_only_album_bg
             } else {
-                numberTitleBarStyle.setTitleAlbumBackgroundResource(com.luck.picture.lib.R.drawable.ps_album_bg)
+                numberTitleBarStyle.titleAlbumBackgroundResource = com.luck.picture.lib.R.drawable.ps_album_bg
             }
-            numberTitleBarStyle.setTitleDrawableRightResource(com.luck.picture.lib.R.drawable.ps_ic_grey_arrow)
-            numberTitleBarStyle.setPreviewTitleLeftBackResource(com.luck.picture.lib.R.drawable.ps_ic_normal_back)
+            numberTitleBarStyle.titleDrawableRightResource = com.luck.picture.lib.R.drawable.ps_ic_grey_arrow
+            numberTitleBarStyle.previewTitleLeftBackResource = com.luck.picture.lib.R.drawable.ps_ic_normal_back
 
             // 底部NavBar 风格
             val numberBottomNavBarStyle = BottomNavBarStyle()
-            numberBottomNavBarStyle.setBottomPreviewNarBarBackgroundColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_half_grey
-                )
+            numberBottomNavBarStyle.bottomPreviewNarBarBackgroundColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_half_grey
             )
             numberBottomNavBarStyle.setBottomPreviewNormalText(com.luck.picture.lib.R.string.ps_preview)
-            numberBottomNavBarStyle.setBottomPreviewNormalTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_9b
-                )
+            numberBottomNavBarStyle.bottomPreviewNormalTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_9b
             )
-            numberBottomNavBarStyle.setBottomPreviewNormalTextSize(16)
-            numberBottomNavBarStyle.setCompleteCountTips(false)
+            numberBottomNavBarStyle.bottomPreviewNormalTextSize = 16
+            numberBottomNavBarStyle.isCompleteCountTips = false
             numberBottomNavBarStyle.setBottomPreviewSelectText(com.luck.picture.lib.R.string.ps_preview_num)
-            numberBottomNavBarStyle.setBottomPreviewSelectTextColor(
-                ContextCompat.getColor(
-                    this.context, com.luck.picture.lib.R.color.ps_color_white
-                )
+            numberBottomNavBarStyle.bottomPreviewSelectTextColor = ContextCompat.getColor(
+                this.context, com.luck.picture.lib.R.color.ps_color_white
             )
 
 
-            selectorStyle!!.setTitleBarStyle(numberTitleBarStyle)
-            selectorStyle!!.setBottomBarStyle(numberBottomNavBarStyle)
-            selectorStyle!!.setSelectMainStyle(numberSelectMainStyle)
+            selectorStyle!!.titleBarStyle = numberTitleBarStyle
+            selectorStyle!!.bottomBarStyle = numberBottomNavBarStyle
+            selectorStyle!!.selectMainStyle = numberSelectMainStyle
         } else if (checkedId == R.id.rb_default) {
             animationMode = AnimationType.DEFAULT_ANIMATION
         } else if (checkedId == R.id.rb_alpha) {
@@ -2356,7 +2308,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         }
         if (result.mResultCode == RESULT_OK) {
             val selectorResult = PictureSelector.obtainSelectorList(result.mResultData)
-            analyticalSelectResults(selectorResult)
+            analyticalSelectResults(selectorResult.filterNotNull().toMutableList() as ArrayList<LocalMedia>)
         } else if (result.mResultCode == RESULT_CANCELED) {
             Log.i(TAG, "onSelectFinish PictureSelector Cancel")
         }
@@ -2367,7 +2319,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         if (resultCode == RESULT_OK) {
             if (requestCode == PictureConfig.CHOOSE_REQUEST || requestCode == PictureConfig.REQUEST_CAMERA) {
                 val result = PictureSelector.obtainSelectorList(data)
-                analyticalSelectResults(result)
+                analyticalSelectResults(result.filterNotNull().toMutableList() as ArrayList<LocalMedia>)
             }
         } else if (resultCode == RESULT_CANCELED) {
             Log.i(TAG, "onActivityResult PictureSelector Cancel")
@@ -2387,7 +2339,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                     val resultCode = result.getResultCode()
                     if (resultCode == RESULT_OK) {
                         val selectList = PictureSelector.obtainSelectorList(result.getData())
-                        analyticalSelectResults(selectList)
+                        analyticalSelectResults(selectList.filterNotNull().toMutableList() as ArrayList<LocalMedia>)
                     } else if (resultCode == RESULT_CANCELED) {
                         Log.i(TAG, "onActivityResult PictureSelector Cancel")
                     }
@@ -2403,33 +2355,33 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      */
     private fun analyticalSelectResults(result: ArrayList<LocalMedia>) {
         for (media in result) {
-            if (media.getWidth() == 0 || media.getHeight() == 0) {
-                if (PictureMimeType.isHasImage(media.getMimeType())) {
-                    val imageExtraInfo = MediaUtils.getImageSize(this@MainActivity, media.getPath())
-                    media.setWidth(imageExtraInfo.getWidth())
-                    media.setHeight(imageExtraInfo.getHeight())
-                } else if (PictureMimeType.isHasVideo(media.getMimeType())) {
-                    val videoExtraInfo = MediaUtils.getVideoSize(this@MainActivity, media.getPath())
-                    media.setWidth(videoExtraInfo.getWidth())
-                    media.setHeight(videoExtraInfo.getHeight())
+            if (media.width == 0 || media.height == 0) {
+                if (PictureMimeType.isHasImage(media.mimeType)) {
+                    val imageExtraInfo = MediaUtils.getImageSize(this@MainActivity, media.path)
+                    media.width = imageExtraInfo.width
+                    media.height = imageExtraInfo.height
+                } else if (PictureMimeType.isHasVideo(media.mimeType)) {
+                    val videoExtraInfo = MediaUtils.getVideoSize(this@MainActivity, media.path)
+                    media.width = videoExtraInfo.width
+                    media.height = videoExtraInfo.height
                 }
             }
-            Log.i(TAG, "文件名: " + media.getFileName())
+            Log.i(TAG, "文件名: " + media.fileName)
             Log.i(TAG, "是否压缩:" + media.isCompressed())
-            Log.i(TAG, "压缩:" + media.getCompressPath())
-            Log.i(TAG, "初始路径:" + media.getPath())
-            Log.i(TAG, "绝对路径:" + media.getRealPath())
+            Log.i(TAG, "压缩:" + media.compressPath)
+            Log.i(TAG, "初始路径:" + media.path)
+            Log.i(TAG, "绝对路径:" + media.realPath)
             Log.i(TAG, "是否裁剪:" + media.isCut())
-            Log.i(TAG, "裁剪路径:" + media.getCutPath())
+            Log.i(TAG, "裁剪路径:" + media.cutPath)
             Log.i(TAG, "是否开启原图:" + media.isOriginal())
-            Log.i(TAG, "原图路径:" + media.getOriginalPath())
-            Log.i(TAG, "沙盒路径:" + media.getSandboxPath())
+            Log.i(TAG, "原图路径:" + media.originalPath)
+            Log.i(TAG, "沙盒路径:" + media.sandboxPath)
             Log.i(TAG, "水印路径:" + media.getWatermarkPath())
-            Log.i(TAG, "视频缩略图:" + media.getVideoThumbnailPath())
-            Log.i(TAG, "原始宽高: " + media.getWidth() + "x" + media.getHeight())
-            Log.i(TAG, "裁剪宽高: " + media.getCropImageWidth() + "x" + media.getCropImageHeight())
-            Log.i(TAG, "文件大小: " + PictureFileUtils.formatAccurateUnitFileSize(media.getSize()))
-            Log.i(TAG, "文件时长: " + media.getDuration())
+            Log.i(TAG, "视频缩略图:" + media.videoThumbnailPath)
+            Log.i(TAG, "原始宽高: " + media.width + "x" + media.height)
+            Log.i(TAG, "裁剪宽高: " + media.cropImageWidth + "x" + media.cropImageHeight)
+            Log.i(TAG, "文件大小: " + PictureFileUtils.formatAccurateUnitFileSize(media.size))
+            Log.i(TAG, "文件时长: " + media.duration)
         }
         runOnUiThread(object : Runnable {
             override fun run() {
@@ -2486,7 +2438,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         ) {
             val dp10 = DensityUtil.dip2px(viewGroup.getContext(), 10f)
             val dp15 = DensityUtil.dip2px(viewGroup.getContext(), 15f)
-            val view = MediumBoldTextView(viewGroup.getContext())
+            val view = MediumBoldTextView(viewGroup.context)
             view.setTag(TAG_EXPLAIN_VIEW)
             view.setTextSize(14f)
             view.setTextColor(Color.parseColor("#333333"))
@@ -2584,7 +2536,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                 fragment.startActivityForResult(recordAudioIntent, requestCode)
             } else {
                 ToastUtils.showToast(
-                    fragment.getContext(),
+                    fragment.context ?: return,
                     "The system is missing a recording component"
                 )
             }

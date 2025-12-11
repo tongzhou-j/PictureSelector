@@ -1,32 +1,26 @@
-package com.luck.picture.lib.entity;
-
-import java.util.ArrayList;
+package com.luck.picture.lib.entity
 
 /**
  * @author：luck
  * @date：2020-04-17 13:52
  * @describe：MediaData
  */
-public class MediaData {
-
+class MediaData {
     /**
      * Is there more
      */
-    public boolean isHasNextMore;
+    var isHasNextMore: Boolean = false
 
     /**
      * data
      */
-    public ArrayList<LocalMedia> data;
+    var data: ArrayList<LocalMedia?>? = null
 
 
-    public MediaData() {
-        super();
-    }
+    constructor() : super()
 
-    public MediaData(boolean isHasNextMore, ArrayList<LocalMedia> data) {
-        super();
-        this.isHasNextMore = isHasNextMore;
-        this.data = data;
+    constructor(isHasNextMore: Boolean, data: ArrayList<LocalMedia?>?) : super() {
+        this.isHasNextMore = isHasNextMore
+        this.data = data
     }
 }

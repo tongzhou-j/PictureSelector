@@ -1,81 +1,43 @@
-package com.luck.picture.lib.entity;
+package com.luck.picture.lib.entity
 
 /**
  * @author：luck
  * @date：2021/5/18 7:30 PM
  * @describe：MediaExtraInfo
  */
-public class MediaExtraInfo {
+class MediaExtraInfo {
     /**
      * videoThumbnail
      */
-    private String videoThumbnail;
+    var videoThumbnail: String? = null
+
     /**
      * width
      */
-    private int width;
+    var width: Int = 0
+
     /**
      * height
      */
-    private int height;
+    var height: Int = 0
+
     /**
      * duration
      */
-    private long duration;
+    var duration: Long = 0
 
     /**
      * orientation
      */
-    private String orientation;
+    var orientation: String? = null
 
-    public String getVideoThumbnail() {
-        return videoThumbnail;
-    }
-
-    public void setVideoThumbnail(String videoThumbnail) {
-        this.videoThumbnail = videoThumbnail;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public long getDuration() {
-        return duration;
-    }
-
-    public void setDuration(long duration) {
-        this.duration = duration;
-    }
-
-    public String getOrientation() {
-        return orientation;
-    }
-
-    public void setOrientation(String orientation) {
-        this.orientation = orientation;
-    }
-
-    @Override
-    public String toString() {
+    override fun toString(): String {
         return "MediaExtraInfo{" +
                 "videoThumbnail='" + videoThumbnail + '\'' +
                 ", width=" + width +
                 ", height=" + height +
                 ", duration=" + duration +
                 ", orientation='" + orientation + '\'' +
-                '}';
+                '}'
     }
 }

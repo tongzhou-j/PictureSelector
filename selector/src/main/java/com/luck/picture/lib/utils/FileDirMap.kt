@@ -1,67 +1,63 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.content.Context;
-import android.os.Environment;
-
-import com.luck.picture.lib.config.SelectMimeType;
-
-import java.io.File;
-import java.util.HashMap;
+import android.content.Context
+import android.os.Environment
+import com.luck.picture.lib.config.SelectMimeType
 
 /**
  * @author：luck
  * @date：2022/9/20 7:57 下午
  * @describe：FileDirMap
  */
-public final class FileDirMap {
-    private static final HashMap<Integer, String> dirMap = new HashMap<>();
+object FileDirMap {
+    private val dirMap = HashMap<Int, String?>()
 
-    public static void init(Context context) {
+    fun init(context: Context) {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
-            return;
+            return
         }
-        if (null == dirMap.get(SelectMimeType.TYPE_IMAGE)) {
-            String path;
-            File externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (null == dirMap[SelectMimeType.TYPE_IMAGE]) {
+            val path: String?
+            val externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
             if (externalFilesDir != null && externalFilesDir.exists()) {
-                path = externalFilesDir.getPath();
+                path = externalFilesDir.absolutePath
             } else {
-                path = context.getCacheDir().getPath();
+                path = context.cacheDir.absolutePath
             }
-            dirMap.put(SelectMimeType.TYPE_IMAGE, path);
+            dirMap[SelectMimeType.TYPE_IMAGE] = path
         }
-        if (null == dirMap.get(SelectMimeType.TYPE_VIDEO)) {
-            String path;
-            File externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES);
+        if (null == dirMap[SelectMimeType.TYPE_VIDEO]) {
+            val path: String?
+            val externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
             if (externalFilesDir != null && externalFilesDir.exists()) {
-                path = externalFilesDir.getPath();
+                path = externalFilesDir.absolutePath
             } else {
-                path = context.getCacheDir().getPath();
+                path = context.cacheDir.absolutePath
             }
-            dirMap.put(SelectMimeType.TYPE_VIDEO, path);
+            dirMap[SelectMimeType.TYPE_VIDEO] = path
         }
-        if (null == dirMap.get(SelectMimeType.TYPE_AUDIO)) {
-            String path;
-            File externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+        if (null == dirMap[SelectMimeType.TYPE_AUDIO]) {
+            val path: String?
+            val externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
             if (externalFilesDir != null && externalFilesDir.exists()) {
-                path = externalFilesDir.getPath();
+                path = externalFilesDir.absolutePath
             } else {
-                path = context.getCacheDir().getPath();
+                path = context.cacheDir.absolutePath
             }
-            dirMap.put(SelectMimeType.TYPE_AUDIO, path);
+            dirMap[SelectMimeType.TYPE_AUDIO] = path
         }
     }
 
-    public static String getFileDirPath(Context context, int type) {
-        String dir = dirMap.get(type);
+    fun getFileDirPath(context: Context, type: Int): String? {
+        var dir = dirMap[type]
         if (null == dir) {
-            init(context);
-            dir = dirMap.get(type);
+            init(context)
+            dir = dirMap[type]
         }
-        return dir;
+        return dir
     }
 
-    public static void clear() {
-        dirMap.clear();
+    fun clear() {
+        dirMap.clear()
     }
 }

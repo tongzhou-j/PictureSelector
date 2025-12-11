@@ -11,6 +11,8 @@ import com.luck.picture.lib.adapter.PicturePreviewAdapter
  */
 class CustomPreviewFragment : PictureSelectorPreviewFragment() {
     companion object {
+        val TAG: String = CustomPreviewFragment::class.java.simpleName
+
         @JvmStatic
         fun newInstance(): CustomPreviewFragment {
             val fragment = CustomPreviewFragment()
@@ -19,12 +21,10 @@ class CustomPreviewFragment : PictureSelectorPreviewFragment() {
         }
     }
 
-    override fun getFragmentTag(): String {
-        return CustomPreviewFragment::class.java.simpleName
-    }
-
     override fun createAdapter(): PicturePreviewAdapter {
         return CustomPreviewAdapter()
     }
 }
+
+
 

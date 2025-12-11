@@ -1,60 +1,60 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.content.Context;
-import android.text.TextUtils;
-import android.widget.Toast;
-
-import com.luck.picture.lib.app.PictureAppMaster;
-import com.luck.picture.lib.thread.PictureThreadUtils;
+import android.content.Context
+import android.text.TextUtils
+import android.widget.Toast
+import com.luck.picture.lib.app.PictureAppMaster
+import com.luck.picture.lib.thread.PictureThreadUtils
 
 /**
  * @author：luck
  * @date：2022/1/8 3:29 下午
  * @describe：ToastUtils
  */
-public class ToastUtils {
+object ToastUtils {
     /**
      * show toast content
      *
      * @param context
      * @param text
      */
-    public static void showToast(Context context, String text) {
-        if (isFastDoubleClick() && TextUtils.equals(text, mLastText)) {
-            return;
+    fun showToast(context: Context, text: String?) {
+        if (isFastDoubleClick && TextUtils.equals(text, ToastUtils.mLastText)) {
+            return
         }
-        Context appContext = PictureAppMaster.getInstance().getAppContext();
+        var appContext: Context? = PictureAppMaster.Companion.instance.appContext
         if (appContext == null) {
-            appContext = context.getApplicationContext();
+            appContext = context.applicationContext
         }
-        if (PictureThreadUtils.isInUiThread()) {
-            Toast.makeText(appContext, text, Toast.LENGTH_SHORT).show();
-            mLastText = text;
+        if (PictureThreadUtils.isInUiThread) {
+            Toast.makeText(appContext, text, Toast.LENGTH_SHORT).show()
+            ToastUtils.mLastText = text
         } else {
-            PictureThreadUtils.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Context appContext = PictureAppMaster.getInstance().getAppContext();
+            PictureThreadUtils.runOnUiThread(object : Runnable {
+                override fun run() {
+                    var appContext: Context? =
+                        PictureAppMaster.Companion.instance.appContext
                     if (appContext == null) {
-                        appContext = context.getApplicationContext();
+                        appContext = context.applicationContext
                     }
-                    Toast.makeText(appContext, text, Toast.LENGTH_SHORT).show();
-                    mLastText = text;
+                    Toast.makeText(appContext, text, Toast.LENGTH_SHORT).show()
+                    ToastUtils.mLastText = text
                 }
-            });
+            })
         }
     }
 
-    private final static long TIME = 1000;
-    private static long lastClickTime;
-    private static String mLastText;
+    private const val TIME: Long = 1000
+    private var lastClickTime: Long = 0
+    private var mLastText: String? = null
 
-    public static boolean isFastDoubleClick() {
-        long time = System.currentTimeMillis();
-        if (time - lastClickTime < TIME) {
-            return true;
+    val isFastDoubleClick: Boolean
+        get() {
+            val time = System.currentTimeMillis()
+            if (time - ToastUtils.lastClickTime < ToastUtils.TIME) {
+                return true
+            }
+            ToastUtils.lastClickTime = time
+            return false
         }
-        lastClickTime = time;
-        return false;
-    }
 }

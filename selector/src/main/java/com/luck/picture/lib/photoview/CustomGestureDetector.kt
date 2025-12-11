@@ -1,200 +1,209 @@
+package com.luck.picture.lib.photoview
 
-package com.luck.picture.lib.photoview;
-
-import android.content.Context;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.VelocityTracker;
-import android.view.ViewConfiguration;
+import android.content.Context
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.ScaleGestureDetector.OnScaleGestureListener
+import android.view.VelocityTracker
+import android.view.ViewConfiguration
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.sqrt
 
 /**
  * Does a whole lot of gesture detecting.
  */
-class CustomGestureDetector {
+internal class CustomGestureDetector(context: Context, listener: OnGestureListener) {
+    private var mActivePointerId: Int = CustomGestureDetector.Companion.INVALID_POINTER_ID
+    private var mActivePointerIndex = 0
+    private val mDetector: ScaleGestureDetector
 
-    private static final int INVALID_POINTER_ID = -1;
+    private var mVelocityTracker: VelocityTracker? = null
+    var isDragging: Boolean = false
+        private set
+    private var mLastTouchX = 0f
+    private var mLastTouchY = 0f
+    private val mTouchSlop: Float
+    private val mMinimumVelocity: Float
+    private val mListener: OnGestureListener
 
-    private int mActivePointerId = INVALID_POINTER_ID;
-    private int mActivePointerIndex = 0;
-    private final ScaleGestureDetector mDetector;
+    init {
+        val configuration = ViewConfiguration.get(context)
+        mMinimumVelocity = configuration.scaledMinimumFlingVelocity.toFloat()
+        mTouchSlop = configuration.scaledTouchSlop.toFloat()
 
-    private VelocityTracker mVelocityTracker;
-    private boolean mIsDragging;
-    private float mLastTouchX;
-    private float mLastTouchY;
-    private final float mTouchSlop;
-    private final float mMinimumVelocity;
-    private OnGestureListener mListener;
+        mListener = listener
+        val mScaleListener: OnScaleGestureListener = object : OnScaleGestureListener {
+            private var lastFocusX = 0f
+            private var lastFocusY = 0f
 
-    CustomGestureDetector(Context context, OnGestureListener listener) {
-        final ViewConfiguration configuration = ViewConfiguration
-                .get(context);
-        mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
-        mTouchSlop = configuration.getScaledTouchSlop();
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val scaleFactor = detector.scaleFactor
 
-        mListener = listener;
-        ScaleGestureDetector.OnScaleGestureListener mScaleListener = new ScaleGestureDetector.OnScaleGestureListener() {
-            private float lastFocusX, lastFocusY = 0;
-
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                float scaleFactor = detector.getScaleFactor();
-
-                if (Float.isNaN(scaleFactor) || Float.isInfinite(scaleFactor))
-                    return false;
+                if (scaleFactor.isNaN() || scaleFactor.isInfinite()) return false
 
                 if (scaleFactor >= 0) {
-                    mListener.onScale(scaleFactor,
-                            detector.getFocusX(),
-                            detector.getFocusY(),
-                            detector.getFocusX() - lastFocusX,
-                            detector.getFocusY() - lastFocusY
-                    );
-                    lastFocusX = detector.getFocusX();
-                    lastFocusY = detector.getFocusY();
+                    mListener.onScale(
+                        scaleFactor,
+                        detector.focusX,
+                        detector.focusY,
+                        detector.focusX - lastFocusX,
+                        detector.focusY - lastFocusY
+                    )
+                    lastFocusX = detector.focusX
+                    lastFocusY = detector.focusY
                 }
-                return true;
+                return true
             }
 
-            @Override
-            public boolean onScaleBegin(ScaleGestureDetector detector) {
-                lastFocusX = detector.getFocusX();
-                lastFocusY = detector.getFocusY();
-                return true;
+            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+                lastFocusX = detector.focusX
+                lastFocusY = detector.focusY
+                return true
             }
 
-            @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
+            override fun onScaleEnd(detector: ScaleGestureDetector) {
                 // NO-OP
             }
-        };
-        mDetector = new ScaleGestureDetector(context, mScaleListener);
+        }
+        mDetector = ScaleGestureDetector(context, mScaleListener)
     }
 
-    private float getActiveX(MotionEvent ev) {
+    private fun getActiveX(ev: MotionEvent): Float {
         try {
-            return ev.getX(mActivePointerIndex);
-        } catch (Exception e) {
-            return ev.getX();
+            return ev.getX(mActivePointerIndex)
+        } catch (e: Exception) {
+            return ev.x
         }
     }
 
-    private float getActiveY(MotionEvent ev) {
+    private fun getActiveY(ev: MotionEvent): Float {
         try {
-            return ev.getY(mActivePointerIndex);
-        } catch (Exception e) {
-            return ev.getY();
+            return ev.getY(mActivePointerIndex)
+        } catch (e: Exception) {
+            return ev.y
         }
     }
 
-    public boolean isScaling() {
-        return mDetector.isInProgress();
-    }
+    val isScaling: Boolean
+        get() = mDetector.isInProgress
 
-    public boolean isDragging() {
-        return mIsDragging;
-    }
-
-    public boolean onTouchEvent(MotionEvent ev) {
+    fun onTouchEvent(ev: MotionEvent): Boolean {
         try {
-            mDetector.onTouchEvent(ev);
-            return processTouchEvent(ev);
-        } catch (IllegalArgumentException e) {
+            mDetector.onTouchEvent(ev)
+            return processTouchEvent(ev)
+        } catch (e: IllegalArgumentException) {
             // Fix for support lib bug, happening when onDestroy is called
-            return true;
+            return true
         }
     }
 
-    private boolean processTouchEvent(MotionEvent ev) {
-        final int action = ev.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-                mActivePointerId = ev.getPointerId(0);
+    private fun processTouchEvent(ev: MotionEvent): Boolean {
+        val action = ev.action
+        when (action and MotionEvent.ACTION_MASK) {
+            MotionEvent.ACTION_DOWN -> {
+                mActivePointerId = ev.getPointerId(0)
 
-                mVelocityTracker = VelocityTracker.obtain();
+                mVelocityTracker = VelocityTracker.obtain()
                 if (null != mVelocityTracker) {
-                    mVelocityTracker.addMovement(ev);
+                    mVelocityTracker!!.addMovement(ev)
                 }
 
-                mLastTouchX = getActiveX(ev);
-                mLastTouchY = getActiveY(ev);
-                mIsDragging = false;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                final float x = getActiveX(ev);
-                final float y = getActiveY(ev);
-                final float dx = x - mLastTouchX, dy = y - mLastTouchY;
+                mLastTouchX = getActiveX(ev)
+                mLastTouchY = getActiveY(ev)
+                this.isDragging = false
+            }
 
-                if (!mIsDragging) {
+            MotionEvent.ACTION_MOVE -> {
+                val x = getActiveX(ev)
+                val y = getActiveY(ev)
+                val dx = x - mLastTouchX
+                val dy = y - mLastTouchY
+
+                if (!this.isDragging) {
                     // Use Pythagoras to see if drag length is larger than
                     // touch slop
-                    mIsDragging = Math.sqrt((dx * dx) + (dy * dy)) >= mTouchSlop;
+                    this.isDragging = sqrt(((dx * dx) + (dy * dy)).toDouble()) >= mTouchSlop.toDouble()
                 }
 
-                if (mIsDragging) {
-                    mListener.onDrag(dx, dy);
-                    mLastTouchX = x;
-                    mLastTouchY = y;
+                if (this.isDragging) {
+                    mListener.onDrag(dx, dy)
+                    mLastTouchX = x
+                    mLastTouchY = y
 
                     if (null != mVelocityTracker) {
-                        mVelocityTracker.addMovement(ev);
+                        mVelocityTracker!!.addMovement(ev)
                     }
                 }
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                mActivePointerId = INVALID_POINTER_ID;
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                mActivePointerId = CustomGestureDetector.Companion.INVALID_POINTER_ID
                 // Recycle Velocity Tracker
                 if (null != mVelocityTracker) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
+                    mVelocityTracker!!.recycle()
+                    mVelocityTracker = null
                 }
-                break;
-            case MotionEvent.ACTION_UP:
-                mActivePointerId = INVALID_POINTER_ID;
-                if (mIsDragging) {
+            }
+
+            MotionEvent.ACTION_UP -> {
+                mActivePointerId = CustomGestureDetector.Companion.INVALID_POINTER_ID
+                if (this.isDragging) {
                     if (null != mVelocityTracker) {
-                        mLastTouchX = getActiveX(ev);
-                        mLastTouchY = getActiveY(ev);
+                        mLastTouchX = getActiveX(ev)
+                        mLastTouchY = getActiveY(ev)
 
                         // Compute velocity within the last 1000ms
-                        mVelocityTracker.addMovement(ev);
-                        mVelocityTracker.computeCurrentVelocity(1000);
+                        mVelocityTracker!!.addMovement(ev)
+                        mVelocityTracker!!.computeCurrentVelocity(1000)
 
-                        final float vX = mVelocityTracker.getXVelocity(), vY = mVelocityTracker
-                                .getYVelocity();
+                        val vX = mVelocityTracker!!.getXVelocity(mActivePointerId)
+                        val vY = mVelocityTracker!!
+                            .getYVelocity(mActivePointerId)
 
                         // If the velocity is greater than minVelocity, call
                         // listener
-                        if (Math.max(Math.abs(vX), Math.abs(vY)) >= mMinimumVelocity) {
-                            mListener.onFling(mLastTouchX, mLastTouchY, -vX,
-                                    -vY);
+                        if (max(abs(vX.toDouble()), abs(vY.toDouble())) >= mMinimumVelocity.toDouble()) {
+                            mListener.onFling(
+                                mLastTouchX, mLastTouchY, -vX,
+                                -vY
+                            )
                         }
                     }
                 }
 
                 // Recycle Velocity Tracker
                 if (null != mVelocityTracker) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
+                    mVelocityTracker!!.recycle()
+                    mVelocityTracker = null
                 }
-                break;
-            case MotionEvent.ACTION_POINTER_UP:
-                final int pointerIndex = Util.getPointerIndex(ev.getAction());
-                final int pointerId = ev.getPointerId(pointerIndex);
+            }
+
+            MotionEvent.ACTION_POINTER_UP -> {
+                val pointerIndex = Util.getPointerIndex(ev.action)
+                val pointerId = ev.getPointerId(pointerIndex)
                 if (pointerId == mActivePointerId) {
                     // This was our active pointer going up. Choose a new
                     // active pointer and adjust accordingly.
-                    final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-                    mActivePointerId = ev.getPointerId(newPointerIndex);
-                    mLastTouchX = ev.getX(newPointerIndex);
-                    mLastTouchY = ev.getY(newPointerIndex);
+                    val newPointerIndex = if (pointerIndex == 0) 1 else 0
+                    mActivePointerId = ev.getPointerId(newPointerIndex)
+                    mLastTouchX = ev.getX(newPointerIndex)
+                    mLastTouchY = ev.getY(newPointerIndex)
                 }
-                break;
+            }
         }
 
         mActivePointerIndex = ev
-                .findPointerIndex(mActivePointerId != INVALID_POINTER_ID ? mActivePointerId
-                        : 0);
-        return true;
+            .findPointerIndex(
+                if (mActivePointerId != CustomGestureDetector.Companion.INVALID_POINTER_ID)
+                    mActivePointerId
+                else
+                    0
+            )
+        return true
+    }
+
+    companion object {
+        private val INVALID_POINTER_ID = -1
     }
 }

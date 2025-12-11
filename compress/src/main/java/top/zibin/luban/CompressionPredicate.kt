@@ -16,3 +16,5 @@ fun interface CompressionPredicate {
     fun apply(path: String): Boolean
 }
 
+
+

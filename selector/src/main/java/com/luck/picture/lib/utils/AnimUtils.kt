@@ -1,18 +1,18 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.view.View;
-import android.view.animation.LinearInterpolator;
-import android.widget.ImageView;
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.view.View
+import android.view.animation.LinearInterpolator
+import android.widget.ImageView
 
 /**
  * @author：luck
  * @date：2019-11-21 19:20
  * @describe：动画相关
  */
-public class AnimUtils {
-    public final static int DURATION = 250;
+object AnimUtils {
+    const val DURATION: Int = 250
 
     /**
      * 箭头旋转动画
@@ -20,19 +20,20 @@ public class AnimUtils {
      * @param arrow
      * @param isFlag
      */
-    public static void rotateArrow(ImageView arrow, boolean isFlag) {
-        float srcValue, targetValue;
+    fun rotateArrow(arrow: ImageView?, isFlag: Boolean) {
+        val srcValue: Float
+        val targetValue: Float
         if (isFlag) {
-            srcValue = 0F;
-            targetValue = 180F;
+            srcValue = 0f
+            targetValue = 180f
         } else {
-            srcValue = 180F;
-            targetValue = 0F;
+            srcValue = 180f
+            targetValue = 0f
         }
-        ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(arrow, "rotation", srcValue, targetValue);
-        objectAnimator.setDuration(DURATION);
-        objectAnimator.setInterpolator(new LinearInterpolator());
-        objectAnimator.start();
+        val objectAnimator = ObjectAnimator.ofFloat(arrow, "rotation", srcValue, targetValue)
+        objectAnimator.duration = DURATION.toLong()
+        objectAnimator.interpolator = LinearInterpolator()
+        objectAnimator.start()
     }
 
     /**
@@ -40,13 +41,13 @@ public class AnimUtils {
      *
      * @param view
      */
-    public static void selectZoom(View view) {
-        AnimatorSet animatorSet = new AnimatorSet();
-        ObjectAnimator objectAnimatorX = ObjectAnimator.ofFloat(view, "scaleX", 1.0F, 1.05F, 1.0F);
-        ObjectAnimator objectAnimatorY = ObjectAnimator.ofFloat(view, "scaleY", 1.0F, 1.05F, 1.0F);
-        animatorSet.playTogether(objectAnimatorX, objectAnimatorY);
-        animatorSet.setDuration(DURATION);
-        animatorSet.setInterpolator(new LinearInterpolator());
-        animatorSet.start();
+    fun selectZoom(view: View?) {
+        val animatorSet = AnimatorSet()
+        val objectAnimatorX = ObjectAnimator.ofFloat(view, "scaleX", 1.0f, 1.05f, 1.0f)
+        val objectAnimatorY = ObjectAnimator.ofFloat(view, "scaleY", 1.0f, 1.05f, 1.0f)
+        animatorSet.playTogether(objectAnimatorX, objectAnimatorY)
+        animatorSet.duration = DURATION.toLong()
+        animatorSet.interpolator = LinearInterpolator()
+        animatorSet.start()
     }
 }

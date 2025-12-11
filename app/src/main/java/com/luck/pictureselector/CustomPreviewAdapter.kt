@@ -42,12 +42,12 @@ class CustomPreviewAdapter : PicturePreviewAdapter() {
     class CustomPreviewImageHolder(@NonNull itemView: View) : BasePreviewHolder(itemView) {
         private var subsamplingScaleImageView: SubsamplingScaleImageView? = null
 
-        override fun findViews(itemView: View) {
-            subsamplingScaleImageView = itemView.findViewById(R.id.big_preview_image)
+        override fun findViews(itemView: View?) {
+            subsamplingScaleImageView = itemView?.findViewById(R.id.big_preview_image)
         }
 
-        override fun loadImage(media: LocalMedia, maxWidth: Int, maxHeight: Int) {
-            if (!ActivityCompatHelper.assertValidRequest(itemView.context)) {
+        override fun loadImage(media: LocalMedia?, maxWidth: Int, maxHeight: Int) {
+            if (media == null || !ActivityCompatHelper.assertValidRequest(itemView.context)) {
                 return
             }
             Glide.with(itemView.context)
@@ -83,21 +83,22 @@ class CustomPreviewAdapter : PicturePreviewAdapter() {
         }
 
         override fun onClickBackPressed() {
-            if (MediaUtils.isLongImage(media.width, media.height)) {
+            val currentMedia = media
+            if (currentMedia != null && MediaUtils.isLongImage(currentMedia.width, currentMedia.height)) {
                 subsamplingScaleImageView?.setOnClickListener { v ->
                     mPreviewEventListener?.onBackPressed()
                 }
             } else {
                 coverImageView.setOnViewTapListener(object : OnViewTapListener {
-                    override fun onViewTap(view: View, x: Float, y: Float) {
+                    override fun onViewTap(view: View?, x: Float, y: Float) {
                         mPreviewEventListener?.onBackPressed()
                     }
                 })
             }
         }
 
-        override fun onLongPressDownload(media: LocalMedia) {
-            if (MediaUtils.isLongImage(media.width, media.height)) {
+        override fun onLongPressDownload(media: LocalMedia?) {
+            if (media != null && MediaUtils.isLongImage(media.width, media.height)) {
                 subsamplingScaleImageView?.setOnLongClickListener { view ->
                     mPreviewEventListener?.onLongPressDownload(media)
                     false
@@ -111,4 +112,6 @@ class CustomPreviewAdapter : PicturePreviewAdapter() {
         }
     }
 }
+
+
 

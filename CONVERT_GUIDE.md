@@ -2,17 +2,12 @@
 
 ## 文件统计
 
-- **总文件数**: 337
-- **模块数**: 6
+- **总文件数**: 189
+- **模块数**: 1
 
 ### 按模块统计
 
-- `app`: 29 个文件
-- `camerax`: 30 个文件
-- `compress`: 20 个文件
-- `ijkplayer-java`: 28 个文件
 - `selector`: 189 个文件
-- `ucrop`: 41 个文件
 
 ## 转换方法
 
@@ -34,152 +29,13 @@
 
 ### 方法 3: 按模块转换（推荐顺序）
 
-1. **compress** (20 个文件)
-   - 路径: `/Users/zt/workspace/PictureSelector/compress/src/main/java/`
-   - 建议: 先转换工具类，再转换业务类
-
-2. **ijkplayer-java** (28 个文件)
-   - 路径: `/Users/zt/workspace/PictureSelector/ijkplayer-java/src/main/java/`
-   - 建议: 先转换工具类，再转换业务类
-
-3. **app** (29 个文件)
-   - 路径: `/Users/zt/workspace/PictureSelector/app/src/main/java/`
-   - 建议: 先转换工具类，再转换业务类
-
-4. **camerax** (30 个文件)
-   - 路径: `/Users/zt/workspace/PictureSelector/camerax/src/main/java/`
-   - 建议: 先转换工具类，再转换业务类
-
-5. **ucrop** (41 个文件)
-   - 路径: `/Users/zt/workspace/PictureSelector/ucrop/src/main/java/`
-   - 建议: 先转换工具类，再转换业务类
-
-6. **selector** (189 个文件)
+1. **selector** (189 个文件)
    - 路径: `/Users/zt/workspace/PictureSelector/selector/src/main/java/`
    - 建议: 先转换工具类，再转换业务类
 
 ## 需要转换的文件列表
 
 ### 按模块分组
-
-#### app
-
-- `app/src/main/java/com/luck/pictureselector/App.java`
-- `app/src/main/java/com/luck/pictureselector/CustomBottomNavBar.java`
-- `app/src/main/java/com/luck/pictureselector/CustomCompleteSelectView.java`
-- `app/src/main/java/com/luck/pictureselector/CustomLoadingDialog.java`
-- `app/src/main/java/com/luck/pictureselector/CustomPreviewAdapter.java`
-- `app/src/main/java/com/luck/pictureselector/CustomPreviewBottomNavBar.java`
-- `app/src/main/java/com/luck/pictureselector/CustomPreviewFragment.java`
-- `app/src/main/java/com/luck/pictureselector/CustomPreviewTitleBar.java`
-- `app/src/main/java/com/luck/pictureselector/CustomTitleBar.java`
-- `app/src/main/java/com/luck/pictureselector/ExoPlayerEngine.java`
-- `app/src/main/java/com/luck/pictureselector/FullyGridLayoutManager.java`
-- `app/src/main/java/com/luck/pictureselector/GlideEngine.java`
-- `app/src/main/java/com/luck/pictureselector/IjkPlayerEngine.java`
-- `app/src/main/java/com/luck/pictureselector/IjkPlayerView.java`
-- `app/src/main/java/com/luck/pictureselector/ImageCacheUtils.java`
-- `app/src/main/java/com/luck/pictureselector/ImageLoaderUtils.java`
-- `app/src/main/java/com/luck/pictureselector/ImageUtil.java`
-- `app/src/main/java/com/luck/pictureselector/InjectFragmentActivity.java`
-- `app/src/main/java/com/luck/pictureselector/LineWrapRadioGroup.java`
-- `app/src/main/java/com/luck/pictureselector/MainActivity.java`
-- `app/src/main/java/com/luck/pictureselector/OnlyQueryDataActivity.java`
-- `app/src/main/java/com/luck/pictureselector/PicassoEngine.java`
-- `app/src/main/java/com/luck/pictureselector/PictureSelectorEngineImp.java`
-- `app/src/main/java/com/luck/pictureselector/RoundedCornersTransform.java`
-- `app/src/main/java/com/luck/pictureselector/SimpleActivity.java`
-- `app/src/main/java/com/luck/pictureselector/VideoRequestHandler.java`
-- `app/src/main/java/com/luck/pictureselector/adapter/GridImageAdapter.java`
-- `app/src/main/java/com/luck/pictureselector/listener/DragListener.java`
-- `app/src/main/java/com/luck/pictureselector/listener/OnItemLongClickListener.java`
-
-#### camerax
-
-- `camerax/src/main/java/com/luck/lib/camerax/CameraImageEngine.java`
-- `camerax/src/main/java/com/luck/lib/camerax/CustomCameraConfig.java`
-- `camerax/src/main/java/com/luck/lib/camerax/CustomCameraView.java`
-- `camerax/src/main/java/com/luck/lib/camerax/PictureCameraActivity.java`
-- `camerax/src/main/java/com/luck/lib/camerax/SimpleCameraX.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/CameraListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/CameraXOrientationEventListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/CameraXPreviewViewTouchListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/CaptureListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/ClickListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/IObtainCameraView.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/ImageCallbackListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/OnSimpleXPermissionDeniedListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/OnSimpleXPermissionDescriptionListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/listener/TypeListener.java`
-- `camerax/src/main/java/com/luck/lib/camerax/permissions/PermissionChecker.java`
-- `camerax/src/main/java/com/luck/lib/camerax/permissions/PermissionResultCallback.java`
-- `camerax/src/main/java/com/luck/lib/camerax/permissions/SimpleXPermissionUtil.java`
-- `camerax/src/main/java/com/luck/lib/camerax/utils/BitmapUtils.java`
-- `camerax/src/main/java/com/luck/lib/camerax/utils/CameraUtils.java`
-- `camerax/src/main/java/com/luck/lib/camerax/utils/DateUtils.java`
-- `camerax/src/main/java/com/luck/lib/camerax/utils/DensityUtil.java`
-- `camerax/src/main/java/com/luck/lib/camerax/utils/DoubleUtils.java`
-- `camerax/src/main/java/com/luck/lib/camerax/utils/FileUtils.java`
-- `camerax/src/main/java/com/luck/lib/camerax/utils/SimpleXSpUtils.java`
-- `camerax/src/main/java/com/luck/lib/camerax/widget/CaptureButton.java`
-- `camerax/src/main/java/com/luck/lib/camerax/widget/CaptureLayout.java`
-- `camerax/src/main/java/com/luck/lib/camerax/widget/FocusImageView.java`
-- `camerax/src/main/java/com/luck/lib/camerax/widget/ReturnButton.java`
-- `camerax/src/main/java/com/luck/lib/camerax/widget/TypeButton.java`
-
-#### compress
-
-- `compress/src/main/java/top/zibin/luban/Checker.java`
-- `compress/src/main/java/top/zibin/luban/CompressionPredicate.java`
-- `compress/src/main/java/top/zibin/luban/Engine.java`
-- `compress/src/main/java/top/zibin/luban/InputStreamAdapter.java`
-- `compress/src/main/java/top/zibin/luban/InputStreamProvider.java`
-- `compress/src/main/java/top/zibin/luban/Luban.java`
-- `compress/src/main/java/top/zibin/luban/LubanUtils.java`
-- `compress/src/main/java/top/zibin/luban/OnCompressListener.java`
-- `compress/src/main/java/top/zibin/luban/OnNewCompressListener.java`
-- `compress/src/main/java/top/zibin/luban/OnRenameListener.java`
-- `compress/src/main/java/top/zibin/luban/io/ArrayAdapterInterface.java`
-- `compress/src/main/java/top/zibin/luban/io/ArrayPool.java`
-- `compress/src/main/java/top/zibin/luban/io/ArrayPoolProvide.java`
-- `compress/src/main/java/top/zibin/luban/io/BaseKeyPool.java`
-- `compress/src/main/java/top/zibin/luban/io/BufferedInputStreamWrap.java`
-- `compress/src/main/java/top/zibin/luban/io/ByteArrayAdapter.java`
-- `compress/src/main/java/top/zibin/luban/io/GroupedLinkedMap.java`
-- `compress/src/main/java/top/zibin/luban/io/IntegerArrayAdapter.java`
-- `compress/src/main/java/top/zibin/luban/io/LruArrayPool.java`
-- `compress/src/main/java/top/zibin/luban/io/PoolAble.java`
-
-#### ijkplayer-java
-
-- `ijkplayer-java/src/androidTest/java/tv/danmaku/ijk/media/player/ApplicationTest.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/AbstractMediaPlayer.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/AndroidMediaPlayer.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IMediaPlayer.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/ISurfaceTextureHolder.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/ISurfaceTextureHost.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkLibLoader.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkMediaCodecInfo.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkMediaMeta.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkMediaPlayer.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/IjkTimedText.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/MediaInfo.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/MediaPlayerProxy.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/TextureMediaPlayer.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/annotations/AccessedByNative.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/annotations/CalledByNative.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/exceptions/IjkMediaException.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/ffmpeg/FFmpegApi.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/AndroidMediaFormat.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/AndroidTrackInfo.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/IAndroidIO.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/IMediaDataSource.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/IMediaFormat.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/ITrackInfo.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/IjkMediaFormat.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/misc/IjkTrackInfo.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/pragma/DebugLog.java`
-- `ijkplayer-java/src/main/java/tv/danmaku/ijk/media/player/pragma/Pragma.java`
 
 #### selector
 
@@ -372,50 +228,6 @@
 - `selector/src/main/java/com/luck/picture/lib/widget/SlideSelectionHandler.java`
 - `selector/src/main/java/com/luck/picture/lib/widget/SquareRelativeLayout.java`
 - `selector/src/main/java/com/luck/picture/lib/widget/TitleBar.java`
-
-#### ucrop
-
-- `ucrop/src/main/java/com/yalantis/ucrop/OkHttpClientStore.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCrop.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCropActivity.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCropDevelopConfig.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCropFragment.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCropFragmentCallback.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCropGalleryAdapter.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCropImageEngine.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/UCropMultipleActivity.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/callback/BitmapCropCallback.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/callback/BitmapLoadCallback.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/callback/CropBoundsChangeListener.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/callback/OverlayViewChangeListener.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/decoration/GridSpacingItemDecoration.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/model/AspectRatio.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/model/CropParameters.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/model/CustomIntentKey.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/model/ExifInfo.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/model/ImageState.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/statusbar/ImmersiveManager.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/statusbar/LightStatusBarUtils.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/statusbar/RomUtils.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/task/BitmapCropTask.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/task/BitmapLoadTask.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/BitmapLoadUtils.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/CubicEasing.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/DensityUtil.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/EglUtils.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/FastBitmapDrawable.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/FileUtils.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/ImageHeaderParser.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/RectUtils.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/RotationGestureDetector.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/util/SelectedStateListDrawable.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/view/CropImageView.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/view/GestureCropImageView.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/view/OverlayView.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/view/TransformImageView.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/view/UCropView.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/view/widget/AspectRatioTextView.java`
-- `ucrop/src/main/java/com/yalantis/ucrop/view/widget/HorizontalProgressWheelView.java`
 
 ## 转换后检查清单
 

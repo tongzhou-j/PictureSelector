@@ -29,44 +29,43 @@ class ExoPlayerEngine : VideoPlayerEngine<StyledPlayerView> {
      */
     private val listeners = CopyOnWriteArrayList<OnPlayerListener>()
 
-    override fun onCreateVideoPlayer(context: Context): View {
+    override fun onCreateVideoPlayer(context: Context?): View? {
+        if (context == null) return null
         val exoPlayer = StyledPlayerView(context)
         exoPlayer.useController = false
         return exoPlayer
     }
 
-    override fun onStarPlayer(exoPlayer: StyledPlayerView, media: LocalMedia) {
-        val player = exoPlayer.player
-        if (player != null) {
-            val path = media.availablePath
-            val mediaItem = when {
-                PictureMimeType.isContent(path) -> MediaItem.fromUri(Uri.parse(path))
-                PictureMimeType.isHasHttp(path) -> MediaItem.fromUri(path)
-                else -> MediaItem.fromUri(Uri.fromFile(File(path)))
-            }
-            val config = SelectorProviders.getInstance().selectorConfig
-            player.repeatMode = if (config.isLoopAutoPlay) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
-            player.setMediaItem(mediaItem)
-            player.prepare()
-            player.play()
+    override fun onStarPlayer(exoPlayer: StyledPlayerView?, media: LocalMedia?) {
+        val player = exoPlayer?.player ?: return
+        val path = media?.availablePath ?: return
+        val mediaItem = when {
+            PictureMimeType.isContent(path) -> MediaItem.fromUri(Uri.parse(path))
+            PictureMimeType.isHasHttp(path) -> MediaItem.fromUri(path)
+            else -> MediaItem.fromUri(Uri.fromFile(File(path)))
         }
+        val config = SelectorProviders.instance?.selectorConfig
+        player.repeatMode = if (config?.isLoopAutoPlay == true) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        player.play()
     }
 
-    override fun onResume(exoPlayer: StyledPlayerView) {
-        exoPlayer.player?.play()
+    override fun onResume(exoPlayer: StyledPlayerView?) {
+        exoPlayer?.player?.play()
     }
 
-    override fun onPause(exoPlayer: StyledPlayerView) {
-        exoPlayer.player?.pause()
+    override fun onPause(exoPlayer: StyledPlayerView?) {
+        exoPlayer?.player?.pause()
     }
 
-    override fun isPlaying(exoPlayer: StyledPlayerView): Boolean {
-        val player = exoPlayer.player
+    override fun isPlaying(exoPlayer: StyledPlayerView?): Boolean {
+        val player = exoPlayer?.player
         return player != null && player.isPlaying
     }
 
-    override fun addPlayListener(playerListener: OnPlayerListener) {
-        if (!listeners.contains(playerListener)) {
+    override fun addPlayListener(playerListener: OnPlayerListener?) {
+        if (playerListener != null && !listeners.contains(playerListener)) {
             listeners.add(playerListener)
         }
     }
@@ -79,14 +78,15 @@ class ExoPlayerEngine : VideoPlayerEngine<StyledPlayerView> {
         }
     }
 
-    override fun onPlayerAttachedToWindow(exoPlayer: StyledPlayerView) {
-        val player = ExoPlayer.Builder(exoPlayer.context).build()
+    override fun onPlayerAttachedToWindow(exoPlayer: StyledPlayerView?) {
+        val context = exoPlayer?.context ?: return
+        val player = ExoPlayer.Builder(context).build()
         exoPlayer.player = player
         player.addListener(mPlayerListener)
     }
 
-    override fun onPlayerDetachedFromWindow(exoPlayer: StyledPlayerView) {
-        val player = exoPlayer.player
+    override fun onPlayerDetachedFromWindow(exoPlayer: StyledPlayerView?) {
+        val player = exoPlayer?.player
         if (player != null) {
             player.removeListener(mPlayerListener)
             player.release()
@@ -94,8 +94,8 @@ class ExoPlayerEngine : VideoPlayerEngine<StyledPlayerView> {
         }
     }
 
-    override fun destroy(exoPlayer: StyledPlayerView) {
-        val player = exoPlayer.player
+    override fun destroy(exoPlayer: StyledPlayerView?) {
+        val player = exoPlayer?.player
         if (player != null) {
             player.removeListener(mPlayerListener)
             player.release()
@@ -137,4 +137,6 @@ class ExoPlayerEngine : VideoPlayerEngine<StyledPlayerView> {
         }
     }
 }
+
+
 

@@ -22,8 +22,8 @@ class GlideEngine private constructor() : ImageEngine {
      * @param url       资源url
      * @param imageView 图片承载控件
      */
-    override fun loadImage(context: Context, url: String, imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadImage(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         Glide.with(context)
@@ -31,8 +31,8 @@ class GlideEngine private constructor() : ImageEngine {
             .into(imageView)
     }
 
-    override fun loadImage(context: Context, imageView: ImageView, url: String, maxWidth: Int, maxHeight: Int) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadImage(context: Context?, imageView: ImageView?, url: String?, maxWidth: Int, maxHeight: Int) {
+        if (context == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         Glide.with(context)
@@ -48,8 +48,8 @@ class GlideEngine private constructor() : ImageEngine {
      * @param url       图片路径
      * @param imageView 承载图片ImageView
      */
-    override fun loadAlbumCover(context: Context, url: String, imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadAlbumCover(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         Glide.with(context)
@@ -69,8 +69,8 @@ class GlideEngine private constructor() : ImageEngine {
      * @param url       图片路径
      * @param imageView 承载图片ImageView
      */
-    override fun loadGridImage(context: Context, url: String, imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadGridImage(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         Glide.with(context)
@@ -81,15 +81,15 @@ class GlideEngine private constructor() : ImageEngine {
             .into(imageView)
     }
 
-    override fun pauseRequests(context: Context) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun pauseRequests(context: Context?) {
+        if (context == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         Glide.with(context).pauseRequests()
     }
 
-    override fun resumeRequests(context: Context) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun resumeRequests(context: Context?) {
+        if (context == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         Glide.with(context).resumeRequests()

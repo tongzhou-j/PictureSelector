@@ -1,53 +1,45 @@
-package com.luck.picture.lib.widget;
+package com.luck.picture.lib.widget
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.RelativeLayout;
-
-import com.luck.picture.lib.R;
-import com.luck.picture.lib.config.SelectorProviders;
-import com.luck.picture.lib.style.TitleBarStyle;
-import com.luck.picture.lib.utils.StyleUtils;
+import android.content.Context
+import android.util.AttributeSet
+import com.luck.picture.lib.R
+import com.luck.picture.lib.utils.StyleUtils
 
 /**
  * @author：luck
  * @date：2021/11/19 4:38 下午
  * @describe：PreviewTitleBar
  */
-public class PreviewTitleBar extends TitleBar {
+open class PreviewTitleBar : TitleBar {
+    constructor(context: Context?) : super(context!!)
 
-    public PreviewTitleBar(Context context) {
-        super(context);
-    }
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
-    public PreviewTitleBar(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
-    public PreviewTitleBar(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    @Override
-    public void setTitleBarStyle() {
-        super.setTitleBarStyle();
-        TitleBarStyle titleBarStyle = config.selectorStyle.getTitleBarStyle();
-        if (StyleUtils.checkStyleValidity(titleBarStyle.getPreviewTitleBackgroundColor())) {
-            setBackgroundColor(titleBarStyle.getPreviewTitleBackgroundColor());
-        } else if (StyleUtils.checkSizeValidity(titleBarStyle.getTitleBackgroundColor())) {
-            setBackgroundColor(titleBarStyle.getTitleBackgroundColor());
+    override fun setTitleBarStyle() {
+        super.setTitleBarStyle()
+        val titleBarStyle = config?.selectorStyle?.titleBarStyle ?: return
+        if (StyleUtils.checkStyleValidity(titleBarStyle.previewTitleBackgroundColor)) {
+            setBackgroundColor(titleBarStyle.previewTitleBackgroundColor)
+        } else if (StyleUtils.checkSizeValidity(titleBarStyle.titleBackgroundColor)) {
+            setBackgroundColor(titleBarStyle.titleBackgroundColor)
         }
-        if (StyleUtils.checkStyleValidity(titleBarStyle.getPreviewTitleLeftBackResource())) {
-            ivLeftBack.setImageResource(titleBarStyle.getPreviewTitleLeftBackResource());
+        if (StyleUtils.checkStyleValidity(titleBarStyle.previewTitleLeftBackResource)) {
+            ivLeftBack?.setImageResource(titleBarStyle.previewTitleLeftBackResource)
         }
-        rlAlbumBg.setOnClickListener(null);
-        viewAlbumClickArea.setOnClickListener(null);
-        RelativeLayout.LayoutParams layoutParams = (LayoutParams) rlAlbumBg.getLayoutParams();
-        layoutParams.removeRule(RelativeLayout.END_OF);
-        layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        rlAlbumBg.setBackgroundResource(R.drawable.ps_ic_trans_1px);
-        tvCancel.setVisibility(GONE);
-        ivArrow.setVisibility(GONE);
-        viewAlbumClickArea.setVisibility(GONE);
+        rlAlbumBg?.setOnClickListener(null)
+        viewAlbumClickArea?.setOnClickListener(null)
+        val layoutParams = rlAlbumBg?.layoutParams as? LayoutParams
+        layoutParams?.removeRule(END_OF)
+        layoutParams?.addRule(CENTER_HORIZONTAL)
+        rlAlbumBg?.setBackgroundResource(R.drawable.ps_ic_trans_1px)
+        tvCancel?.visibility = GONE
+        ivArrow?.visibility = GONE
+        viewAlbumClickArea?.visibility = GONE
     }
 }

@@ -1,52 +1,54 @@
-package com.luck.picture.lib.config;
+package com.luck.picture.lib.config
 
-import java.util.LinkedList;
+import java.util.LinkedList
 
 /**
  * @author：luck
  * @date：2023/3/31 4:15 下午
  * @describe：SelectorProviders
  */
-public class SelectorProviders {
+class SelectorProviders {
+    private val selectionConfigsQueue = LinkedList<SelectorConfig?>()
 
-    private final LinkedList<SelectorConfig> selectionConfigsQueue = new LinkedList<>();
-
-    public void addSelectorConfigQueue(SelectorConfig config) {
-        selectionConfigsQueue.add(config);
+    fun addSelectorConfigQueue(config: SelectorConfig?) {
+        selectionConfigsQueue.add(config)
     }
 
-    public SelectorConfig getSelectorConfig() {
-        return selectionConfigsQueue.size() > 0 ? selectionConfigsQueue.getLast() : new SelectorConfig();
-    }
+    val selectorConfig: SelectorConfig?
+        get() = if (selectionConfigsQueue.size > 0) selectionConfigsQueue.getLast() else SelectorConfig()
 
-    public void destroy() {
-        SelectorConfig selectorConfig = getSelectorConfig();
+    fun destroy() {
+        val selectorConfig = this.selectorConfig
         if (selectorConfig != null) {
-            selectorConfig.destroy();
-            selectionConfigsQueue.remove(selectorConfig);
+            selectorConfig.destroy()
+            selectionConfigsQueue.remove(selectorConfig)
         }
     }
 
-    public void reset() {
-        for (int i = 0; i < selectionConfigsQueue.size(); i++) {
-            SelectorConfig selectorConfig = selectionConfigsQueue.get(i);
+    fun reset() {
+        for (i in selectionConfigsQueue.indices) {
+            val selectorConfig = selectionConfigsQueue.get(i)
             if (selectorConfig != null) {
-                selectorConfig.destroy();
+                selectorConfig.destroy()
             }
         }
-        selectionConfigsQueue.clear();
+        selectionConfigsQueue.clear()
     }
 
-    private static volatile SelectorProviders selectorProviders;
+    companion object {
+        @Volatile
+        private var selectorProviders: SelectorProviders? = null
 
-    public static SelectorProviders getInstance() {
-        if (selectorProviders == null) {
-            synchronized (SelectorProviders.class) {
-                if (selectorProviders == null) {
-                    selectorProviders = new SelectorProviders();
+        val instance: SelectorProviders?
+            get() {
+                if (SelectorProviders.Companion.selectorProviders == null) {
+                    synchronized(SelectorProviders::class.java) {
+                        if (SelectorProviders.Companion.selectorProviders == null) {
+                            SelectorProviders.Companion.selectorProviders = SelectorProviders()
+                        }
+                    }
                 }
+                return SelectorProviders.Companion.selectorProviders
             }
-        }
-        return selectorProviders;
     }
 }

@@ -1,713 +1,314 @@
-package com.luck.picture.lib.style;
-
-import android.widget.RelativeLayout;
+package com.luck.picture.lib.style
 
 /**
  * @author：luck
  * @date：2021/11/15 4:14 下午
  * @describe：SelectMainStyle
  */
-public class SelectMainStyle {
-
+class SelectMainStyle {
     /**
      * 状态栏背景色
      */
-    private int statusBarColor;
+    var statusBarColor: Int = 0
 
     /**
      * 导航栏背景色
      */
-    private int navigationBarColor;
+    var navigationBarColor: Int = 0
 
     /**
      * 状态栏字体颜色，非黑即白
      */
-    private boolean isDarkStatusBarBlack = false;
+    var isDarkStatusBarBlack: Boolean = false
 
     /**
      * 完成按钮从底部放在右上角
      */
-    private boolean isCompleteSelectRelativeTop;
+    var isCompleteSelectRelativeTop: Boolean = false
 
     /**
      * 预览页选择按钮从顶部放在右下角
      */
-    private boolean isPreviewSelectRelativeBottom;
+    var isPreviewSelectRelativeBottom: Boolean = false
 
     /**
      * 预览页是否显示选择画廊
      */
-    private boolean isPreviewDisplaySelectGallery;
+    var isPreviewDisplaySelectGallery: Boolean = false
 
     /**
      * 预览页选择按钮MarginRight
-     * <p>
+     *
+     *
      * unit dp
-     * </p>
+     *
      */
-    private int previewSelectMarginRight;
+    var previewSelectMarginRight: Int = 0
 
     /**
      * 预览背景色
      */
-    private int previewBackgroundColor;
+    var previewBackgroundColor: Int = 0
 
     /**
      * 预览页选择按钮文本
      */
-    private String previewSelectText;
+    var previewSelectText: String? = null
 
     /**
      * 预览页选择按钮文本
      */
-    private int previewSelectTextResId;
+    var previewSelectTextResId: Int = 0
+        private set
 
     /**
      * 预览页选择按钮字体大小
      */
-    private int previewSelectTextSize;
+    var previewSelectTextSize: Int = 0
 
     /**
      * 预览页选择按钮字体颜色
      */
-    private int previewSelectTextColor;
+    var previewSelectTextColor: Int = 0
 
 
     /**
      * 勾选样式
      */
-    private int selectBackground;
+    var selectBackground: Int = 0
 
     /**
      * 预览样式勾选样式
      */
-    private int previewSelectBackground;
+    var previewSelectBackground: Int = 0
 
     /**
      * 勾选样式是否使用数量类型
      */
-    private boolean isSelectNumberStyle;
+    var isSelectNumberStyle: Boolean = false
 
     /**
      * 预览页勾选样式是否使用数量类型
      */
-    private boolean isPreviewSelectNumberStyle;
+    var isPreviewSelectNumberStyle: Boolean = false
 
     /**
      * 列表背景色
      */
-    private int mainListBackgroundColor;
+    var mainListBackgroundColor: Int = 0
 
     /**
      * 选择按钮默认文本
      */
-    private String selectNormalText;
+    var selectNormalText: String? = null
 
     /**
      * 选择按钮默认文本
      */
-    private int selectNormalTextResId;
+    var selectNormalTextResId: Int = 0
+        private set
 
     /**
      * 选择按钮默认文本字体大小
      */
-    private int selectNormalTextSize;
+    var selectNormalTextSize: Int = 0
+
     /**
      * 选择按钮默认文本字体色值
      */
-    private int selectNormalTextColor;
+    var selectNormalTextColor: Int = 0
 
     /**
      * 选择按钮默认背景
      */
-    private int selectNormalBackgroundResources;
+    var selectNormalBackgroundResources: Int = 0
 
     /**
      * 选择按钮文本
      */
-    private String selectText;
+    var selectText: String? = null
 
     /**
      * 选择按钮文本
      */
-    private int selectTextResId;
+    var selectTextResId: Int = 0
+        private set
 
     /**
      * 选择按钮文本字体大小
      */
-    private int selectTextSize;
+    var selectTextSize: Int = 0
+
     /**
      * 选择按钮文本字体色值
      */
-    private int selectTextColor;
+    var selectTextColor: Int = 0
 
     /**
      * 选择按钮选中背景
      */
-    private int selectBackgroundResources;
+    var selectBackgroundResources: Int = 0
 
     /**
      * RecyclerView列表item间隙
-     * <p>
+     *
+     *
      * use unit dp
-     * </p>
+     *
      */
-    private int adapterItemSpacingSize;
+    var adapterItemSpacingSize: Int = 0
 
     /**
      * 是否显示左右间距
      */
-    private boolean isAdapterItemIncludeEdge;
+    var isAdapterItemIncludeEdge: Boolean = false
 
     /**
      * 勾选样式字体大小
      */
-    private int adapterSelectTextSize;
+    var adapterSelectTextSize: Int = 0
 
     /**
      * 勾选按钮点击区域
-     * <p>
+     *
+     *
      * use unit dp
-     * </p>
+     *
      */
-    private int adapterSelectClickArea;
+    var adapterSelectClickArea: Int = 0
 
     /**
      * 勾选样式字体色值
      */
-    private int adapterSelectTextColor;
+    var adapterSelectTextColor: Int = 0
 
     /**
      * 勾选样式位置
-     * {@link RelativeLayout.addRule()}
+     * []
      */
-    private int[] adapterSelectStyleGravity;
+    var adapterSelectStyleGravity: IntArray? = null
 
     /**
      * 资源类型标识
      */
-    private int adapterDurationDrawableLeft;
+    var adapterDurationDrawableLeft: Int = 0
 
     /**
      * 时长文字字体大小
      */
-    private int adapterDurationTextSize;
+    var adapterDurationTextSize: Int = 0
 
     /**
      * 时长文字颜色
      */
-    private int adapterDurationTextColor;
+    var adapterDurationTextColor: Int = 0
 
     /**
      * 时长文字位置
-     * {@link RelativeLayout.addRule()}
+     * []
      */
-    private int[] adapterDurationGravity;
+    var adapterDurationGravity: IntArray? = null
 
     /**
      * 时长文字阴影背景
      */
-    private int adapterDurationBackgroundResources;
+    var adapterDurationBackgroundResources: Int = 0
 
     /**
      * 拍照按钮背景色
      */
-    private int adapterCameraBackgroundColor;
+    var adapterCameraBackgroundColor: Int = 0
 
     /**
      * 拍照按钮图标
      */
-    private int adapterCameraDrawableTop;
+    var adapterCameraDrawableTop: Int = 0
 
     /**
      * 拍照按钮文本
      */
-    private String adapterCameraText;
+    var adapterCameraText: String? = null
 
     /**
      * 拍照按钮文本
      */
-    private int adapterCameraTextResId;
+    var adapterCameraTextResId: Int = 0
+        private set
 
     /**
      * 拍照按钮文本字体色值
      */
-    private int adapterCameraTextColor;
+    var adapterCameraTextColor: Int = 0
+
     /**
      * 拍照按钮文本字体大小
      */
-    private int adapterCameraTextSize;
+    var adapterCameraTextSize: Int = 0
+
     /**
      * 资源图标识的背景
      */
-    private int adapterTagBackgroundResources;
+    var adapterTagBackgroundResources: Int = 0
+
     /**
      * 资源标识的字体大小
      */
-    private int adapterTagTextSize;
+    var adapterTagTextSize: Int = 0
+
     /**
      * 资源标识的字体色值
      */
-    private int adapterTagTextColor;
+    var adapterTagTextColor: Int = 0
+
     /**
      * 资源标识的位置
-     * {@link RelativeLayout.addRule()}
+     * []
      */
-    private int[] adapterTagGravity;
+    var adapterTagGravity: IntArray? = null
+
     /**
      * 图片被编辑标识
      */
-    private int adapterImageEditorResources;
+    var adapterImageEditorResources: Int = 0
 
     /**
      * 图片被编辑标识位置
-     * {@link RelativeLayout.addRule()}
+     * []
      */
-    private int[] adapterImageEditorGravity;
+    var adapterImageEditorGravity: IntArray? = null
 
     /**
      * 预览页画廊边框样式
      */
-    private int adapterPreviewGalleryFrameResource;
+    var adapterPreviewGalleryFrameResource: Int = 0
 
     /**
      * 预览页画廊背景色
      */
-    private int adapterPreviewGalleryBackgroundResource;
+    var adapterPreviewGalleryBackgroundResource: Int = 0
 
     /**
      * 预览页画廊item大小
-     * <p>
+     *
+     *
      * use unit dp
-     * </p>
+     *
      */
-    private int adapterPreviewGalleryItemSize;
+    var adapterPreviewGalleryItemSize: Int = 0
 
-    public SelectMainStyle() {
-
-    }
-
-    public int getStatusBarColor() {
-        return statusBarColor;
-    }
-
-    public void setStatusBarColor(int statusBarColor) {
-        this.statusBarColor = statusBarColor;
-    }
-
-    public int getNavigationBarColor() {
-        return navigationBarColor;
-    }
-
-    public void setNavigationBarColor(int navigationBarColor) {
-        this.navigationBarColor = navigationBarColor;
-    }
-
-    public boolean isDarkStatusBarBlack() {
-        return isDarkStatusBarBlack;
-    }
-
-    public void setDarkStatusBarBlack(boolean darkStatusBarBlack) {
-        isDarkStatusBarBlack = darkStatusBarBlack;
-    }
-
-    public boolean isCompleteSelectRelativeTop() {
-        return isCompleteSelectRelativeTop;
-    }
-
-    public void setCompleteSelectRelativeTop(boolean completeSelectRelativeTop) {
-        isCompleteSelectRelativeTop = completeSelectRelativeTop;
-    }
-
-    public boolean isPreviewSelectRelativeBottom() {
-        return isPreviewSelectRelativeBottom;
-    }
-
-    public void setPreviewSelectRelativeBottom(boolean previewSelectRelativeBottom) {
-        isPreviewSelectRelativeBottom = previewSelectRelativeBottom;
-    }
-
-    public boolean isPreviewDisplaySelectGallery() {
-        return isPreviewDisplaySelectGallery;
-    }
-
-    public void setPreviewDisplaySelectGallery(boolean previewDisplaySelectGallery) {
-        isPreviewDisplaySelectGallery = previewDisplaySelectGallery;
-    }
-
-    public int getPreviewSelectMarginRight() {
-        return previewSelectMarginRight;
-    }
-
-    public void setPreviewSelectMarginRight(int previewSelectMarginRight) {
-        this.previewSelectMarginRight = previewSelectMarginRight;
-    }
-
-    public String getPreviewSelectText() {
-        return previewSelectText;
-    }
-
-    public void setPreviewSelectText(String previewSelectText) {
-        this.previewSelectText = previewSelectText;
-    }
-
-    public int getPreviewSelectTextResId() {
-        return previewSelectTextResId;
-    }
-
-    public void setPreviewSelectText(int resId) {
-        this.previewSelectTextResId = resId;
-    }
-
-    public int getPreviewSelectTextSize() {
-        return previewSelectTextSize;
-    }
-
-    public void setPreviewSelectTextSize(int previewSelectTextSize) {
-        this.previewSelectTextSize = previewSelectTextSize;
-    }
-
-    public int getPreviewSelectTextColor() {
-        return previewSelectTextColor;
-    }
-
-    public void setPreviewSelectTextColor(int previewSelectTextColor) {
-        this.previewSelectTextColor = previewSelectTextColor;
-    }
-
-    public int getSelectBackground() {
-        return selectBackground;
-    }
-
-    public void setSelectBackground(int selectBackground) {
-        this.selectBackground = selectBackground;
-    }
-
-    public int getPreviewSelectBackground() {
-        return previewSelectBackground;
-    }
-
-    public void setPreviewSelectBackground(int previewSelectBackground) {
-        this.previewSelectBackground = previewSelectBackground;
-    }
-
-    public boolean isSelectNumberStyle() {
-        return isSelectNumberStyle;
-    }
-
-    public void setSelectNumberStyle(boolean selectNumberStyle) {
-        isSelectNumberStyle = selectNumberStyle;
-    }
-
-    public boolean isPreviewSelectNumberStyle() {
-        return isPreviewSelectNumberStyle;
-    }
-
-    public void setPreviewSelectNumberStyle(boolean previewSelectNumberStyle) {
-        isPreviewSelectNumberStyle = previewSelectNumberStyle;
-    }
-
-    public int getMainListBackgroundColor() {
-        return mainListBackgroundColor;
-    }
-
-    public void setMainListBackgroundColor(int mainListBackgroundColor) {
-        this.mainListBackgroundColor = mainListBackgroundColor;
-    }
-
-    public String getSelectNormalText() {
-        return selectNormalText;
-    }
-
-    public void setSelectNormalText(String selectNormalText) {
-        this.selectNormalText = selectNormalText;
-    }
-
-    public int getSelectNormalTextResId() {
-        return selectNormalTextResId;
-    }
-
-    public void setSelectNormalText(int resId) {
-        this.selectNormalTextResId = resId;
-    }
-
-    public int getSelectNormalTextSize() {
-        return selectNormalTextSize;
-    }
-
-    public void setSelectNormalTextSize(int selectNormalTextSize) {
-        this.selectNormalTextSize = selectNormalTextSize;
-    }
-
-    public int getSelectNormalTextColor() {
-        return selectNormalTextColor;
-    }
-
-    public void setSelectNormalTextColor(int selectNormalTextColor) {
-        this.selectNormalTextColor = selectNormalTextColor;
-    }
-
-    public int getSelectNormalBackgroundResources() {
-        return selectNormalBackgroundResources;
-    }
-
-    public void setSelectNormalBackgroundResources(int selectNormalBackgroundResources) {
-        this.selectNormalBackgroundResources = selectNormalBackgroundResources;
-    }
-
-    public String getSelectText() {
-        return selectText;
-    }
-
-    public void setSelectText(String selectText) {
-        this.selectText = selectText;
-    }
-
-    public int getSelectTextResId() {
-        return selectTextResId;
-    }
-
-    public void setSelectText(int resId) {
-        this.selectTextResId = resId;
-    }
-
-    public int getSelectTextSize() {
-        return selectTextSize;
-    }
-
-    public void setSelectTextSize(int selectTextSize) {
-        this.selectTextSize = selectTextSize;
-    }
-
-    public int getSelectTextColor() {
-        return selectTextColor;
-    }
-
-    public void setSelectTextColor(int selectTextColor) {
-        this.selectTextColor = selectTextColor;
-    }
-
-    public int getSelectBackgroundResources() {
-        return selectBackgroundResources;
-    }
-
-    public void setSelectBackgroundResources(int selectBackgroundResources) {
-        this.selectBackgroundResources = selectBackgroundResources;
-    }
-
-    public int getAdapterItemSpacingSize() {
-        return adapterItemSpacingSize;
-    }
-
-    public void setAdapterItemSpacingSize(int adapterItemSpacingSize) {
-        this.adapterItemSpacingSize = adapterItemSpacingSize;
-    }
-
-    public boolean isAdapterItemIncludeEdge() {
-        return isAdapterItemIncludeEdge;
-    }
-
-    public void setAdapterItemIncludeEdge(boolean adapterItemIncludeEdge) {
-        isAdapterItemIncludeEdge = adapterItemIncludeEdge;
-    }
-
-    public int getAdapterSelectTextSize() {
-        return adapterSelectTextSize;
-    }
-
-    public void setAdapterSelectTextSize(int adapterSelectTextSize) {
-        this.adapterSelectTextSize = adapterSelectTextSize;
-    }
-
-    public int getAdapterSelectClickArea() {
-        return adapterSelectClickArea;
-    }
-
-    public void setAdapterSelectClickArea(int adapterSelectClickArea) {
-        this.adapterSelectClickArea = adapterSelectClickArea;
-    }
-
-    public int getAdapterSelectTextColor() {
-        return adapterSelectTextColor;
-    }
-
-    public void setAdapterSelectTextColor(int adapterSelectTextColor) {
-        this.adapterSelectTextColor = adapterSelectTextColor;
-    }
-
-    public int[] getAdapterSelectStyleGravity() {
-        return adapterSelectStyleGravity;
-    }
-
-    public void setAdapterSelectStyleGravity(int[] adapterSelectStyleGravity) {
-        this.adapterSelectStyleGravity = adapterSelectStyleGravity;
-    }
-
-    public int getAdapterDurationDrawableLeft() {
-        return adapterDurationDrawableLeft;
-    }
-
-    public void setAdapterDurationDrawableLeft(int adapterDurationDrawableLeft) {
-        this.adapterDurationDrawableLeft = adapterDurationDrawableLeft;
-    }
-
-    public int getAdapterDurationTextSize() {
-        return adapterDurationTextSize;
-    }
-
-    public void setAdapterDurationTextSize(int adapterDurationTextSize) {
-        this.adapterDurationTextSize = adapterDurationTextSize;
-    }
-
-    public int getAdapterDurationTextColor() {
-        return adapterDurationTextColor;
-    }
-
-    public void setAdapterDurationTextColor(int adapterDurationTextColor) {
-        this.adapterDurationTextColor = adapterDurationTextColor;
-    }
-
-    public int[] getAdapterDurationGravity() {
-        return adapterDurationGravity;
-    }
-
-    public void setAdapterDurationGravity(int[] adapterDurationGravity) {
-        this.adapterDurationGravity = adapterDurationGravity;
-    }
-
-    public int getAdapterDurationBackgroundResources() {
-        return adapterDurationBackgroundResources;
-    }
-
-    public void setAdapterDurationBackgroundResources(int adapterDurationBackgroundResources) {
-        this.adapterDurationBackgroundResources = adapterDurationBackgroundResources;
-    }
-
-    public int getAdapterCameraBackgroundColor() {
-        return adapterCameraBackgroundColor;
-    }
-
-    public void setAdapterCameraBackgroundColor(int adapterCameraBackgroundColor) {
-        this.adapterCameraBackgroundColor = adapterCameraBackgroundColor;
-    }
-
-    public int getAdapterCameraDrawableTop() {
-        return adapterCameraDrawableTop;
-    }
-
-    public void setAdapterCameraDrawableTop(int adapterCameraDrawableTop) {
-        this.adapterCameraDrawableTop = adapterCameraDrawableTop;
-    }
-
-    public String getAdapterCameraText() {
-        return adapterCameraText;
-    }
-
-    public void setAdapterCameraText(String adapterCameraText) {
-        this.adapterCameraText = adapterCameraText;
-    }
-
-    public int getAdapterCameraTextResId() {
-        return adapterCameraTextResId;
-    }
-
-    public void setAdapterCameraText(int resId) {
-        this.adapterCameraTextResId = resId;
-    }
-
-    public int getAdapterCameraTextColor() {
-        return adapterCameraTextColor;
-    }
-
-    public void setAdapterCameraTextColor(int adapterCameraTextColor) {
-        this.adapterCameraTextColor = adapterCameraTextColor;
-    }
-
-    public int getAdapterCameraTextSize() {
-        return adapterCameraTextSize;
-    }
-
-    public void setAdapterCameraTextSize(int adapterCameraTextSize) {
-        this.adapterCameraTextSize = adapterCameraTextSize;
-    }
-
-    public int getAdapterTagBackgroundResources() {
-        return adapterTagBackgroundResources;
-    }
-
-    public void setAdapterTagBackgroundResources(int adapterTagBackgroundResources) {
-        this.adapterTagBackgroundResources = adapterTagBackgroundResources;
-    }
-
-    public int getAdapterTagTextSize() {
-        return adapterTagTextSize;
-    }
-
-    public void setAdapterTagTextSize(int adapterTagTextSize) {
-        this.adapterTagTextSize = adapterTagTextSize;
-    }
-
-    public int getAdapterTagTextColor() {
-        return adapterTagTextColor;
-    }
-
-    public void setAdapterTagTextColor(int adapterTagTextColor) {
-        this.adapterTagTextColor = adapterTagTextColor;
-    }
-
-    public int[] getAdapterTagGravity() {
-        return adapterTagGravity;
-    }
-
-    public void setAdapterTagGravity(int[] adapterTagGravity) {
-        this.adapterTagGravity = adapterTagGravity;
-    }
-
-    public int getAdapterImageEditorResources() {
-        return adapterImageEditorResources;
-    }
-
-    public void setAdapterImageEditorResources(int adapterImageEditorResources) {
-        this.adapterImageEditorResources = adapterImageEditorResources;
-    }
-
-    public int[] getAdapterImageEditorGravity() {
-        return adapterImageEditorGravity;
-    }
-
-    public void setAdapterImageEditorGravity(int[] adapterImageEditorGravity) {
-        this.adapterImageEditorGravity = adapterImageEditorGravity;
-    }
-
-    public int getAdapterPreviewGalleryFrameResource() {
-        return adapterPreviewGalleryFrameResource;
-    }
-
-    public void setAdapterPreviewGalleryFrameResource(int adapterPreviewGalleryFrameResource) {
-        this.adapterPreviewGalleryFrameResource = adapterPreviewGalleryFrameResource;
-    }
-
-    public int getAdapterPreviewGalleryBackgroundResource() {
-        return adapterPreviewGalleryBackgroundResource;
-    }
-
-    public void setAdapterPreviewGalleryBackgroundResource(int adapterPreviewGalleryBackgroundResource) {
-        this.adapterPreviewGalleryBackgroundResource = adapterPreviewGalleryBackgroundResource;
-    }
-
-    public int getAdapterPreviewGalleryItemSize() {
-        return adapterPreviewGalleryItemSize;
+    fun setPreviewSelectText(resId: Int) {
+        this.previewSelectTextResId = resId
     }
 
-    public void setAdapterPreviewGalleryItemSize(int adapterPreviewGalleryItemSize) {
-        this.adapterPreviewGalleryItemSize = adapterPreviewGalleryItemSize;
+    fun setSelectNormalText(resId: Int) {
+        this.selectNormalTextResId = resId
     }
 
-    public int getPreviewBackgroundColor() {
-        return previewBackgroundColor;
+    fun setSelectText(resId: Int) {
+        this.selectTextResId = resId
     }
 
-    public void setPreviewBackgroundColor(int previewBackgroundColor) {
-        this.previewBackgroundColor = previewBackgroundColor;
+    fun setAdapterCameraText(resId: Int) {
+        this.adapterCameraTextResId = resId
     }
 }

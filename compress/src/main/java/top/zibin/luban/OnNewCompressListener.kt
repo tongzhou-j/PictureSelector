@@ -19,3 +19,5 @@ interface OnNewCompressListener {
     fun onError(source: String, e: Throwable)
 }
 
+
+

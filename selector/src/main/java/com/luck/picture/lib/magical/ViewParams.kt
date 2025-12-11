@@ -1,78 +1,44 @@
-package com.luck.picture.lib.magical;
+package com.luck.picture.lib.magical
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Parcel
+import android.os.Parcelable
 
-public class ViewParams implements Parcelable {
-    public int left;
-    public int top;
-    public int width;
-    public int height;
+class ViewParams : Parcelable {
+    var left: Int = 0
+    var top: Int = 0
+    var width: Int = 0
+    var height: Int = 0
 
-    public int getLeft() {
-        return left;
+    override fun describeContents(): Int {
+        return 0
     }
 
-    public void setLeft(int left) {
-        this.left = left;
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeInt(this.left)
+        dest.writeInt(this.top)
+        dest.writeInt(this.width)
+        dest.writeInt(this.height)
     }
 
-    public int getTop() {
-        return top;
+    constructor()
+
+    protected constructor(`in`: Parcel) {
+        this.left = `in`.readInt()
+        this.top = `in`.readInt()
+        this.width = `in`.readInt()
+        this.height = `in`.readInt()
     }
 
-    public void setTop(int top) {
-        this.top = top;
-    }
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<ViewParams?> = object : Parcelable.Creator<ViewParams?> {
+            override fun createFromParcel(source: Parcel): ViewParams {
+                return ViewParams(source)
+            }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.left);
-        dest.writeInt(this.top);
-        dest.writeInt(this.width);
-        dest.writeInt(this.height);
-    }
-
-    public ViewParams() {
-    }
-
-    protected ViewParams(Parcel in) {
-        this.left = in.readInt();
-        this.top = in.readInt();
-        this.width = in.readInt();
-        this.height = in.readInt();
-    }
-
-    public static final Creator<ViewParams> CREATOR = new Creator<ViewParams>() {
-        @Override
-        public ViewParams createFromParcel(Parcel source) {
-            return new ViewParams(source);
+            override fun newArray(size: Int): Array<ViewParams?> {
+                return arrayOfNulls<ViewParams>(size)
+            }
         }
-
-        @Override
-        public ViewParams[] newArray(int size) {
-            return new ViewParams[size];
-        }
-    };
+    }
 }

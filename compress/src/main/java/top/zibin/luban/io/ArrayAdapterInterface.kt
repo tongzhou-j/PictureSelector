@@ -27,3 +27,5 @@ interface ArrayAdapterInterface<T> {
     fun getElementSizeInBytes(): Int
 }
 
+
+

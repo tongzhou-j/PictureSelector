@@ -17,9 +17,8 @@ class CustomTitleBar @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : TitleBar(context, attrs, defStyleAttr), View.OnClickListener {
 
-    override fun getTitleCancelView(): TextView {
-        return tvCancel
-    }
+    override val titleCancelView: TextView
+        get() = tvCancel ?: throw IllegalStateException("tvCancel is null")
 
     override fun inflateLayout() {
         inflate(context, R.layout.ps_custom_title_bar, this)

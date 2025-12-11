@@ -26,8 +26,8 @@ class PicassoEngine private constructor() : ImageEngine {
      * @param url
      * @param imageView
      */
-    override fun loadImage(@NonNull context: Context, @NonNull url: String, @NonNull imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadImage(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || url == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         val videoRequestHandler = VideoRequestHandler()
@@ -48,8 +48,8 @@ class PicassoEngine private constructor() : ImageEngine {
         }
     }
 
-    override fun loadImage(context: Context, imageView: ImageView, url: String, maxWidth: Int, maxHeight: Int) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadImage(context: Context?, imageView: ImageView?, url: String?, maxWidth: Int, maxHeight: Int) {
+        if (context == null || imageView == null || url == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         val picasso = Picasso.Builder(context)
@@ -69,8 +69,8 @@ class PicassoEngine private constructor() : ImageEngine {
      * @param url       图片路径
      * @param imageView 承载图片ImageView
      */
-    override fun loadAlbumCover(@NonNull context: Context, @NonNull url: String, @NonNull imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadAlbumCover(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || url == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         val videoRequestHandler = VideoRequestHandler()
@@ -117,8 +117,8 @@ class PicassoEngine private constructor() : ImageEngine {
      * @param url       图片路径
      * @param imageView 承载图片ImageView
      */
-    override fun loadGridImage(@NonNull context: Context, @NonNull url: String, @NonNull imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadGridImage(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || url == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         val videoRequestHandler = VideoRequestHandler()
@@ -155,12 +155,16 @@ class PicassoEngine private constructor() : ImageEngine {
         }
     }
 
-    override fun pauseRequests(context: Context) {
-        Picasso.get().pauseTag(context)
+    override fun pauseRequests(context: Context?) {
+        if (context != null) {
+            Picasso.get().pauseTag(context)
+        }
     }
 
-    override fun resumeRequests(context: Context) {
-        Picasso.get().resumeTag(context)
+    override fun resumeRequests(context: Context?) {
+        if (context != null) {
+            Picasso.get().resumeTag(context)
+        }
     }
 
     companion object {

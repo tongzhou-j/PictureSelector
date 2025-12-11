@@ -1,25 +1,23 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.ContextWrapper;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.fragment.app.FragmentActivity
 
 /**
  * @author：luck
  * @date：2021/11/17 4:42 下午
  * @describe：ActivityCompatHelper
  */
-public class ActivityCompatHelper {
-    private static final int MIN_FRAGMENT_COUNT = 1;
+object ActivityCompatHelper {
+    private const val MIN_FRAGMENT_COUNT = 1
 
-    public static boolean isDestroy(Activity activity) {
+    fun isDestroy(activity: Activity?): Boolean {
         if (activity == null) {
-            return true;
+            return true
         }
-        return activity.isFinishing() || activity.isDestroyed();
+        return activity.isFinishing() || activity.isDestroyed()
     }
 
 
@@ -29,27 +27,27 @@ public class ActivityCompatHelper {
      * @param fragmentTag Fragment标签
      * @return
      */
-    public static boolean checkFragmentNonExits(FragmentActivity activity, String fragmentTag) {
+    fun checkFragmentNonExits(activity: FragmentActivity?, fragmentTag: String?): Boolean {
         if (isDestroy(activity)) {
-            return false;
+            return false
         }
-        Fragment fragment = activity.getSupportFragmentManager().findFragmentByTag(fragmentTag);
-        return fragment == null;
+        val fragment = activity!!.getSupportFragmentManager().findFragmentByTag(fragmentTag)
+        return fragment == null
     }
 
 
-    public static boolean assertValidRequest(Context context) {
-        if (context instanceof Activity) {
-            Activity activity = (Activity) context;
-            return !isDestroy(activity);
-        } else if (context instanceof ContextWrapper) {
-            ContextWrapper contextWrapper = (ContextWrapper) context;
-            if (contextWrapper.getBaseContext() instanceof Activity) {
-                Activity activity = (Activity) contextWrapper.getBaseContext();
-                return !isDestroy(activity);
+    fun assertValidRequest(context: Context?): Boolean {
+        if (context is Activity) {
+            val activity = context
+            return !isDestroy(activity)
+        } else if (context is ContextWrapper) {
+            val contextWrapper = context
+            if (contextWrapper.getBaseContext() is Activity) {
+                val activity = contextWrapper.getBaseContext() as Activity?
+                return !isDestroy(activity)
             }
         }
-        return true;
+        return true
     }
 
     /**
@@ -58,10 +56,11 @@ public class ActivityCompatHelper {
      * @param activity
      * @return
      */
-    public static boolean checkRootFragment(FragmentActivity activity) {
-        if (ActivityCompatHelper.isDestroy(activity)) {
-            return false;
+    fun checkRootFragment(activity: FragmentActivity?): Boolean {
+        if (isDestroy(activity)) {
+            return false
         }
-        return activity.getSupportFragmentManager().getBackStackEntryCount() == MIN_FRAGMENT_COUNT;
+        return activity!!.getSupportFragmentManager()
+            .getBackStackEntryCount() == ActivityCompatHelper.MIN_FRAGMENT_COUNT
     }
 }

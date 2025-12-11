@@ -1,48 +1,37 @@
-package com.luck.picture.lib.widget;
+package com.luck.picture.lib.widget
 
-import android.content.Context;
-import android.graphics.Rect;
-import android.util.AttributeSet;
-
-import androidx.annotation.Nullable;
+import android.content.Context
+import android.graphics.Rect
+import android.util.AttributeSet
 
 /**
  * @author：luck
  * @date：2020/8/25 10:32 AM
  * @describe：MarqueeTextView
  */
-public class MarqueeTextView extends MediumBoldTextView {
+class MarqueeTextView : MediumBoldTextView {
+    constructor(context: Context?) : super(context!!)
 
-    public MarqueeTextView(Context context) {
-        super(context);
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
+
+
+    override fun isFocused(): Boolean {
+        return true
     }
 
-    public MarqueeTextView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+    override fun isSelected(): Boolean {
+        return true
     }
 
-
-    @Override
-    public boolean isFocused() {
-        return true;
-    }
-
-    @Override
-    public boolean isSelected() {
-        return true;
-    }
-
-    @Override
-    protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
-        if (focused){
-            super.onFocusChanged(true, direction, previouslyFocusedRect);
+    override fun onFocusChanged(focused: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
+        if (focused) {
+            super.onFocusChanged(true, direction, previouslyFocusedRect)
         }
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
+    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
         if (hasWindowFocus) {
-            super.onWindowFocusChanged(true);
+            super.onWindowFocusChanged(true)
         }
     }
 }

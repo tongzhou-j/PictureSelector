@@ -1,17 +1,14 @@
-package com.luck.picture.lib.interfaces;
+package com.luck.picture.lib.interfaces
 
-import android.content.Context;
-
-import com.luck.picture.lib.entity.LocalMedia;
-
-import java.util.ArrayList;
+import android.content.Context
+import com.luck.picture.lib.entity.LocalMedia
 
 /**
  * @author：luck
  * @date：2021/12/24 9:43 上午
  * @describe：OnPreviewInterceptListener
  */
-public interface OnPreviewInterceptListener {
+interface OnPreviewInterceptListener {
     /**
      * Custom preview event
      *
@@ -25,7 +22,9 @@ public interface OnPreviewInterceptListener {
      * @param data             preview source
      * @param isBottomPreview  from bottomNavBar preview mode
      */
-    void onPreview(Context context, int position, int totalNum, int page,
-                   long currentBucketId, String currentAlbumName, boolean isShowCamera,
-                   ArrayList<LocalMedia> data, boolean isBottomPreview);
+    fun onPreview(
+        context: Context?, position: Int, totalNum: Int, page: Int,
+        currentBucketId: Long, currentAlbumName: String?, isShowCamera: Boolean,
+        data: ArrayList<LocalMedia?>?, isBottomPreview: Boolean
+    )
 }

@@ -22,3 +22,5 @@ abstract class InputStreamAdapter : InputStreamProvider {
     }
 }
 
+
+

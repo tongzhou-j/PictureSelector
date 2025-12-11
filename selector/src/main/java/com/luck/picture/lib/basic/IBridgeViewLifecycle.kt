@@ -1,16 +1,15 @@
-package com.luck.picture.lib.basic;
+package com.luck.picture.lib.basic
 
-import android.os.Bundle;
-import android.view.View;
-
-import androidx.fragment.app.Fragment;
+import android.os.Bundle
+import android.view.View
+import androidx.fragment.app.Fragment
 
 /**
  * @author：luck
  * @date：2022/6/4 12:56 下午
  * @describe：IBridgeViewLifecycle
  */
-public interface IBridgeViewLifecycle {
+interface IBridgeViewLifecycle {
     /**
      * onViewCreated
      *
@@ -18,12 +17,12 @@ public interface IBridgeViewLifecycle {
      * @param view
      * @param savedInstanceState
      */
-    void onViewCreated(Fragment fragment, View view, Bundle savedInstanceState);
+    fun onViewCreated(fragment: Fragment?, view: View?, savedInstanceState: Bundle?)
 
     /**
      * onDestroy
      *
      * @param fragment
      */
-    void onDestroy(Fragment fragment);
+    fun onDestroy(fragment: Fragment?)
 }

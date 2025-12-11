@@ -1,23 +1,25 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.os.SystemClock;
+import android.os.SystemClock
 
 /**
  * @author：luck
  * @date：2021/12/10 10:07 上午
  * @describe：DoubleUtils
  */
-public class DoubleUtils {
-    private final static long TIME = 600;
+object DoubleUtils {
+    private const val TIME: Long = 600
 
-    private static long lastClickTime;
+    private var lastClickTime: Long = 0
 
-    public static boolean isFastDoubleClick() {
-        long time = SystemClock.elapsedRealtime();
-        if (time - lastClickTime < TIME) {
-            return true;
+    val isFastDoubleClick: Boolean
+        get() {
+            val time = SystemClock.elapsedRealtime()
+            if (time - lastClickTime < TIME) {
+                lastClickTime = time
+                return true
+            }
+            lastClickTime = time
+            return false
         }
-        lastClickTime = time;
-        return false;
-    }
 }

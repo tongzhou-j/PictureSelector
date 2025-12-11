@@ -1,18 +1,16 @@
-package com.luck.picture.lib.basic;
+package com.luck.picture.lib.basic
 
-import android.content.Context;
-import android.net.Uri;
-
-import java.io.InputStream;
-import java.io.OutputStream;
+import android.content.Context
+import android.net.Uri
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * @author：luck
  * @date：2021/5/26 9:22 PM
  * @describe：PictureContentResolver
  */
-public final class PictureContentResolver {
-
+object PictureContentResolver {
     /**
      * ContentResolver openInputStream
      *
@@ -20,13 +18,13 @@ public final class PictureContentResolver {
      * @param uri
      * @return
      */
-    public static InputStream openInputStream(Context context, Uri uri) {
+    fun openInputStream(context: Context, uri: Uri): InputStream? {
         try {
-            return context.getContentResolver().openInputStream(uri);
-        } catch (Exception e) {
-            e.printStackTrace();
+            return context.getContentResolver().openInputStream(uri)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return null;
+        return null
     }
 
     /**
@@ -36,12 +34,12 @@ public final class PictureContentResolver {
      * @param uri
      * @return
      */
-    public static OutputStream openOutputStream(Context context, Uri uri) {
+    fun openOutputStream(context: Context, uri: Uri): OutputStream? {
         try {
-            return context.getContentResolver().openOutputStream(uri);
-        } catch (Exception e) {
-            e.printStackTrace();
+            return context.getContentResolver().openOutputStream(uri)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return null;
+        return null
     }
 }

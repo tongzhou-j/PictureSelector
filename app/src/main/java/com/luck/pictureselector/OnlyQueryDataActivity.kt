@@ -59,10 +59,12 @@ class OnlyQueryDataActivity : AppCompatActivity() {
         PictureSelector.create(this)
             .dataSource(SelectMimeType.ofAll())
             .setQuerySortOrder(MediaStore.MediaColumns.DATE_MODIFIED + " DESC")
-            .obtainMediaData(object : OnQueryDataSourceListener<LocalMedia> {
+            .obtainMediaData(object : OnQueryDataSourceListener<LocalMedia?> {
                 @SuppressLint("NotifyDataSetChanged")
-                override fun onComplete(result: List<LocalMedia>) {
-                    mData.addAll(result)
+                override fun onComplete(result: MutableList<LocalMedia?>?) {
+                    if (result != null) {
+                        mData.addAll(result.filterNotNull())
+                    }
                     adapter.notifyDataSetChanged()
                 }
             })
@@ -70,8 +72,8 @@ class OnlyQueryDataActivity : AppCompatActivity() {
         findViewById<View>(R.id.tv_build_loader).setOnClickListener { v ->
             val loader = PictureSelector.create(v.context)
                 .dataSource(SelectMimeType.ofImage()).buildMediaLoader()
-            loader.loadAllAlbum(object : OnQueryAllAlbumListener<LocalMediaFolder> {
-                override fun onComplete(result: List<LocalMediaFolder>) {
+            loader.loadAllAlbum(object : OnQueryAllAlbumListener<LocalMediaFolder?> {
+                override fun onComplete(result: MutableList<LocalMediaFolder?>?) {
                 }
             })
         }

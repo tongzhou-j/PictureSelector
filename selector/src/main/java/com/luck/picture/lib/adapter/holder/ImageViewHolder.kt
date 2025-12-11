@@ -1,91 +1,96 @@
-package com.luck.picture.lib.adapter.holder;
+package com.luck.picture.lib.adapter.holder
 
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import com.luck.picture.lib.R;
-import com.luck.picture.lib.config.PictureMimeType;
-import com.luck.picture.lib.config.SelectorConfig;
-import com.luck.picture.lib.config.SelectorProviders;
-import com.luck.picture.lib.entity.LocalMedia;
-import com.luck.picture.lib.style.SelectMainStyle;
-import com.luck.picture.lib.utils.MediaUtils;
-import com.luck.picture.lib.utils.StyleUtils;
+import android.view.View
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
+import com.luck.picture.lib.R
+import com.luck.picture.lib.config.PictureMimeType
+import com.luck.picture.lib.config.SelectorConfig
+import com.luck.picture.lib.entity.LocalMedia
+import com.luck.picture.lib.utils.MediaUtils
+import com.luck.picture.lib.utils.StyleUtils
 
 /**
  * @author：luck
  * @date：2021/11/20 3:59 下午
  * @describe：ImageViewHolder
  */
-public class ImageViewHolder extends BaseRecyclerMediaHolder {
-    private final ImageView ivEditor;
-    private final TextView tvMediaTag;
+class ImageViewHolder(itemView: View, config: SelectorConfig) :
+    BaseRecyclerMediaHolder(itemView, config) {
+    private val ivEditor: ImageView
+    private val tvMediaTag: TextView
 
-    public ImageViewHolder(View itemView, SelectorConfig config) {
-        super(itemView, config);
-        tvMediaTag = itemView.findViewById(R.id.tv_media_tag);
-        ivEditor = itemView.findViewById(R.id.ivEditor);
-        SelectMainStyle adapterStyle = selectorConfig.selectorStyle.getSelectMainStyle();
-        int imageEditorRes = adapterStyle.getAdapterImageEditorResources();
+    init {
+        tvMediaTag = itemView.findViewById<TextView>(R.id.tv_media_tag)
+        ivEditor = itemView.findViewById<ImageView>(R.id.ivEditor)
+        val adapterStyle = selectorConfig?.selectorStyle?.selectMainStyle
+        val imageEditorRes = adapterStyle?.adapterImageEditorResources ?: 0
         if (StyleUtils.checkStyleValidity(imageEditorRes)) {
-            ivEditor.setImageResource(imageEditorRes);
+            ivEditor.setImageResource(imageEditorRes)
         }
-        int[] editorGravity = adapterStyle.getAdapterImageEditorGravity();
+        val editorGravity = adapterStyle?.adapterImageEditorGravity
         if (StyleUtils.checkArrayValidity(editorGravity)) {
-            if (ivEditor.getLayoutParams() instanceof RelativeLayout.LayoutParams) {
-                ((RelativeLayout.LayoutParams) ivEditor.getLayoutParams()).removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                for (int i : editorGravity) {
-                    ((RelativeLayout.LayoutParams) ivEditor.getLayoutParams()).addRule(i);
+            if (ivEditor.getLayoutParams() is RelativeLayout.LayoutParams) {
+                (ivEditor.getLayoutParams() as RelativeLayout.LayoutParams).removeRule(
+                    RelativeLayout.ALIGN_PARENT_BOTTOM
+                )
+                for (i in editorGravity!!) {
+                    (ivEditor.getLayoutParams() as RelativeLayout.LayoutParams).addRule(i)
                 }
             }
         }
 
-        int[] tagGravity = adapterStyle.getAdapterTagGravity();
+        val tagGravity = adapterStyle?.adapterTagGravity
         if (StyleUtils.checkArrayValidity(tagGravity)) {
-            if (tvMediaTag.getLayoutParams() instanceof RelativeLayout.LayoutParams) {
-                ((RelativeLayout.LayoutParams) tvMediaTag.getLayoutParams()).removeRule(RelativeLayout.ALIGN_PARENT_END);
-                ((RelativeLayout.LayoutParams) tvMediaTag.getLayoutParams()).removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                for (int i : tagGravity) {
-                    ((RelativeLayout.LayoutParams) tvMediaTag.getLayoutParams()).addRule(i);
+            if (tvMediaTag.getLayoutParams() is RelativeLayout.LayoutParams) {
+                (tvMediaTag.getLayoutParams() as RelativeLayout.LayoutParams).removeRule(
+                    RelativeLayout.ALIGN_PARENT_END
+                )
+                (tvMediaTag.getLayoutParams() as RelativeLayout.LayoutParams).removeRule(
+                    RelativeLayout.ALIGN_PARENT_BOTTOM
+                )
+                for (i in tagGravity!!) {
+                    (tvMediaTag.getLayoutParams() as RelativeLayout.LayoutParams).addRule(i)
                 }
             }
         }
-        int background = adapterStyle.getAdapterTagBackgroundResources();
+        val background = adapterStyle?.adapterTagBackgroundResources ?: 0
         if (StyleUtils.checkStyleValidity(background)) {
-            tvMediaTag.setBackgroundResource(background);
+            tvMediaTag.setBackgroundResource(background)
         }
 
-        int textSize = adapterStyle.getAdapterTagTextSize();
+        val textSize = adapterStyle?.adapterTagTextSize ?: 0
         if (StyleUtils.checkSizeValidity(textSize)) {
-            tvMediaTag.setTextSize(textSize);
+            tvMediaTag.setTextSize(textSize.toFloat())
         }
 
-        int textColor = adapterStyle.getAdapterTagTextColor();
+        val textColor = adapterStyle?.adapterTagTextColor ?: 0
         if (StyleUtils.checkStyleValidity(textColor)) {
-            tvMediaTag.setTextColor(textColor);
+            tvMediaTag.setTextColor(textColor)
         }
     }
 
 
-    @Override
-    public void bindData(LocalMedia media, int position) {
-        super.bindData(media, position);
+    override fun bindData(media: LocalMedia, position: Int) {
+        super.bindData(media, position)
         if (media.isEditorImage() && media.isCut()) {
-            ivEditor.setVisibility(View.VISIBLE);
+            ivEditor.setVisibility(View.VISIBLE)
         } else {
-            ivEditor.setVisibility(View.GONE);
+            ivEditor.setVisibility(View.GONE)
         }
-        tvMediaTag.setVisibility(View.VISIBLE);
-        if (PictureMimeType.isHasGif(media.getMimeType())) {
-            tvMediaTag.setText(mContext.getString(R.string.ps_gif_tag));
-        } else if (PictureMimeType.isHasWebp(media.getMimeType())) {
-            tvMediaTag.setText(mContext.getString(R.string.ps_webp_tag));
-        } else if (MediaUtils.isLongImage(media.getWidth(), media.getHeight())) {
-            tvMediaTag.setText(mContext.getString(R.string.ps_long_chart));
-        } else {
-            tvMediaTag.setVisibility(View.GONE);
+        tvMediaTag.setVisibility(View.VISIBLE)
+        val context = mContext
+        if (context != null) {
+            if (PictureMimeType.isHasGif(media.mimeType)) {
+                tvMediaTag.setText(context.getString(R.string.ps_gif_tag))
+            } else if (PictureMimeType.isHasWebp(media.mimeType)) {
+                tvMediaTag.setText(context.getString(R.string.ps_webp_tag))
+            } else if (MediaUtils.isLongImage(media.width, media.height)) {
+                tvMediaTag.setText(context.getString(R.string.ps_long_chart))
+            } else {
+                tvMediaTag.setVisibility(View.GONE)
+            }
         }
     }
 }

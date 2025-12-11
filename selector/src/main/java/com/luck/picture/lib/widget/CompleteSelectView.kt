@@ -1,114 +1,116 @@
-package com.luck.picture.lib.widget;
+package com.luck.picture.lib.widget
 
-import android.content.Context;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-
-import com.luck.picture.lib.R;
-import com.luck.picture.lib.config.SelectorConfig;
-import com.luck.picture.lib.config.SelectorProviders;
-import com.luck.picture.lib.style.BottomNavBarStyle;
-import com.luck.picture.lib.style.PictureSelectorStyle;
-import com.luck.picture.lib.style.SelectMainStyle;
-import com.luck.picture.lib.utils.StyleUtils;
-import com.luck.picture.lib.utils.ValueOf;
+import android.content.Context
+import android.text.TextUtils
+import android.util.AttributeSet
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import com.luck.picture.lib.R
+import com.luck.picture.lib.config.SelectorConfig
+import com.luck.picture.lib.config.SelectorProviders
+import com.luck.picture.lib.utils.StyleUtils
+import com.luck.picture.lib.utils.ValueOf.toString
 
 /**
  * @author：luck
  * @date：2021/11/21 11:28 下午
  * @describe：CompleteSelectView
  */
-public class CompleteSelectView extends LinearLayout {
-    private TextView tvSelectNum;
-    private TextView tvComplete;
-    private Animation numberChangeAnimation;
-    private SelectorConfig config;
+open class CompleteSelectView : LinearLayout {
+    private var tvSelectNum: TextView? = null
+    private var tvComplete: TextView? = null
+    private var numberChangeAnimation: Animation? = null
+    private var config: SelectorConfig? = null
 
-    public CompleteSelectView(Context context) {
-        super(context);
-        init();
+    constructor(context: Context?) : super(context!!) {
+        init()
     }
 
-    public CompleteSelectView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init();
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+        init()
     }
 
-    public CompleteSelectView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
+        init()
     }
 
-    private void init() {
-        inflateLayout();
-        setOrientation(LinearLayout.HORIZONTAL);
-        tvSelectNum = findViewById(R.id.ps_tv_select_num);
-        tvComplete = findViewById(R.id.ps_tv_complete);
-        setGravity(Gravity.CENTER_VERTICAL);
-        numberChangeAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.ps_anim_modal_in);
-        config = SelectorProviders.getInstance().getSelectorConfig();
+    private fun init() {
+        inflateLayout()
+        orientation = HORIZONTAL
+        tvSelectNum = findViewById<TextView>(R.id.ps_tv_select_num)
+        tvComplete = findViewById<TextView>(R.id.ps_tv_complete)
+        gravity = Gravity.CENTER_VERTICAL
+        numberChangeAnimation = AnimationUtils.loadAnimation(context, R.anim.ps_anim_modal_in)
+        config = SelectorProviders.Companion.instance?.selectorConfig
     }
 
-    protected void inflateLayout() {
-        LayoutInflater.from(getContext()).inflate(R.layout.ps_complete_selected_layout, this);
+    protected open fun inflateLayout() {
+        LayoutInflater.from(context!!).inflate(R.layout.ps_complete_selected_layout, this)
     }
 
     /**
      * 完成选择按钮样式
      */
-    public void setCompleteSelectViewStyle() {
-        PictureSelectorStyle selectorStyle = config.selectorStyle;
-        SelectMainStyle selectMainStyle = selectorStyle.getSelectMainStyle();
-        if (StyleUtils.checkStyleValidity(selectMainStyle.getSelectNormalBackgroundResources())) {
-            setBackgroundResource(selectMainStyle.getSelectNormalBackgroundResources());
+    open fun setCompleteSelectViewStyle() {
+        val selectorStyle = config?.selectorStyle ?: return
+        val selectMainStyle = selectorStyle.selectMainStyle ?: return
+        if (StyleUtils.checkStyleValidity(selectMainStyle.selectNormalBackgroundResources)) {
+            setBackgroundResource(selectMainStyle.selectNormalBackgroundResources)
         }
-        String selectNormalText = StyleUtils.checkStyleValidity(selectMainStyle.getSelectNormalTextResId())
-                ? getContext().getString(selectMainStyle.getSelectNormalTextResId()) : selectMainStyle.getSelectNormalText();
+        val selectNormalText =
+            if (StyleUtils.checkStyleValidity(selectMainStyle.selectNormalTextResId))
+                context.getString(selectMainStyle.selectNormalTextResId)
+            else
+                selectMainStyle.selectNormalText
         if (StyleUtils.checkTextValidity(selectNormalText)) {
-            int formatCount = StyleUtils.getFormatCount(selectNormalText);
+            val formatCount = StyleUtils.getFormatCount(selectNormalText!!)
             if (formatCount == 1) {
-                tvComplete.setText(String.format(selectNormalText, config.getSelectCount()));
+                tvComplete?.text = java.lang.String.format(selectNormalText!!, config!!.selectCount)
             } else if (formatCount == 2) {
-                tvComplete.setText(String.format(selectNormalText, config.getSelectCount(), config.maxSelectNum));
+                tvComplete?.text = java.lang.String.format(
+                    selectNormalText!!,
+                    config!!.selectCount,
+                    config!!.maxSelectNum
+                )
             } else {
-                tvComplete.setText(selectNormalText);
+                tvComplete?.text = selectNormalText
             }
         }
 
-        int selectNormalTextSize = selectMainStyle.getSelectNormalTextSize();
+        val selectNormalTextSize = selectMainStyle.selectNormalTextSize
         if (StyleUtils.checkSizeValidity(selectNormalTextSize)) {
-            tvComplete.setTextSize(selectNormalTextSize);
+            tvComplete?.textSize = selectNormalTextSize.toFloat()
         }
 
-        int selectNormalTextColor = selectMainStyle.getSelectNormalTextColor();
+        val selectNormalTextColor = selectMainStyle.selectNormalTextColor
         if (StyleUtils.checkStyleValidity(selectNormalTextColor)) {
-            tvComplete.setTextColor(selectNormalTextColor);
+            tvComplete?.setTextColor(selectNormalTextColor)
         }
 
-        BottomNavBarStyle bottomBarStyle = selectorStyle.getBottomBarStyle();
+        val bottomBarStyle = selectorStyle.bottomBarStyle
 
-        if (bottomBarStyle.isCompleteCountTips()) {
-            int selectNumRes = bottomBarStyle.getBottomSelectNumResources();
+        if (bottomBarStyle?.isCompleteCountTips == true) {
+            val selectNumRes = bottomBarStyle.bottomSelectNumResources
             if (StyleUtils.checkStyleValidity(selectNumRes)) {
-                tvSelectNum.setBackgroundResource(selectNumRes);
+                tvSelectNum?.setBackgroundResource(selectNumRes)
             }
-            int selectNumTextSize = bottomBarStyle.getBottomSelectNumTextSize();
+            val selectNumTextSize = bottomBarStyle.bottomSelectNumTextSize
             if (StyleUtils.checkSizeValidity(selectNumTextSize)) {
-                tvSelectNum.setTextSize(selectNumTextSize);
+                tvSelectNum?.textSize = selectNumTextSize.toFloat()
             }
 
-            int selectNumTextColor = bottomBarStyle.getBottomSelectNumTextColor();
+            val selectNumTextColor = bottomBarStyle.bottomSelectNumTextColor
             if (StyleUtils.checkStyleValidity(selectNumTextColor)) {
-                tvSelectNum.setTextColor(selectNumTextColor);
+                tvSelectNum?.setTextColor(selectNumTextColor)
             }
         }
     }
@@ -116,107 +118,140 @@ public class CompleteSelectView extends LinearLayout {
     /**
      * 选择结果发生变化
      */
-    public void setSelectedChange(boolean isPreview) {
-        PictureSelectorStyle selectorStyle = config.selectorStyle;
-        SelectMainStyle selectMainStyle = selectorStyle.getSelectMainStyle();
-        if (config.getSelectCount() > 0) {
-            setEnabled(true);
-            int selectBackground = selectMainStyle.getSelectBackgroundResources();
+    fun setSelectedChange(isPreview: Boolean) {
+        val selectorStyle = config?.selectorStyle ?: return
+        val selectMainStyle = selectorStyle.selectMainStyle ?: return
+        if (config!!.selectCount > 0) {
+            isEnabled = true
+            val selectBackground = selectMainStyle.selectBackgroundResources
             if (StyleUtils.checkStyleValidity(selectBackground)) {
-                setBackgroundResource(selectBackground);
+                setBackgroundResource(selectBackground)
             } else {
-                setBackgroundResource(R.drawable.ps_ic_trans_1px);
+                setBackgroundResource(R.drawable.ps_ic_trans_1px)
             }
-            String selectText = StyleUtils.checkStyleValidity(selectMainStyle.getSelectTextResId())
-                    ? getContext().getString(selectMainStyle.getSelectTextResId()) : selectMainStyle.getSelectText();
+            val selectText =
+                if (StyleUtils.checkStyleValidity(selectMainStyle.selectTextResId))
+                    context.getString(selectMainStyle.selectTextResId)
+                else
+                    selectMainStyle.selectText
             if (StyleUtils.checkTextValidity(selectText)) {
-                int formatCount = StyleUtils.getFormatCount(selectText);
+                val formatCount = StyleUtils.getFormatCount(selectText!!)
                 if (formatCount == 1) {
-                    tvComplete.setText(String.format(selectText, config.getSelectCount()));
+                    tvComplete?.text = java.lang.String.format(selectText!!, config!!.selectCount)
                 } else if (formatCount == 2) {
-                    tvComplete.setText(String.format(selectText, config.getSelectCount(), config.maxSelectNum));
+                    tvComplete?.text = java.lang.String.format(
+                        selectText!!,
+                        config!!.selectCount,
+                        config!!.maxSelectNum
+                    )
                 } else {
-                    tvComplete.setText(selectText);
+                    tvComplete?.text = selectText
                 }
             } else {
-                tvComplete.setText(getContext().getString(R.string.ps_completed));
+                tvComplete?.text = context.getString(R.string.ps_completed)
             }
-            int selectTextSize = selectMainStyle.getSelectTextSize();
+            val selectTextSize = selectMainStyle.selectTextSize
             if (StyleUtils.checkSizeValidity(selectTextSize)) {
-                tvComplete.setTextSize(selectTextSize);
+                tvComplete?.textSize = selectTextSize.toFloat()
             }
-            int selectTextColor = selectMainStyle.getSelectTextColor();
+            val selectTextColor = selectMainStyle.selectTextColor
             if (StyleUtils.checkStyleValidity(selectTextColor)) {
-                tvComplete.setTextColor(selectTextColor);
+                tvComplete?.setTextColor(selectTextColor)
             } else {
-                tvComplete.setTextColor(ContextCompat.getColor(getContext(), R.color.ps_color_fa632d));
+                tvComplete?.setTextColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.ps_color_fa632d
+                    )
+                )
             }
-            if (selectorStyle.getBottomBarStyle().isCompleteCountTips()) {
-                if (tvSelectNum.getVisibility() == GONE || tvSelectNum.getVisibility() == INVISIBLE) {
-                    tvSelectNum.setVisibility(VISIBLE);
+            if (selectorStyle.bottomBarStyle?.isCompleteCountTips == true) {
+                if (tvSelectNum?.visibility == GONE || tvSelectNum?.visibility == INVISIBLE) {
+                    tvSelectNum?.visibility = VISIBLE
                 }
-                if (TextUtils.equals(ValueOf.toString(config.getSelectCount()), tvSelectNum.getText())) {
+                if (TextUtils.equals(
+                        toString(config!!.selectCount),
+                        tvSelectNum?.text
+                    )
+                ) {
                     // ignore
                 } else {
-                    tvSelectNum.setText(ValueOf.toString(config.getSelectCount()));
-                    if (config.onSelectAnimListener != null) {
-                        config.onSelectAnimListener.onSelectAnim(tvSelectNum);
-                    } else {
-                        tvSelectNum.startAnimation(numberChangeAnimation);
-                    }
+                    tvSelectNum?.text = toString(config!!.selectCount)
+                    config?.onSelectAnimListener?.onSelectAnim(tvSelectNum)
+                        ?: tvSelectNum?.startAnimation(numberChangeAnimation)
                 }
             } else {
-                tvSelectNum.setVisibility(GONE);
+                tvSelectNum?.visibility = GONE
             }
         } else {
-            if (isPreview && selectMainStyle.isCompleteSelectRelativeTop()) {
-                setEnabled(true);
-                int selectBackground = selectMainStyle.getSelectBackgroundResources();
+            if (isPreview && selectMainStyle.isCompleteSelectRelativeTop) {
+                isEnabled = true
+                val selectBackground = selectMainStyle.selectBackgroundResources
                 if (StyleUtils.checkStyleValidity(selectBackground)) {
-                    setBackgroundResource(selectBackground);
+                    setBackgroundResource(selectBackground)
                 } else {
-                    setBackgroundResource(R.drawable.ps_ic_trans_1px);
+                    setBackgroundResource(R.drawable.ps_ic_trans_1px)
                 }
-                int selectTextColor = selectMainStyle.getSelectTextColor();
+                val selectTextColor = selectMainStyle.selectTextColor
                 if (StyleUtils.checkStyleValidity(selectTextColor)) {
-                    tvComplete.setTextColor(selectTextColor);
+                    tvComplete?.setTextColor(selectTextColor)
                 } else {
-                    tvComplete.setTextColor(ContextCompat.getColor(getContext(), R.color.ps_color_9b));
+                    tvComplete?.setTextColor(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.ps_color_9b
+                        )
+                    )
                 }
             } else {
-                setEnabled(config.isEmptyResultReturn);
-                int normalBackground = selectMainStyle.getSelectNormalBackgroundResources();
+                isEnabled = config!!.isEmptyResultReturn
+                val normalBackground = selectMainStyle.selectNormalBackgroundResources
                 if (StyleUtils.checkStyleValidity(normalBackground)) {
-                    setBackgroundResource(normalBackground);
+                    setBackgroundResource(normalBackground)
                 } else {
-                    setBackgroundResource(R.drawable.ps_ic_trans_1px);
+                    setBackgroundResource(R.drawable.ps_ic_trans_1px)
                 }
-                int normalTextColor = selectMainStyle.getSelectNormalTextColor();
+                val normalTextColor = selectMainStyle.selectNormalTextColor
                 if (StyleUtils.checkStyleValidity(normalTextColor)) {
-                    tvComplete.setTextColor(normalTextColor);
+                    tvComplete?.setTextColor(normalTextColor)
                 } else {
-                    tvComplete.setTextColor(ContextCompat.getColor(getContext(), R.color.ps_color_9b));
+                    tvComplete?.setTextColor(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.ps_color_9b
+                        )
+                    )
                 }
             }
 
-            tvSelectNum.setVisibility(GONE);
-            String selectNormalText = StyleUtils.checkStyleValidity(selectMainStyle.getSelectNormalTextResId())
-                    ? getContext().getString(selectMainStyle.getSelectNormalTextResId()) : selectMainStyle.getSelectNormalText();
+            tvSelectNum?.visibility = GONE
+            val selectNormalText =
+                if (StyleUtils.checkStyleValidity(selectMainStyle.selectNormalTextResId))
+                    context.getString(selectMainStyle.selectNormalTextResId)
+                else
+                    selectMainStyle.selectNormalText
             if (StyleUtils.checkTextValidity(selectNormalText)) {
-                int formatCount = StyleUtils.getFormatCount(selectNormalText);
+                val formatCount = StyleUtils.getFormatCount(selectNormalText!!)
                 if (formatCount == 1) {
-                    tvComplete.setText(String.format(selectNormalText, config.getSelectCount()));
+                    tvComplete?.text = java.lang.String.format(
+                        selectNormalText!!,
+                        config!!.selectCount
+                    )
                 } else if (formatCount == 2) {
-                    tvComplete.setText(String.format(selectNormalText, config.getSelectCount(), config.maxSelectNum));
+                    tvComplete?.text = java.lang.String.format(
+                        selectNormalText!!,
+                        config!!.selectCount,
+                        config!!.maxSelectNum
+                    )
                 } else {
-                    tvComplete.setText(selectNormalText);
+                    tvComplete?.text = selectNormalText
                 }
             } else {
-                tvComplete.setText(getContext().getString(R.string.ps_please_select));
+                tvComplete?.text = context.getString(R.string.ps_please_select)
             }
-            int normalTextSize = selectMainStyle.getSelectNormalTextSize();
+            val normalTextSize = selectMainStyle.selectNormalTextSize
             if (StyleUtils.checkSizeValidity(normalTextSize)) {
-                tvComplete.setTextSize(normalTextSize);
+                tvComplete?.textSize = normalTextSize.toFloat()
             }
         }
     }

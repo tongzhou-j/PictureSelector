@@ -1,69 +1,73 @@
-package com.luck.picture.lib.config;
+package com.luck.picture.lib.config
 
 /**
  * @author：luck
  * @date：2021/11/23 6:53 下午
  * @describe：SelectMimeType
  */
-public class SelectMimeType {
-
+object SelectMimeType {
     /**
      * GET image or video only
-     * <p>
+     *
+     *
      * excluding Audio
-     * </p>
+     *
      */
-    public static int ofAll() {
-        return TYPE_ALL;
+    fun ofAll(): Int {
+        return TYPE_ALL
     }
 
     /**
      * GET image only
      */
-    public static int ofImage() {
-        return TYPE_IMAGE;
+    fun ofImage(): Int {
+        return TYPE_IMAGE
     }
 
     /**
      * GET video only
      */
-    public static int ofVideo() {
-        return TYPE_VIDEO;
+    fun ofVideo(): Int {
+        return TYPE_VIDEO
     }
 
     /**
      * GET audio only
-     * <p>
+     *
+     *
      * # No longer maintain audio related functions,
      * but can continue to use but there will be phone compatibility issues
-     * <p>
+     *
+     *
      * 不再维护音频相关功能，但可以继续使用但会有机型兼容性问题
      */
-    public static int ofAudio() {
-        return TYPE_AUDIO;
+    fun ofAudio(): Int {
+        return TYPE_AUDIO
     }
 
 
-    public final static int TYPE_ALL = 0;
-    public final static int TYPE_IMAGE = 1;
-    public final static int TYPE_VIDEO = 2;
-    public final static int TYPE_AUDIO = 3;
-
-    /**
-     * System all image or video album
-     */
-    public final static String SYSTEM_ALL = SelectMimeType.SYSTEM_IMAGE + "," + SelectMimeType.SYSTEM_VIDEO;
+    const val TYPE_ALL: Int = 0
+    const val TYPE_IMAGE: Int = 1
+    const val TYPE_VIDEO: Int = 2
+    const val TYPE_AUDIO: Int = 3
 
     /**
      * System image album
      */
-    public final static String SYSTEM_IMAGE = "image/*";
+    const val SYSTEM_IMAGE: String = "image/*"
+
     /**
      * System video album
      */
-    public final static String SYSTEM_VIDEO = "video/*";
+    const val SYSTEM_VIDEO: String = "video/*"
+
     /**
      * System audio album
      */
-    public final static String SYSTEM_AUDIO = "audio/*";
+    const val SYSTEM_AUDIO: String = "audio/*"
+
+    /**
+     * System all image or video album
+     */
+    val SYSTEM_ALL: String = SYSTEM_IMAGE + "," + SYSTEM_VIDEO
 }

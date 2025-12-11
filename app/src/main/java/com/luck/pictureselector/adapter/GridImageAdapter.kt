@@ -148,7 +148,7 @@ class GridImageAdapter(context: Context, result: List<LocalMedia>) : RecyclerVie
                 viewHolder.mImg.setImageResource(PictureLibR.drawable.ps_audio_placeholder)
             } else {
                 Glide.with(viewHolder.itemView.context)
-                    .load(if (PictureMimeType.isContent(path) && !media.isCut && !media.isCompressed) Uri.parse(path) else path)
+                    .load(if (PictureMimeType.isContent(path) && !media.isCut() && !media.isCompressed()) Uri.parse(path) else path)
                     .centerCrop()
                     .placeholder(R.color.app_color_f6)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)

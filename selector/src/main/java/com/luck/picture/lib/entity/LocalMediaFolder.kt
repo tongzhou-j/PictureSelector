@@ -1,184 +1,125 @@
-package com.luck.picture.lib.entity;
+package com.luck.picture.lib.entity
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
-
-import com.luck.picture.lib.config.PictureConfig;
-
-import java.util.ArrayList;
+import android.os.Parcel
+import android.os.Parcelable
+import android.text.TextUtils
+import com.luck.picture.lib.config.PictureConfig
 
 /**
  * @author：luck
  * @date：2016-12-31 15:21
  * @describe：MediaFolder Entity
  */
-
-public class LocalMediaFolder implements Parcelable {
+class LocalMediaFolder : Parcelable {
     /**
      * folder bucketId
      */
-    private long bucketId = PictureConfig.ALL;
+    var bucketId: Long = PictureConfig.ALL.toLong()
+
     /**
      * folder name
      */
-    private String folderName;
+    private var folderName: String? = null
+
     /**
      * folder first path
      */
-    private String firstImagePath;
+    var firstImagePath: String? = null
 
     /**
      * first data mime type
      */
-    private String firstMimeType;
+    var firstMimeType: String? = null
 
     /**
      * folder total media num
      */
-    private int folderTotalNum;
+    var folderTotalNum: Int = 0
 
     /**
      * There are selected resources in the current directory
      */
-    private boolean isSelectTag;
+    var isSelectTag: Boolean = false
 
     /**
      * current folder data
-     * <p>
+     *
+     *
      * In isPageStrategy mode, there is no data for the first time
-     * </p>
+     *
      */
-    private ArrayList<LocalMedia> data = new ArrayList<>();
+    private var data: ArrayList<LocalMedia?>? = ArrayList<LocalMedia?>()
 
     /**
      * # Internal use
      * setCurrentDataPage
      */
-    private int currentDataPage = 1;
+    var currentDataPage: Int = 1
 
     /**
      * # Internal use
      * is load more
      */
-    private boolean isHasMore;
+    var isHasMore: Boolean = false
 
 
-    public LocalMediaFolder() {
+    constructor()
+
+
+    protected constructor(`in`: Parcel) {
+        bucketId = `in`.readLong()
+        folderName = `in`.readString()
+        firstImagePath = `in`.readString()
+        firstMimeType = `in`.readString()
+        folderTotalNum = `in`.readInt()
+        isSelectTag = `in`.readByte().toInt() != 0
+        data = `in`.createTypedArrayList<LocalMedia?>(LocalMedia.Companion.CREATOR)
+        currentDataPage = `in`.readInt()
+        isHasMore = `in`.readByte().toInt() != 0
     }
 
-
-    protected LocalMediaFolder(Parcel in) {
-        bucketId = in.readLong();
-        folderName = in.readString();
-        firstImagePath = in.readString();
-        firstMimeType = in.readString();
-        folderTotalNum = in.readInt();
-        isSelectTag = in.readByte() != 0;
-        data = in.createTypedArrayList(LocalMedia.CREATOR);
-        currentDataPage = in.readInt();
-        isHasMore = in.readByte() != 0;
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeLong(bucketId)
+        dest.writeString(folderName)
+        dest.writeString(firstImagePath)
+        dest.writeString(firstMimeType)
+        dest.writeInt(folderTotalNum)
+        dest.writeByte((if (isSelectTag) 1 else 0).toByte())
+        dest.writeTypedList<LocalMedia?>(data)
+        dest.writeInt(currentDataPage)
+        dest.writeByte((if (isHasMore) 1 else 0).toByte())
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(bucketId);
-        dest.writeString(folderName);
-        dest.writeString(firstImagePath);
-        dest.writeString(firstMimeType);
-        dest.writeInt(folderTotalNum);
-        dest.writeByte((byte) (isSelectTag ? 1 : 0));
-        dest.writeTypedList(data);
-        dest.writeInt(currentDataPage);
-        dest.writeByte((byte) (isHasMore ? 1 : 0));
+    override fun describeContents(): Int {
+        return 0
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    fun getFolderName(): String? {
+        return if (TextUtils.isEmpty(folderName)) "unknown" else folderName
     }
 
-    public static final Creator<LocalMediaFolder> CREATOR = new Creator<LocalMediaFolder>() {
-        @Override
-        public LocalMediaFolder createFromParcel(Parcel in) {
-            return new LocalMediaFolder(in);
-        }
-
-        @Override
-        public LocalMediaFolder[] newArray(int size) {
-            return new LocalMediaFolder[size];
-        }
-    };
-
-    public String getFolderName() {
-        return TextUtils.isEmpty(folderName) ? "unknown" : folderName;
+    fun setFolderName(folderName: String?) {
+        this.folderName = folderName
     }
 
-    public void setFolderName(String folderName) {
-        this.folderName = folderName;
+    fun getData(): ArrayList<LocalMedia?> {
+        return (if (data != null) data else java.util.ArrayList<LocalMedia?>())!!
     }
 
-    public int getFolderTotalNum() {
-        return folderTotalNum;
+    fun setData(data: ArrayList<LocalMedia?>?) {
+        this.data = data
     }
 
-    public void setFolderTotalNum(int folderTotalNum) {
-        this.folderTotalNum = folderTotalNum;
-    }
+    companion object {
+        val CREATOR: Parcelable.Creator<LocalMediaFolder?> =
+            object : Parcelable.Creator<LocalMediaFolder?> {
+                override fun createFromParcel(`in`: Parcel): LocalMediaFolder {
+                    return LocalMediaFolder(`in`)
+                }
 
-    public boolean isSelectTag() {
-        return isSelectTag;
-    }
-
-    public void setSelectTag(boolean selectTag) {
-        isSelectTag = selectTag;
-    }
-
-    public long getBucketId() {
-        return bucketId;
-    }
-
-    public void setBucketId(long bucketId) {
-        this.bucketId = bucketId;
-    }
-
-    public String getFirstImagePath() {
-        return firstImagePath;
-    }
-
-    public void setFirstImagePath(String firstImagePath) {
-        this.firstImagePath = firstImagePath;
-    }
-
-    public ArrayList<LocalMedia> getData() {
-        return data != null ? data : new ArrayList<>();
-    }
-
-    public void setData(ArrayList<LocalMedia> data) {
-        this.data = data;
-    }
-
-    public int getCurrentDataPage() {
-        return currentDataPage;
-    }
-
-    public void setCurrentDataPage(int currentDataPage) {
-        this.currentDataPage = currentDataPage;
-    }
-
-    public boolean isHasMore() {
-        return isHasMore;
-    }
-
-    public void setHasMore(boolean hasMore) {
-        isHasMore = hasMore;
-    }
-
-    public String getFirstMimeType() {
-        return firstMimeType;
-    }
-
-    public void setFirstMimeType(String firstMimeType) {
-        this.firstMimeType = firstMimeType;
+                override fun newArray(size: Int): Array<LocalMediaFolder?> {
+                    return arrayOfNulls<LocalMediaFolder>(size)
+                }
+            }
     }
 }

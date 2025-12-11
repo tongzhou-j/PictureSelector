@@ -12,6 +12,7 @@ import com.luck.picture.lib.app.PictureAppMaster
 import com.luck.picture.lib.basic.IBridgePictureBehavior
 import com.luck.picture.lib.basic.PictureCommonFragment
 import com.luck.picture.lib.basic.PictureSelector
+import com.luck.picture.lib.basic.SelectorResult
 import com.luck.picture.lib.config.PictureMimeType
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.entity.LocalMedia
@@ -44,8 +45,8 @@ class InjectFragmentActivity : AppCompatActivity(), IBridgePictureBehavior {
             PictureSelector.create(v.context)
                 .openGallery(SelectMimeType.ofAll())
                 .setImageEngine(GlideEngine.createGlideEngine())
-                .buildLaunch(R.id.fragment_container, object : OnResultCallbackListener<LocalMedia> {
-                    override fun onResult(result: ArrayList<LocalMedia>) {
+                .buildLaunch(R.id.fragment_container, object : OnResultCallbackListener<LocalMedia?> {
+                    override fun onResult(result: ArrayList<LocalMedia?>) {
                         setTranslucentStatusBar()
                         analyticalSelectResults(result)
                     }
@@ -63,14 +64,15 @@ class InjectFragmentActivity : AppCompatActivity(), IBridgePictureBehavior {
                 .openGallery(SelectMimeType.ofAll())
                 .setImageEngine(GlideEngine.createGlideEngine())
                 .build()
+            val fragmentTag = PictureSelectorFragment.Companion.TAG
             supportFragmentManager.beginTransaction()
-                .add(R.id.fragment_container, selectorFragment, selectorFragment.fragmentTag)
-                .addToBackStack(selectorFragment.fragmentTag)
+                .add(R.id.fragment_container, selectorFragment, fragmentTag)
+                .addToBackStack(fragmentTag)
                 .commitAllowingStateLoss()
         }
     }
 
-    override fun onSelectFinish(result: PictureCommonFragment.SelectorResult?) {
+    override fun onSelectFinish(result: SelectorResult?) {
         setTranslucentStatusBar()
         if (result == null) {
             return
@@ -89,30 +91,31 @@ class InjectFragmentActivity : AppCompatActivity(), IBridgePictureBehavior {
      *
      * @param result
      */
-    private fun analyticalSelectResults(result: ArrayList<LocalMedia>) {
+    private fun analyticalSelectResults(result: ArrayList<LocalMedia?>) {
         val builder = StringBuilder()
         builder.append("Result").append("\n")
         for (media in result) {
+            if (media == null) continue
             if (media.width == 0 || media.height == 0) {
                 if (PictureMimeType.isHasImage(media.mimeType)) {
                     val imageExtraInfo = MediaUtils.getImageSize(this, media.path)
                     media.width = imageExtraInfo.width
                     media.height = imageExtraInfo.height
                 } else if (PictureMimeType.isHasVideo(media.mimeType)) {
-                    val videoExtraInfo = MediaUtils.getVideoSize(PictureAppMaster.getInstance().appContext, media.path)
+                    val videoExtraInfo = MediaUtils.getVideoSize(PictureAppMaster.instance?.appContext ?: this, media.path)
                     media.width = videoExtraInfo.width
                     media.height = videoExtraInfo.height
                 }
             }
             builder.append(media.availablePath).append("\n")
             Log.i(TAG, "文件名: " + media.fileName)
-            Log.i(TAG, "是否压缩:" + media.isCompressed)
+            Log.i(TAG, "是否压缩:" + media.isCompressed())
             Log.i(TAG, "压缩:" + media.compressPath)
             Log.i(TAG, "原图:" + media.path)
             Log.i(TAG, "绝对路径:" + media.realPath)
-            Log.i(TAG, "是否裁剪:" + media.isCut)
+            Log.i(TAG, "是否裁剪:" + media.isCut())
             Log.i(TAG, "裁剪:" + media.cutPath)
-            Log.i(TAG, "是否开启原图:" + media.isOriginal)
+            Log.i(TAG, "是否开启原图:" + media.isOriginal())
             Log.i(TAG, "原图路径:" + media.originalPath)
             Log.i(TAG, "沙盒路径:" + media.sandboxPath)
             Log.i(TAG, "原始宽高: " + media.width + "x" + media.height)
@@ -129,4 +132,6 @@ class InjectFragmentActivity : AppCompatActivity(), IBridgePictureBehavior {
         ImmersiveManager.translucentStatusBar(this, true)
     }
 }
+
+
 

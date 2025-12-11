@@ -15,8 +15,8 @@ import com.luck.picture.lib.utils.ActivityCompatHelper
  * @describe：CoilEngine
  */
 class CoilEngine : ImageEngine {
-    override fun loadImage(context: Context, url: String, imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadImage(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         val target = ImageRequest.Builder(context)
@@ -47,8 +47,8 @@ class CoilEngine : ImageEngine {
         }
     }
 
-    override fun loadAlbumCover(context: Context, url: String, imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadAlbumCover(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -62,8 +62,8 @@ class CoilEngine : ImageEngine {
         context.imageLoader.enqueue(target)
     }
 
-    override fun loadGridImage(context: Context, url: String, imageView: ImageView) {
-        if (!ActivityCompatHelper.assertValidRequest(context)) {
+    override fun loadGridImage(context: Context?, url: String?, imageView: ImageView?) {
+        if (context == null || imageView == null || !ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         imageView.scaleType = ImageView.ScaleType.CENTER_CROP

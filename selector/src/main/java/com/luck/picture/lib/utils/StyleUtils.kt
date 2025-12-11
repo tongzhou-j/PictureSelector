@@ -1,23 +1,20 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.content.Context;
-import android.graphics.ColorFilter;
-import android.text.TextUtils;
-
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.BlendModeColorFilterCompat;
-import androidx.core.graphics.BlendModeCompat;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import android.content.Context
+import android.graphics.ColorFilter
+import android.text.TextUtils
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
+import java.util.regex.Pattern
 
 /**
  * @author：luck
  * @date：2021/11/20 3:27 下午
  * @describe：StyleUtils
  */
-public class StyleUtils {
-    private static final int INVALID = 0;
+object StyleUtils {
+    private const val INVALID = 0
 
     /**
      * 验证样式资源的合法性
@@ -25,8 +22,8 @@ public class StyleUtils {
      * @param resource
      * @return
      */
-    public static boolean checkStyleValidity(int resource) {
-        return resource != INVALID;
+    fun checkStyleValidity(resource: Int): Boolean {
+        return resource != StyleUtils.INVALID
     }
 
     /**
@@ -35,8 +32,8 @@ public class StyleUtils {
      * @param text
      * @return
      */
-    public static boolean checkTextValidity(String text) {
-        return !TextUtils.isEmpty(text);
+    fun checkTextValidity(text: String?): Boolean {
+        return !TextUtils.isEmpty(text)
     }
 
     /**
@@ -45,15 +42,15 @@ public class StyleUtils {
      * @param text
      * @return
      */
-    public static int getFormatCount(String text) {
-        String pattern = "%[^%]*\\d";
-        Pattern compile = Pattern.compile(pattern);
-        Matcher matcher = compile.matcher(text);
-        int count = 0;
+    fun getFormatCount(text: String): Int {
+        val pattern = "%[^%]*\\d"
+        val compile = Pattern.compile(pattern)
+        val matcher = compile.matcher(text)
+        var count = 0
         while (matcher.find()) {
-            count++;
+            count++
         }
-        return count;
+        return count
     }
 
     /**
@@ -62,8 +59,8 @@ public class StyleUtils {
      * @param size
      * @return
      */
-    public static boolean checkSizeValidity(int size) {
-        return size > INVALID;
+    fun checkSizeValidity(size: Int): Boolean {
+        return size > StyleUtils.INVALID
     }
 
     /**
@@ -72,8 +69,8 @@ public class StyleUtils {
      * @param size
      * @return
      */
-    public static boolean checkArrayValidity(int[] array) {
-        return array != null && array.length > 0;
+    fun checkArrayValidity(array: IntArray?): Boolean {
+        return array != null && array.size > 0
     }
 
     /**
@@ -83,8 +80,12 @@ public class StyleUtils {
      * @param color
      * @return
      */
-    public static ColorFilter getColorFilter(Context context, int color) {
-        return BlendModeColorFilterCompat.createBlendModeColorFilterCompat
-                (ContextCompat.getColor(context, color), BlendModeCompat.SRC_ATOP);
+    fun getColorFilter(context: Context, color: Int): ColorFilter? {
+        return BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+            ContextCompat.getColor(
+                context,
+                color
+            ), BlendModeCompat.SRC_ATOP
+        )
     }
 }

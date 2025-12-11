@@ -1,65 +1,75 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-
-import com.luck.picture.lib.R;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import android.annotation.SuppressLint
+import android.content.Context
+import com.luck.picture.lib.R
+import com.luck.picture.lib.utils.ValueOf.toLong
+import com.luck.picture.lib.utils.ValueOf.toString
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import kotlin.math.abs
 
 /**
  * @author：luck
  * @date：2017-5-25 23:30
  * @describe：DateUtils
  */
-
-public class DateUtils {
+object DateUtils {
     @SuppressLint("SimpleDateFormat")
-    private static final SimpleDateFormat SF = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-    @SuppressLint("SimpleDateFormat")
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM");
+    private val SF = SimpleDateFormat("yyyyMMddHHmmssSSS")
 
     @SuppressLint("SimpleDateFormat")
-    private static final SimpleDateFormat SDF_YEAR = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private val SDF = SimpleDateFormat("yyyy-MM")
 
-    public static long getCurrentTimeMillis() {
-        String timeToString = ValueOf.toString(System.currentTimeMillis());
-        return ValueOf.toLong(timeToString.length() > 10 ? timeToString.substring(0, 10) : timeToString);
-    }
+    @SuppressLint("SimpleDateFormat")
+    private val SDF_YEAR = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+    val currentTimeMillis: Long
+        get() {
+            val timeToString =
+                toString(System.currentTimeMillis())
+            return toLong(
+                if (timeToString.length > 10) timeToString.substring(
+                    0,
+                    10
+                ) else timeToString
+            )
+        }
 
 
-    public static String getDataFormat(Context context, long time) {
-        time = String.valueOf(time).length() > 10 ? time : time * 1000;
-        if (isThisWeek(time)) {
-            return context.getString(R.string.ps_current_week);
-        } else if (isThisMonth(time)) {
-            return context.getString(R.string.ps_current_month);
+    fun getDataFormat(context: Context, time: Long): String? {
+        var timeValue = time
+        timeValue = if (timeValue.toString().length > 10) timeValue else timeValue * 1000
+        if (isThisWeek(timeValue)) {
+            return context.getString(R.string.ps_current_week)
+        } else if (isThisMonth(timeValue)) {
+            return context.getString(R.string.ps_current_month)
         } else {
-            return SDF.format(time);
+            return SDF.format(Date(timeValue))
         }
     }
 
-    public static String getYearDataFormat(long time) {
-        time = String.valueOf(time).length() > 10 ? time : time * 1000;
-        return SDF_YEAR.format(time);
+    fun getYearDataFormat(time: Long): String {
+        var timeValue = time
+        timeValue = if (timeValue.toString().length > 10) timeValue else timeValue * 1000
+        return SDF_YEAR.format(Date(timeValue))
     }
 
-    private static boolean isThisWeek(long time) {
-        Calendar calendar = Calendar.getInstance();
-        int currentWeek = calendar.get(Calendar.WEEK_OF_YEAR);
-        calendar.setTime(new Date(time));
-        int paramWeek = calendar.get(Calendar.WEEK_OF_YEAR);
-        return paramWeek == currentWeek;
+    private fun isThisWeek(time: Long): Boolean {
+        val calendar = Calendar.getInstance()
+        val currentWeek = calendar.get(Calendar.WEEK_OF_YEAR)
+        calendar.time = Date(time)
+        val paramWeek = calendar.get(Calendar.WEEK_OF_YEAR)
+        return paramWeek == currentWeek
     }
 
-    public static boolean isThisMonth(long time) {
-        Date date = new Date(time);
-        String param = SDF.format(date);
-        String now = SDF.format(new Date());
-        return param.equals(now);
+    fun isThisMonth(time: Long): Boolean {
+        val date = Date(time)
+        val param = SDF.format(date)
+        val now = SDF.format(Date())
+        return param == now
     }
 
 
@@ -69,8 +79,8 @@ public class DateUtils {
      * @param duration millisecond
      * @return
      */
-    public static long millisecondToSecond(long duration) {
-        return (duration / 1000) * 1000;
+    fun millisecondToSecond(duration: Long): Long {
+        return (duration / 1000) * 1000
     }
 
     /**
@@ -79,14 +89,14 @@ public class DateUtils {
      * @param d
      * @return
      */
-    public static int dateDiffer(long d) {
+    fun dateDiffer(d: Long): Int {
         try {
-            long l1 = getCurrentTimeMillis();
-            long interval = l1 - d;
-            return (int) Math.abs(interval);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
+            val l1: Long = currentTimeMillis
+            val interval = l1 - d
+            return abs(interval.toDouble()).toInt()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return -1
         }
     }
 
@@ -96,16 +106,24 @@ public class DateUtils {
      * @param timeMs
      * @return
      */
-    public static String formatDurationTime(long timeMs) {
-        String prefix = timeMs < 0 ? "-" : "";
-        timeMs = Math.abs(timeMs);
-        long totalSeconds = timeMs / 1000;
-        long seconds = totalSeconds % 60;
-        long minutes = (totalSeconds / 60) % 60;
-        long hours = totalSeconds / 3600;
-        return hours > 0
-                ? String.format(Locale.getDefault(), "%s%d:%02d:%02d", prefix, hours, minutes, seconds)
-                : String.format(Locale.getDefault(), "%s%02d:%02d", prefix, minutes, seconds);
+    fun formatDurationTime(timeMs: Long): String {
+        var timeMs = timeMs
+        val prefix = if (timeMs < 0) "-" else ""
+        timeMs = abs(timeMs.toDouble()).toLong()
+        val totalSeconds = timeMs / 1000
+        val seconds = totalSeconds % 60
+        val minutes = (totalSeconds / 60) % 60
+        val hours = totalSeconds / 3600
+        return if (hours > 0) String.format(
+            Locale.getDefault(),
+            "%s%d:%02d:%02d",
+            prefix,
+            hours,
+            minutes,
+            seconds
+        ) else String.format(
+            Locale.getDefault(), "%s%02d:%02d", prefix, minutes, seconds
+        )
     }
 
 
@@ -115,20 +133,21 @@ public class DateUtils {
      * @param prefix 前缀名
      * @return
      */
-    public static String getCreateFileName(String prefix) {
-        long millis = System.currentTimeMillis();
-        return prefix + SF.format(millis);
+    fun getCreateFileName(prefix: String?): String {
+        val millis = System.currentTimeMillis()
+        return prefix + SF.format(Date(millis))
     }
 
-    /**
-     * 根据时间戳创建文件名
-     *
-     * @return
-     */
-    public static String getCreateFileName() {
-        long millis = System.currentTimeMillis();
-        return SF.format(millis);
-    }
+    val createFileName: String
+        /**
+         * 根据时间戳创建文件名
+         *
+         * @return
+         */
+        get() {
+            val millis = System.currentTimeMillis()
+            return SF.format(Date(millis))
+        }
 
     /**
      * 计算两个时间间隔
@@ -137,9 +156,8 @@ public class DateUtils {
      * @param eTime
      * @return
      */
-    public static String cdTime(long sTime, long eTime) {
-        long diff = eTime - sTime;
-        return diff > 1000 ? diff / 1000 + "秒" : diff + "毫秒";
+    fun cdTime(sTime: Long, eTime: Long): String {
+        val diff = eTime - sTime
+        return if (diff > 1000) (diff / 1000).toString() + "秒" else diff.toString() + "毫秒"
     }
-
 }

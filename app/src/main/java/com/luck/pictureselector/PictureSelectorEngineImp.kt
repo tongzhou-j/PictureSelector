@@ -110,7 +110,7 @@ class PictureSelectorEngineImp : PictureSelectorEngine {
      */
     override fun createLayoutResourceListener(): OnInjectLayoutResourceListener {
         return object : OnInjectLayoutResourceListener {
-            override fun getLayoutResourceId(context: Context, resourceSource: Int): Int {
+            override fun getLayoutResourceId(context: Context?, resourceSource: Int): Int {
                 return when (resourceSource) {
                     InjectResourceSource.MAIN_SELECTOR_LAYOUT_RESOURCE -> R.layout.ps_custom_fragment_selector
                     InjectResourceSource.PREVIEW_LAYOUT_RESOURCE -> R.layout.ps_custom_fragment_preview
@@ -127,9 +127,9 @@ class PictureSelectorEngineImp : PictureSelectorEngine {
         }
     }
 
-    override fun getResultCallbackListener(): OnResultCallbackListener<LocalMedia> {
-        return object : OnResultCallbackListener<LocalMedia> {
-            override fun onResult(result: ArrayList<LocalMedia>) {
+    override val resultCallbackListener: OnResultCallbackListener<LocalMedia?>?
+        get() = object : OnResultCallbackListener<LocalMedia?> {
+            override fun onResult(result: ArrayList<LocalMedia?>) {
                 // TODO 这种情况是内存极度不足的情况下，比如开启开发者选项中的不保留活动或后台进程限制，导致OnResultCallbackListener被回收
                 // 可以在这里进行一些补救措施，通过广播或其他方式将结果推送到相应页面，防止结果丢失的情况
                 Log.i(TAG, "onResult:" + result.size)
@@ -139,6 +139,7 @@ class PictureSelectorEngineImp : PictureSelectorEngine {
                 Log.i(TAG, "PictureSelector onCancel")
             }
         }
-    }
 }
+
+
 

@@ -32,16 +32,14 @@ class App : Application(), IApp, CameraXConfig.Provider, ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
-        PictureAppMaster.getInstance().setApp(this)
+        PictureAppMaster.instance.app = this
     }
 
-    override fun getAppContext(): Context {
-        return this
-    }
+    override val appContext: Context?
+        get() = this
 
-    override fun getPictureSelectorEngine(): PictureSelectorEngine {
-        return PictureSelectorEngineImp()
-    }
+    override val pictureSelectorEngine: PictureSelectorEngine?
+        get() = PictureSelectorEngineImp()
 
     @NonNull
     override fun getCameraXConfig(): CameraXConfig {
@@ -51,7 +49,7 @@ class App : Application(), IApp, CameraXConfig.Provider, ImageLoaderFactory {
 
     @NonNull
     override fun newImageLoader(): ImageLoader {
-        val imageLoader = ImageLoader.Builder(getAppContext())
+        val imageLoader = ImageLoader.Builder(appContext ?: this)
         val newBuilder = ComponentRegistry().newBuilder()
         newBuilder.add(VideoFrameDecoder.Factory())
         if (SDK_INT >= 28) {
@@ -61,7 +59,7 @@ class App : Application(), IApp, CameraXConfig.Provider, ImageLoaderFactory {
         }
         val componentRegistry = newBuilder.build()
         imageLoader.components(componentRegistry)
-        imageLoader.memoryCache(MemoryCache.Builder(getAppContext())
+        imageLoader.memoryCache(MemoryCache.Builder(appContext ?: this)
             .maxSizePercent(0.25).build())
         imageLoader.diskCache(DiskCache.Builder()
             .directory(File(cacheDir, "image_cache"))
@@ -70,4 +68,6 @@ class App : Application(), IApp, CameraXConfig.Provider, ImageLoaderFactory {
         return imageLoader.build()
     }
 }
+
+
 

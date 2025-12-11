@@ -1,38 +1,38 @@
-package com.luck.picture.lib.utils;
+package com.luck.picture.lib.utils
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import com.luck.picture.lib.config.PictureConfig;
+import android.content.Context
+import android.content.SharedPreferences
+import com.luck.picture.lib.config.PictureConfig
 
 /**
  * @author：luck
  * @date：2022/3/15 6:26 下午
  * @describe：SpUtils
  */
-public class SpUtils {
-    private static SharedPreferences pictureSpUtils;
+object SpUtils {
+    private var pictureSpUtils: SharedPreferences? = null
 
-    private static SharedPreferences getSp(Context context) {
-        if (pictureSpUtils == null) {
-            pictureSpUtils = context.getSharedPreferences(PictureConfig.SP_NAME, Context.MODE_PRIVATE);
+    private fun getSp(context: Context): SharedPreferences? {
+        if (SpUtils.pictureSpUtils == null) {
+            SpUtils.pictureSpUtils =
+                context.getSharedPreferences(PictureConfig.SP_NAME, Context.MODE_PRIVATE)
         }
-        return pictureSpUtils;
+        return SpUtils.pictureSpUtils
     }
 
-    public static void putString(Context context, String key, String value) {
-        getSp(context).edit().putString(key, value).apply();
+    fun putString(context: Context, key: String?, value: String?) {
+        SpUtils.getSp(context!!)!!.edit().putString(key, value).apply()
     }
 
-    public static void putBoolean(Context context, String key, boolean value) {
-        getSp(context).edit().putBoolean(key, value).apply();
+    fun putBoolean(context: Context, key: String?, value: Boolean) {
+        SpUtils.getSp(context!!)!!.edit().putBoolean(key, value).apply()
     }
 
-    public static boolean getBoolean(Context context, String key, boolean defValue) {
-        return getSp(context).getBoolean(key, defValue);
+    fun getBoolean(context: Context, key: String?, defValue: Boolean): Boolean {
+        return SpUtils.getSp(context!!)!!.getBoolean(key, defValue)
     }
 
-    public static boolean contains(Context context, String key) {
-        return getSp(context).contains(key);
+    fun contains(context: Context, key: String?): Boolean {
+        return SpUtils.getSp(context!!)!!.contains(key)
     }
 }

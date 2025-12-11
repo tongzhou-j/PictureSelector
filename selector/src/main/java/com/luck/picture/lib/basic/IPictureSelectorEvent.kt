@@ -1,4 +1,4 @@
-package com.luck.picture.lib.basic;
+package com.luck.picture.lib.basic
 
 
 /**
@@ -6,24 +6,24 @@ package com.luck.picture.lib.basic;
  * @date：2021/11/18 8:35 下午
  * @describe：IPictureSelectorEvent
  */
-public interface IPictureSelectorEvent {
+interface IPictureSelectorEvent {
     /**
      * 获取相册目录
      */
-    void loadAllAlbumData();
+    fun loadAllAlbumData()
 
     /**
      * 获取首页资源
      */
-    void loadFirstPageMediaData(long firstBucketId);
+    fun loadFirstPageMediaData(firstBucketId: Long)
 
     /**
      * 加载应用沙盒内的资源
      */
-    void loadOnlyInAppDirectoryAllMediaData();
+    fun loadOnlyInAppDirectoryAllMediaData()
 
     /**
      * 加载更多
      */
-    void loadMoreMediaData();
+    fun loadMoreMediaData()
 }

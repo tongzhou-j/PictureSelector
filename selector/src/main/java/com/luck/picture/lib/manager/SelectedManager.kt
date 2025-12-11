@@ -1,4 +1,4 @@
-package com.luck.picture.lib.manager;
+package com.luck.picture.lib.manager
 
 
 /**
@@ -6,9 +6,9 @@ package com.luck.picture.lib.manager;
  * @date：2021/11/20 8:57 下午
  * @describe：SelectedManager
  */
-public final class SelectedManager {
-    public static final int INVALID = -1;
-    public static final int ADD_SUCCESS = 0;
-    public static final int REMOVE = 1;
-    public static final int SUCCESS = 200;
+object SelectedManager {
+    val INVALID: Int = -1
+    const val ADD_SUCCESS: Int = 0
+    const val REMOVE: Int = 1
+    const val SUCCESS: Int = 200
 }

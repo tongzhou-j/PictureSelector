@@ -1,4 +1,4 @@
-package com.luck.picture.lib.magical;
+package com.luck.picture.lib.magical
 
 
 /**
@@ -6,15 +6,14 @@ package com.luck.picture.lib.magical;
  * @date：2021/12/15 11:06 上午
  * @describe：OnMagicalViewCallback
  */
-public interface OnMagicalViewCallback {
+interface OnMagicalViewCallback {
+    fun onBeginBackMinAnim()
 
-    void onBeginBackMinAnim();
+    fun onBeginBackMinMagicalFinish(isResetSize: Boolean)
 
-    void onBeginBackMinMagicalFinish(boolean isResetSize);
+    fun onBeginMagicalAnimComplete(mojitoView: MagicalView?, showImmediately: Boolean)
 
-    void onBeginMagicalAnimComplete(MagicalView mojitoView, boolean showImmediately);
+    fun onBackgroundAlpha(alpha: Float)
 
-    void onBackgroundAlpha(float alpha);
-
-    void onMagicalViewFinish();
+    fun onMagicalViewFinish()
 }

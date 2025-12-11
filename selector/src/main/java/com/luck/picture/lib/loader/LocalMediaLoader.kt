@@ -1,362 +1,335 @@
-package com.luck.picture.lib.loader;
+package com.luck.picture.lib.loader
 
-import android.content.Context;
-import android.database.Cursor;
-import android.provider.MediaStore;
-import android.text.TextUtils;
-
-import com.luck.picture.lib.R;
-import com.luck.picture.lib.config.FileSizeUnit;
-import com.luck.picture.lib.config.PictureConfig;
-import com.luck.picture.lib.config.PictureMimeType;
-import com.luck.picture.lib.config.SelectorConfig;
-import com.luck.picture.lib.config.SelectMimeType;
-import com.luck.picture.lib.entity.LocalMedia;
-import com.luck.picture.lib.entity.LocalMediaFolder;
-import com.luck.picture.lib.interfaces.OnQueryAlbumListener;
-import com.luck.picture.lib.interfaces.OnQueryAllAlbumListener;
-import com.luck.picture.lib.interfaces.OnQueryDataResultListener;
-import com.luck.picture.lib.thread.PictureThreadUtils;
-import com.luck.picture.lib.utils.MediaUtils;
-import com.luck.picture.lib.utils.SdkVersionUtils;
-import com.luck.picture.lib.utils.SortUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.content.Context
+import android.database.Cursor
+import android.provider.MediaStore
+import android.text.TextUtils
+import com.luck.picture.lib.R
+import com.luck.picture.lib.config.FileSizeUnit
+import com.luck.picture.lib.config.PictureConfig
+import com.luck.picture.lib.config.PictureMimeType
+import com.luck.picture.lib.config.SelectMimeType
+import com.luck.picture.lib.config.SelectorConfig
+import com.luck.picture.lib.entity.LocalMedia
+import com.luck.picture.lib.entity.LocalMediaFolder
+import com.luck.picture.lib.interfaces.OnQueryAlbumListener
+import com.luck.picture.lib.interfaces.OnQueryAllAlbumListener
+import com.luck.picture.lib.interfaces.OnQueryDataResultListener
+import com.luck.picture.lib.thread.PictureThreadUtils
+import com.luck.picture.lib.thread.PictureThreadUtils.SimpleTask
+import com.luck.picture.lib.utils.MediaUtils
+import com.luck.picture.lib.utils.SdkVersionUtils
+import com.luck.picture.lib.utils.SortUtils
 
 /**
  * @author：luck
  * @data：2016/12/31 19:12
  * @describe: Local media database query class
  */
-public final class LocalMediaLoader extends IBridgeMediaLoader {
-
-    public LocalMediaLoader(Context context, SelectorConfig config) {
-        super(context, config);
-    }
-
-    /**
-     * Video mode conditions
-     *
-     * @param durationCondition
-     * @param queryMimeCondition
-     * @return
-     */
-    private static String getSelectionArgsForVideoMediaCondition(String durationCondition, String queryMimeCondition) {
-        return MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryMimeCondition + " AND " + durationCondition;
-    }
-
-    /**
-     * Audio mode conditions
-     *
-     * @param durationCondition
-     * @param queryMimeCondition
-     * @return
-     */
-    private static String getSelectionArgsForAudioMediaCondition(String durationCondition, String queryMimeCondition) {
-        return MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryMimeCondition + " AND " + durationCondition;
-    }
-
-    /**
-     * Query conditions in all modes
-     *
-     * @param timeCondition
-     * @param sizeCondition
-     * @param queryImageMimeType
-     * @param queryVideoMimeType
-     */
-    private static String getSelectionArgsForAllMediaCondition(String timeCondition,
-                                                               String sizeCondition,
-                                                               String queryImageMimeType,
-                                                               String queryVideoMimeType) {
-        return "(" +
-                MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryImageMimeType + " OR " +
-                MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryVideoMimeType + " AND " +
-                timeCondition + ") AND " +
-                sizeCondition;
-    }
-
-    /**
-     * Query conditions in image modes
-     *
-     * @param fileSizeCondition
-     * @param queryMimeCondition
-     * @return
-     */
-    private static String getSelectionArgsForImageMediaCondition(String fileSizeCondition, String queryMimeCondition) {
-        return MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryMimeCondition + " AND " + fileSizeCondition;
-    }
-
-
-    @Override
-    public void loadAllAlbum(OnQueryAllAlbumListener<LocalMediaFolder> query) {
-        PictureThreadUtils.executeByIo(new PictureThreadUtils.SimpleTask<List<LocalMediaFolder>>() {
-
-            @Override
-            public List<LocalMediaFolder> doInBackground() {
-                List<LocalMediaFolder> imageFolders = new ArrayList<>();
-                Cursor data = getContext().getContentResolver().query(QUERY_URI, PROJECTION,
-                        getSelection(), getSelectionArgs(), getSortOrder());
+class LocalMediaLoader(context: Context?, config: SelectorConfig?) :
+    IBridgeMediaLoader(context, config) {
+    override fun loadAllAlbum(query: OnQueryAllAlbumListener<LocalMediaFolder?>?) {
+        PictureThreadUtils.executeByIo<MutableList<LocalMediaFolder?>?>(object :
+            SimpleTask<MutableList<LocalMediaFolder?>?>() {
+            override fun doInBackground(): MutableList<LocalMediaFolder?>? {
+                val imageFolders: MutableList<LocalMediaFolder> = ArrayList<LocalMediaFolder>()
+                val ctx = context ?: return ArrayList<LocalMediaFolder?>()
+                val queryUri = queryUri ?: return ArrayList<LocalMediaFolder?>()
+                val data = ctx.contentResolver.query(
+                    queryUri, projection,
+                    selection, selectionArgs, sortOrder
+                )
                 try {
                     if (data != null) {
-                        LocalMediaFolder allImageFolder = new LocalMediaFolder();
-                        ArrayList<LocalMedia> latelyImages = new ArrayList<>();
-                        int count = data.getCount();
+                        val allImageFolder = LocalMediaFolder()
+                        val latelyImages = ArrayList<LocalMedia?>()
+                        val count = data.count
                         if (count > 0) {
-                            data.moveToFirst();
+                            data.moveToFirst()
                             do {
-                                LocalMedia media = parseLocalMedia(data, false);
+                                val media = parseLocalMedia(data, false)
                                 if (media == null) {
-                                    continue;
+                                    continue
                                 }
-                                LocalMediaFolder folder = getImageFolder(media.getPath(),
-                                        media.getMimeType(), media.getParentFolderName(), imageFolders);
-                                folder.setBucketId(media.getBucketId());
-                                folder.getData().add(media);
-                                folder.setFolderTotalNum(folder.getFolderTotalNum() + 1);
-                                folder.setBucketId(media.getBucketId());
-                                latelyImages.add(media);
-                                int imageNum = allImageFolder.getFolderTotalNum();
-                                allImageFolder.setFolderTotalNum(imageNum + 1);
+                                val folder = getImageFolder(
+                                    media.path,
+                                    media.mimeType, media.parentFolderName, imageFolders
+                                )
+                                folder.bucketId = media.bucketId
+                                val folderData = folder.getData()
+                                folderData.add(media)
+                                folder.setData(folderData)
+                                folder.folderTotalNum = folder.folderTotalNum + 1
+                                latelyImages.add(media)
+                                val imageNum = allImageFolder.folderTotalNum
+                                allImageFolder.folderTotalNum = imageNum + 1
+                            } while (data.moveToNext())
 
-                            } while (data.moveToNext());
-
-                            LocalMediaFolder selfFolder = SandboxFileLoader
-                                    .loadInAppSandboxFolderFile(getContext(), getConfig().sandboxDir);
+                            val selfFolder = SandboxFileLoader.loadInAppSandboxFolderFile(
+                                context,
+                                config?.sandboxDir
+                            )
                             if (selfFolder != null) {
-                                imageFolders.add(selfFolder);
-                                allImageFolder.setFolderTotalNum(allImageFolder.getFolderTotalNum() + selfFolder.getFolderTotalNum());
-                                allImageFolder.setData(selfFolder.getData());
-                                latelyImages.addAll(0, selfFolder.getData());
-                                if (MAX_SORT_SIZE > selfFolder.getFolderTotalNum()) {
-                                    if (latelyImages.size() > MAX_SORT_SIZE) {
-                                        SortUtils.sortLocalMediaAddedTime(latelyImages.subList(0, MAX_SORT_SIZE));
+                                imageFolders.add(selfFolder)
+                                allImageFolder.folderTotalNum = allImageFolder.folderTotalNum + selfFolder.folderTotalNum
+                                allImageFolder.setData(selfFolder.getData())
+                                selfFolder.getData()?.let { latelyImages.addAll(0, it) }
+                                if (IBridgeMediaLoader.MAX_SORT_SIZE > selfFolder.folderTotalNum) {
+                                    if (latelyImages.size > IBridgeMediaLoader.MAX_SORT_SIZE) {
+                                        SortUtils.sortLocalMediaAddedTime(
+                                            latelyImages.subList(
+                                                0,
+                                                IBridgeMediaLoader.MAX_SORT_SIZE
+                                            )
+                                        )
                                     } else {
-                                        SortUtils.sortLocalMediaAddedTime(latelyImages);
+                                        SortUtils.sortLocalMediaAddedTime(latelyImages)
                                     }
                                 }
                             }
 
-                            if (latelyImages.size() > 0) {
-                                SortUtils.sortFolder(imageFolders);
-                                imageFolders.add(0, allImageFolder);
-                                allImageFolder.setFirstImagePath
-                                        (latelyImages.get(0).getPath());
-                                allImageFolder.setFirstMimeType(latelyImages.get(0).getMimeType());
-                                String folderName;
-                                if (TextUtils.isEmpty(getConfig().defaultAlbumName)) {
-                                    folderName = getConfig().chooseMode == SelectMimeType.ofAudio()
-                                            ? getContext().getString(R.string.ps_all_audio) : getContext().getString(R.string.ps_camera_roll);
+                            if (latelyImages.size > 0) {
+                                val sortableFolders = imageFolders.map { it as LocalMediaFolder? }.toMutableList()
+                                SortUtils.sortFolder(sortableFolders)
+                                sortableFolders.add(0, allImageFolder)
+                                allImageFolder.firstImagePath = latelyImages[0]?.path
+                                allImageFolder.firstMimeType = latelyImages[0]?.mimeType
+                                val folderName: String?
+                                if (TextUtils.isEmpty(config?.defaultAlbumName)) {
+                                    folderName =
+                                        if (config?.chooseMode == SelectMimeType.ofAudio())
+                                            ctx.getString(R.string.ps_all_audio)
+                                        else
+                                            ctx.getString(R.string.ps_camera_roll)
                                 } else {
-                                    folderName = getConfig().defaultAlbumName;
+                                    folderName = config?.defaultAlbumName
                                 }
-                                allImageFolder.setFolderName(folderName);
-                                allImageFolder.setBucketId(PictureConfig.ALL);
-                                allImageFolder.setData(latelyImages);
+                                allImageFolder.setFolderName(folderName)
+                                allImageFolder.bucketId = PictureConfig.ALL.toLong()
+                                allImageFolder.setData(latelyImages)
+                                return sortableFolders
                             }
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 } finally {
-                    if (data != null && !data.isClosed()) {
-                        data.close();
+                    if (data != null && !data.isClosed) {
+                        data.close()
                     }
                 }
-                return imageFolders;
+                return imageFolders.map { it as LocalMediaFolder? }.toMutableList()
             }
 
-            @Override
-            public void onSuccess(List<LocalMediaFolder> result) {
-                PictureThreadUtils.cancel(this);
+            override fun onSuccess(result: MutableList<LocalMediaFolder?>?) {
+                PictureThreadUtils.cancel(this)
                 if (query != null) {
-                    query.onComplete(result);
+                    query.onComplete(result)
                 }
             }
-        });
+        })
     }
 
 
-    @Override
-    public void loadOnlyInAppDirAllMedia(OnQueryAlbumListener<LocalMediaFolder> listener) {
-        PictureThreadUtils.executeByIo(new PictureThreadUtils.SimpleTask<LocalMediaFolder>() {
-
-            @Override
-            public LocalMediaFolder doInBackground() {
-                return SandboxFileLoader.loadInAppSandboxFolderFile(getContext(), getConfig().sandboxDir);
+    override fun loadOnlyInAppDirAllMedia(listener: OnQueryAlbumListener<LocalMediaFolder?>?) {
+        PictureThreadUtils.executeByIo<LocalMediaFolder?>(object : SimpleTask<LocalMediaFolder?>() {
+            override fun doInBackground(): LocalMediaFolder? {
+                return SandboxFileLoader.loadInAppSandboxFolderFile(
+                    context,
+                    config?.sandboxDir
+                )
             }
 
-            @Override
-            public void onSuccess(LocalMediaFolder result) {
-                PictureThreadUtils.cancel(this);
+            override fun onSuccess(result: LocalMediaFolder?) {
+                PictureThreadUtils.cancel(this)
                 if (listener != null) {
-                    listener.onComplete(result);
+                    listener.onComplete(result)
                 }
             }
-        });
+        })
     }
 
-    @Override
-    public void loadPageMediaData(long bucketId, int page, int pageSize, OnQueryDataResultListener<LocalMedia> query) {
-
+    override fun loadPageMediaData(
+        bucketId: Long,
+        page: Int,
+        pageSize: Int,
+        query: OnQueryDataResultListener<LocalMedia?>?
+    ) {
     }
 
-    @Override
-    public String getAlbumFirstCover(long bucketId) {
-        return null;
+    override fun getAlbumFirstCover(bucketId: Long): String? {
+        return null
     }
 
-    @Override
-    protected String getSelection() {
-        String durationCondition = getDurationCondition();
-        String fileSizeCondition = getFileSizeCondition();
-        switch (getConfig().chooseMode) {
-            case SelectMimeType.TYPE_ALL:
-                // Get all, not including audio
-                return getSelectionArgsForAllMediaCondition(durationCondition, fileSizeCondition, getImageMimeTypeCondition(),getVideoMimeTypeCondition());
-            case SelectMimeType.TYPE_IMAGE:
-                // Gets the image
-                return getSelectionArgsForImageMediaCondition(fileSizeCondition, getImageMimeTypeCondition());
-            case SelectMimeType.TYPE_VIDEO:
-                // Access to video
-                return getSelectionArgsForVideoMediaCondition(durationCondition, getVideoMimeTypeCondition());
-            case SelectMimeType.TYPE_AUDIO:
-                // Access to the audio
-                return getSelectionArgsForAudioMediaCondition(durationCondition, getAudioMimeTypeCondition());
-        }
-        return null;
+    override val selection: String?
+        get() {
+            val durationCondition = durationCondition
+            val fileSizeCondition = fileSizeCondition
+            when (config?.chooseMode) {
+            SelectMimeType.TYPE_ALL ->                 // Get all, not including audio
+                    return Companion.getSelectionArgsForAllMediaCondition(
+                    durationCondition,
+                    fileSizeCondition,
+                        imageMimeTypeCondition,
+                        videoMimeTypeCondition
+                )
+
+            SelectMimeType.TYPE_IMAGE ->                 // Gets the image
+                    return Companion.getSelectionArgsForImageMediaCondition(
+                    fileSizeCondition,
+                        imageMimeTypeCondition
+                )
+
+            SelectMimeType.TYPE_VIDEO ->                 // Access to video
+                    return Companion.getSelectionArgsForVideoMediaCondition(
+                    durationCondition,
+                        videoMimeTypeCondition
+                )
+
+            SelectMimeType.TYPE_AUDIO ->                 // Access to the audio
+                    return Companion.getSelectionArgsForAudioMediaCondition(
+                    durationCondition,
+                        audioMimeTypeCondition
+                )
+                else -> return null
+            }
     }
 
-    @Override
-    protected String[] getSelectionArgs() {
-        switch (getConfig().chooseMode) {
-            case SelectMimeType.TYPE_ALL:
-                // Get all
-                return new String[]{
-                        String.valueOf(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE),
-                        String.valueOf(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO)};
-            case SelectMimeType.TYPE_IMAGE:
-                // Get photo
-                return new String[]{String.valueOf(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE)};
-            case SelectMimeType.TYPE_VIDEO:
-                // Get video
-                return new String[]{String.valueOf(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO)};
-            case SelectMimeType.TYPE_AUDIO:
-                // Get audio
-                return new String[]{String.valueOf(MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO)};
-        }
-        return null;
+    override val selectionArgs: Array<String?>?
+        get() {
+            when (config?.chooseMode) {
+            SelectMimeType.TYPE_ALL ->                 // Get all
+                    return arrayOf<String?>(
+                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
+                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString()
+                )
+
+            SelectMimeType.TYPE_IMAGE ->                 // Get photo
+                    return arrayOf<String?>(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString())
+
+            SelectMimeType.TYPE_VIDEO ->                 // Get video
+                    return arrayOf<String?>(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString())
+
+            SelectMimeType.TYPE_AUDIO ->                 // Get audio
+                    return arrayOf<String?>(MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO.toString())
+                else -> return null
+            }
     }
 
-    @Override
-    protected String getSortOrder() {
-        return TextUtils.isEmpty(getConfig().sortOrder) ? ORDER_BY : getConfig().sortOrder;
-    }
+    override val sortOrder: String?
+        get() = if (TextUtils.isEmpty(config?.sortOrder)) orderBy else config?.sortOrder
 
-    @Override
-    protected LocalMedia parseLocalMedia(Cursor data, boolean isUsePool) {
-        int idColumn = data.getColumnIndexOrThrow(PROJECTION[0]);
-        int dataColumn = data.getColumnIndexOrThrow(PROJECTION[1]);
-        int mimeTypeColumn = data.getColumnIndexOrThrow(PROJECTION[2]);
-        int widthColumn = data.getColumnIndexOrThrow(PROJECTION[3]);
-        int heightColumn = data.getColumnIndexOrThrow(PROJECTION[4]);
-        int durationColumn = data.getColumnIndexOrThrow(PROJECTION[5]);
-        int sizeColumn = data.getColumnIndexOrThrow(PROJECTION[6]);
-        int folderNameColumn = data.getColumnIndexOrThrow(PROJECTION[7]);
-        int fileNameColumn = data.getColumnIndexOrThrow(PROJECTION[8]);
-        int bucketIdColumn = data.getColumnIndexOrThrow(PROJECTION[9]);
-        int dateAddedColumn = data.getColumnIndexOrThrow(PROJECTION[10]);
-        int orientationColumn = data.getColumnIndexOrThrow(PROJECTION[11]);
-        long id = data.getLong(idColumn);
-        long dateAdded = data.getLong(dateAddedColumn);
-        String mimeType = data.getString(mimeTypeColumn);
-        String absolutePath = data.getString(dataColumn);
-        String url = SdkVersionUtils.isQ() ? MediaUtils.getRealPathUri(id, mimeType) : absolutePath;
-        mimeType = TextUtils.isEmpty(mimeType) ? PictureMimeType.ofJPEG() : mimeType;
+    override fun parseLocalMedia(data: Cursor?, isUsePool: Boolean): LocalMedia? {
+        if (data == null) return null
+        val proj = projection
+        val idColumn = data.getColumnIndexOrThrow(proj[0]!!)
+        val dataColumn = data.getColumnIndexOrThrow(proj[1]!!)
+        val mimeTypeColumn = data.getColumnIndexOrThrow(proj[2]!!)
+        val widthColumn = data.getColumnIndexOrThrow(proj[3]!!)
+        val heightColumn = data.getColumnIndexOrThrow(proj[4]!!)
+        val durationColumn = data.getColumnIndexOrThrow(proj[5]!!)
+        val sizeColumn = data.getColumnIndexOrThrow(proj[6]!!)
+        val folderNameColumn =
+            data.getColumnIndexOrThrow(proj[7]!!)
+        val fileNameColumn = data.getColumnIndexOrThrow(proj[8]!!)
+        val bucketIdColumn = data.getColumnIndexOrThrow(proj[9]!!)
+        val dateAddedColumn =
+            data.getColumnIndexOrThrow(proj[10]!!)
+        val orientationColumn =
+            data.getColumnIndexOrThrow(proj[11]!!)
+        val id = data.getLong(idColumn)
+        val dateAdded = data.getLong(dateAddedColumn)
+        var mimeType = data.getString(mimeTypeColumn)
+        val absolutePath = data.getString(dataColumn)
+        val url =
+            if (SdkVersionUtils.isQ) MediaUtils.getRealPathUri(id, mimeType ?: "") else absolutePath
+        mimeType = if (TextUtils.isEmpty(mimeType)) PictureMimeType.ofJPEG() else mimeType
         // Here, it is solved that some models obtain mimeType and return the format of image / *,
         // which makes it impossible to distinguish the specific type, such as mi 8,9,10 and other models
         if (mimeType.endsWith("image/*")) {
-            mimeType = MediaUtils.getMimeTypeFromMediaUrl(absolutePath);
-            if (!getConfig().isGif) {
+            mimeType = MediaUtils.getMimeTypeFromMediaUrl(absolutePath ?: "")
+            if (config?.isGif != true) {
                 if (PictureMimeType.isHasGif(mimeType)) {
-                    return null;
+                    return null
                 }
             }
         }
 
         if (mimeType.endsWith("image/*")) {
-            return null;
+            return null
         }
 
-        if (!getConfig().isWebp) {
+        if (config?.isWebp != true) {
             if (mimeType.startsWith(PictureMimeType.ofWEBP())) {
-                return null;
+                return null
             }
         }
-        if (!getConfig().isBmp) {
+        if (config?.isBmp != true) {
             if (PictureMimeType.isHasBmp(mimeType)) {
-                return null;
+                return null
             }
         }
-        if (!getConfig().isHeic) {
+        if (config?.isHeic != true) {
             if (PictureMimeType.isHasHeic(mimeType)) {
-                return null;
+                return null
             }
         }
 
-        int width = data.getInt(widthColumn);
-        int height = data.getInt(heightColumn);
-        int orientation = data.getInt(orientationColumn);
+        var width = data.getInt(widthColumn)
+        var height = data.getInt(heightColumn)
+        val orientation = data.getInt(orientationColumn)
         if (orientation == 90 || orientation == 270) {
-            width = data.getInt(heightColumn);
-            height = data.getInt(widthColumn);
+            width = data.getInt(heightColumn)
+            height = data.getInt(widthColumn)
         }
-        long duration = data.getLong(durationColumn);
-        long size = data.getLong(sizeColumn);
-        String folderName = data.getString(folderNameColumn);
-        String fileName = data.getString(fileNameColumn);
-        long bucketId = data.getLong(bucketIdColumn);
+        val duration = data.getLong(durationColumn)
+        val size = data.getLong(sizeColumn)
+        val folderName = data.getString(folderNameColumn)
+        var fileName = data.getString(fileNameColumn)
+        val bucketId = data.getLong(bucketIdColumn)
         if (TextUtils.isEmpty(fileName)) {
-            fileName = PictureMimeType.getUrlToFileName(absolutePath);
+            fileName = PictureMimeType.getUrlToFileName(absolutePath ?: "")
         }
-        if (getConfig().isFilterSizeDuration && size > 0 && size < FileSizeUnit.KB) {
+        if (config?.isFilterSizeDuration == true && size > 0 && size < FileSizeUnit.KB) {
             // Filter out files less than 1KB
-            return null;
+            return null
         }
         if (PictureMimeType.isHasVideo(mimeType) || PictureMimeType.isHasAudio(mimeType)) {
-            if (getConfig().filterVideoMinSecond > 0 && duration < getConfig().filterVideoMinSecond) {
+            if (config?.filterVideoMinSecond ?: 0 > 0 && duration < (config?.filterVideoMinSecond ?: 0)) {
                 // If you set the minimum number of seconds of video to display
-                return null;
+                return null
             }
-            if (getConfig().filterVideoMaxSecond > 0 && duration > getConfig().filterVideoMaxSecond) {
+            if (config?.filterVideoMaxSecond ?: 0 > 0 && duration > (config?.filterVideoMaxSecond ?: 0)) {
                 // If you set the maximum number of seconds of video to display
-                return null;
+                return null
             }
-            if (getConfig().isFilterSizeDuration && duration <= 0) {
+            if (config?.isFilterSizeDuration == true && duration <= 0) {
                 //If the length is 0, the corrupted video is processed and filtered out
-                return null;
+                return null
             }
         }
-        LocalMedia media = LocalMedia.create();
-        media.setId(id);
-        media.setBucketId(bucketId);
-        media.setPath(url);
-        media.setRealPath(absolutePath);
-        media.setFileName(fileName);
-        media.setParentFolderName(folderName);
-        media.setDuration(duration);
-        media.setChooseModel(getConfig().chooseMode);
-        media.setMimeType(mimeType);
-        media.setWidth(width);
-        media.setHeight(height);
-        media.setSize(size);
-        media.setDateAddedTime(dateAdded);
-        if (mConfig.onQueryFilterListener != null) {
-            if (mConfig.onQueryFilterListener.onFilter(media)) {
-                return null;
+        val media: LocalMedia =
+            if (isUsePool) LocalMedia.obtain() else LocalMedia.create()
+        media.id = id
+        media.bucketId = bucketId
+        media.path = url
+        media.realPath = absolutePath
+        media.fileName = fileName
+        media.parentFolderName = folderName
+        media.duration = duration
+        media.chooseModel = config?.chooseMode ?: 0
+        media.mimeType = mimeType
+        media.width = width
+        media.height = height
+        media.size = size
+        media.dateAddedTime = dateAdded
+        val onQueryFilterListener = config?.onQueryFilterListener
+        if (onQueryFilterListener != null) {
+            if (onQueryFilterListener.onFilter(media)) {
+                return null
             }
         }
-        return media;
+        return media
     }
 
     /**
@@ -368,22 +341,92 @@ public final class LocalMediaLoader extends IBridgeMediaLoader {
      * @param folderName
      * @return
      */
-    private LocalMediaFolder getImageFolder(String firstPath, String firstMimeType, String folderName, List<LocalMediaFolder> imageFolders) {
-        for (LocalMediaFolder folder : imageFolders) {
+    private fun getImageFolder(
+        firstPath: String?,
+        firstMimeType: String?,
+        folderName: String?,
+        imageFolders: MutableList<LocalMediaFolder>
+    ): LocalMediaFolder {
+        for (folder in imageFolders) {
             // Under the same folder, return yourself, otherwise create a new folder
-            String name = folder.getFolderName();
+            val name = folder.getFolderName()
             if (TextUtils.isEmpty(name)) {
-                continue;
+                continue
             }
             if (TextUtils.equals(name, folderName)) {
-                return folder;
+                return folder
             }
         }
-        LocalMediaFolder newFolder = new LocalMediaFolder();
-        newFolder.setFolderName(folderName);
-        newFolder.setFirstImagePath(firstPath);
-        newFolder.setFirstMimeType(firstMimeType);
-        imageFolders.add(newFolder);
-        return newFolder;
+        val newFolder = LocalMediaFolder()
+        newFolder.setFolderName(folderName)
+        newFolder.firstImagePath = firstPath
+        newFolder.firstMimeType = firstMimeType
+        imageFolders.add(newFolder)
+        return newFolder
+    }
+
+    companion object {
+        /**
+         * Video mode conditions
+         *
+         * @param durationCondition
+         * @param queryMimeCondition
+         * @return
+         */
+        private fun getSelectionArgsForVideoMediaCondition(
+            durationCondition: String?,
+            queryMimeCondition: String?
+        ): String {
+            return MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryMimeCondition + " AND " + durationCondition
+        }
+
+        /**
+         * Audio mode conditions
+         *
+         * @param durationCondition
+         * @param queryMimeCondition
+         * @return
+         */
+        private fun getSelectionArgsForAudioMediaCondition(
+            durationCondition: String?,
+            queryMimeCondition: String?
+        ): String {
+            return MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryMimeCondition + " AND " + durationCondition
+        }
+
+        /**
+         * Query conditions in all modes
+         *
+         * @param timeCondition
+         * @param sizeCondition
+         * @param queryImageMimeType
+         * @param queryVideoMimeType
+         */
+        private fun getSelectionArgsForAllMediaCondition(
+            timeCondition: String?,
+            sizeCondition: String?,
+            queryImageMimeType: String?,
+            queryVideoMimeType: String?
+        ): String {
+            return "(" +
+                    MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryImageMimeType + " OR " +
+                    MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryVideoMimeType + " AND " +
+                    timeCondition + ") AND " +
+                    sizeCondition
+        }
+
+        /**
+         * Query conditions in image modes
+         *
+         * @param fileSizeCondition
+         * @param queryMimeCondition
+         * @return
+         */
+        private fun getSelectionArgsForImageMediaCondition(
+            fileSizeCondition: String?,
+            queryMimeCondition: String?
+        ): String {
+            return MediaStore.Files.FileColumns.MEDIA_TYPE + "=?" + queryMimeCondition + " AND " + fileSizeCondition
+        }
     }
 }
