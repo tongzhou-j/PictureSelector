@@ -1,5 +1,7 @@
 package com.luck.pictureselector
 
+import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_OK
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -77,10 +79,10 @@ class InjectFragmentActivity : AppCompatActivity(), IBridgePictureBehavior {
         if (result == null) {
             return
         }
-        if (result.mResultCode == RESULT_OK) {
-            val selectorResult = PictureSelector.obtainSelectorList(result.mResultData)
+        if (result.resultCode == RESULT_OK) {
+            val selectorResult = PictureSelector.obtainSelectorList(result.intent)
             analyticalSelectResults(selectorResult)
-        } else if (result.mResultCode == RESULT_CANCELED) {
+        } else if (result.resultCode == RESULT_CANCELED) {
             Log.i(TAG, "onSelectFinish PictureSelector Cancel")
             setTranslucentStatusBar()
         }

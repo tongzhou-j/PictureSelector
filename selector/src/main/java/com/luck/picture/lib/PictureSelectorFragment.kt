@@ -117,7 +117,7 @@ class PictureSelectorFragment : PictureCommonFragment(), OnRecyclerViewPreloadMo
     override val resourceId: Int
         get() {
             val layoutResourceId = InjectResourceSource.getLayoutResource(
-                context!!,
+                requireContext(),
                 InjectResourceSource.MAIN_SELECTOR_LAYOUT_RESOURCE,
                 selectorConfig
             )
@@ -645,7 +645,7 @@ class PictureSelectorFragment : PictureCommonFragment(), OnRecyclerViewPreloadMo
         val engine = selectorConfig?.loaderDataEngine
         if (engine != null) {
             engine.loadAllAlbumData(
-                context!!,
+                requireContext(),
                 object : OnQueryAllAlbumListener<LocalMediaFolder?> {
                     override fun onComplete(result: MutableList<LocalMediaFolder?>?) {
                         handleAllAlbumData(false, result?.filterNotNull()?.toMutableList() ?: mutableListOf())

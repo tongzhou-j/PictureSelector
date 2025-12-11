@@ -1169,13 +1169,13 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      */
     private class MeOnPermissionDeniedListener : OnPermissionDeniedListener {
         override fun onDenied(
-            fragment: Fragment, permissionArray: Array<String>,
-            requestCode: Int, call: OnCallbackListener<Boolean>
+            fragment: Fragment, permissions: Array<String>,
+            requestType: Int, callback: OnCallbackListener<Boolean>?
         ) {
             val tips: String?
-            if (TextUtils.equals(permissionArray[0], PermissionConfig.CAMERA[0])) {
+            if (TextUtils.equals(permissions[0], PermissionConfig.CAMERA[0])) {
                 tips = "缺少相机权限\n可能会导致不能使用摄像头功能"
-            } else if (TextUtils.equals(permissionArray[0], Manifest.permission.RECORD_AUDIO)) {
+            } else if (TextUtils.equals(permissions[0], Manifest.permission.RECORD_AUDIO)) {
                 tips = "缺少录音权限\n访问您设备上的音频、媒体内容和文件"
             } else {
                 tips = "缺少存储权限\n访问您设备上的照片、媒体内容和文件"
@@ -1186,8 +1186,9 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             dialog.setContentTextColor(-0xcccccd)
             dialog.setOnDialogClickListener(object : OnDialogClickListener {
                 override fun onClick(view: View?) {
-                    PermissionUtil.goIntentSetting(fragment, requestCode)
+                    PermissionUtil.goIntentSetting(fragment, requestType)
                     dialog.dismiss()
+                    callback?.onCall(true)
                 }
             })
             dialog.show()
@@ -2306,10 +2307,10 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         if (result == null) {
             return
         }
-        if (result.mResultCode == RESULT_OK) {
-            val selectorResult = PictureSelector.obtainSelectorList(result.mResultData)
+        if (result.resultCode == RESULT_OK) {
+            val selectorResult = PictureSelector.obtainSelectorList(result.intent)
             analyticalSelectResults(selectorResult.filterNotNull().toMutableList() as ArrayList<LocalMedia>)
-        } else if (result.mResultCode == RESULT_CANCELED) {
+        } else if (result.resultCode == RESULT_CANCELED) {
             Log.i(TAG, "onSelectFinish PictureSelector Cancel")
         }
     }

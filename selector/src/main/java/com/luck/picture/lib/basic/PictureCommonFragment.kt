@@ -227,8 +227,8 @@ abstract class PictureCommonFragment : Fragment(), IPictureSelectorCommonEvent {
             listener.onDenied(
                 this, permissions.filterNotNull().toTypedArray(), PictureConfig.REQUEST_GO_SETTING,
                 object : OnCallbackListener<Boolean> {
-                    override fun onCall(isResult: Boolean) {
-                        if (isResult) {
+                    override fun onCall(isResult: Boolean?) {
+                        if (isResult == true) {
                             handlePermissionSettingResult(PermissionConfig.CURRENT_REQUEST_PERMISSION)
                         }
                     }

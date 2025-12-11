@@ -92,10 +92,11 @@ abstract class IBridgeMediaLoader(
         get() {
             val maxS =
                 if (this.config!!.filterVideoMaxSecond == 0) Long.Companion.MAX_VALUE else this.config.filterVideoMaxSecond.toLong()
+            val minS = max(0L, this.config.filterVideoMinSecond.toLong())
             return String.format(
                 Locale.CHINA,
                 "%d <%s " + COLUMN_DURATION + " and " + COLUMN_DURATION + " <= %d",
-                max(0L.toDouble(), this.config.filterVideoMinSecond.toDouble()),
+                minS,
                 "=",
                 maxS
             )
@@ -110,10 +111,11 @@ abstract class IBridgeMediaLoader(
         get() {
             val maxS =
                 if (this.config!!.filterMaxFileSize == 0L) Long.Companion.MAX_VALUE else this.config.filterMaxFileSize
+            val minS = max(0L, this.config.filterMinFileSize)
             return String.format(
                 Locale.CHINA,
                 "%d <%s " + MediaStore.MediaColumns.SIZE + " and " + MediaStore.MediaColumns.SIZE + " <= %d",
-                max(0.0, this.config.filterMinFileSize.toDouble()),
+                minS,
                 "=",
                 maxS
             )
