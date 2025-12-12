@@ -1,6 +1,10 @@
 jdk:
-  - openjdk11
+  - openjdk17
 
 before_install:
   - ./gradlew --version
+
+# 跳过 app 模块的构建，只构建库模块
+install:
+  - ./gradlew clean :selector:publishToMavenLocal -x test -x lint
 

@@ -21,24 +21,30 @@ android {
     }
 
     signingConfigs {
-        pictureSelectorKey {
-            storeFile file("signature/picture.jks")
-            storePassword "luck888A"
-            keyAlias "picture"
-            keyPassword "luck888A"
+        if (file("signature/picture.jks").exists()) {
+            pictureSelectorKey {
+                storeFile file("signature/picture.jks")
+                storePassword "luck888A"
+                keyAlias "picture"
+                keyPassword "luck888A"
+            }
         }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.pictureSelectorKey
+            if (file("signature/picture.jks").exists()) {
+                signingConfig signingConfigs.pictureSelectorKey
+            }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
         debug {
             minifyEnabled false
-            signingConfig signingConfigs.pictureSelectorKey
+            if (file("signature/picture.jks").exists()) {
+                signingConfig signingConfigs.pictureSelectorKey
+            }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
