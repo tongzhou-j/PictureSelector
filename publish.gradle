@@ -1,10 +1,17 @@
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
+// 检查 local.properties 文件是否存在
+def localPropertiesFile = project.rootProject.file('local.properties')
 Properties localProperties = new Properties()
-localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
-localProperties.each { name, value ->
-    project.ext[name] = value
+
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.newDataInputStream())
+    localProperties.each { name, value ->
+        project.ext[name] = value
+    }
+} else {
+    println('Warning: local.properties 文件不存在，跳过 Sonatype 发布配置（JitPack 构建）')
 }
 
 def mavenUsername = localProperties.getProperty("sonatype.username")
@@ -24,6 +31,12 @@ def developerAuthorName = mavenUsername
 
 println("${mavenUsername} ${mavenPassword} - ${projectGroupId}:${projectArtifactId}:${projectVersionName}")
 println("${projectLicense} - ${projectLicenseUrl}")
+
+// 如果 local.properties 不存在，跳过 Sonatype 发布配置（JitPack 构建）
+if (!localPropertiesFile.exists()) {
+    println('Info: 跳过 Sonatype 发布配置，使用 JitPack 发布机制')
+    return
+}
 
 if (!mavenUsername || !mavenPassword || !projectGroupId || !projectArtifactId || !projectVersionName) {
     println('Error：缺少参数')
