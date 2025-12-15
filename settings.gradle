@@ -1,3 +1,7 @@
-include ':app', ':selector',':ucrop',':compress'
+// JitPack 构建时排除 app 模块
+if (!hasProperty('isJitpack')) {
+    include ':app'
+}
+include ':selector',':ucrop',':compress'
 include ':camerax'
 include ':ijkplayer-java'

@@ -6,5 +6,5 @@ before_install:
 
 # 跳过 app 模块的构建，只构建库模块
 install:
-  - ./gradlew clean :selector:publishToMavenLocal -x test -x lint
+  - ./gradlew clean :selector:assembleRelease :selector:publishToMavenLocal -PisJitpack=true -x test -x lint
 

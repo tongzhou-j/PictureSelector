@@ -20,10 +20,13 @@ android {
         versionName cfgs.versionName
     }
 
+    def keystoreFile = file("signature/picture.jks")
+    def keystoreExists = keystoreFile.exists()
+    
     signingConfigs {
-        if (file("signature/picture.jks").exists()) {
+        if (keystoreExists) {
             pictureSelectorKey {
-                storeFile file("signature/picture.jks")
+                storeFile keystoreFile
                 storePassword "luck888A"
                 keyAlias "picture"
                 keyPassword "luck888A"
@@ -34,7 +37,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            if (file("signature/picture.jks").exists()) {
+            if (keystoreExists) {
                 signingConfig signingConfigs.pictureSelectorKey
             }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -42,7 +45,7 @@ android {
 
         debug {
             minifyEnabled false
-            if (file("signature/picture.jks").exists()) {
+            if (keystoreExists) {
                 signingConfig signingConfigs.pictureSelectorKey
             }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
