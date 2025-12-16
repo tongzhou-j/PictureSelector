@@ -66,8 +66,8 @@ afterEvaluate {
                 from components.release
 
                 groupId = 'com.github.tongzhou-j'
-                artifactId = 'selector'
-                version = '1.0.4'
+                artifactId = 'pictureselector'
+                version = '1.0.5'
             }
         }
     }
