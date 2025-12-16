@@ -1,17 +1,29 @@
-package com.yalantis.ucrop.util;
+package com.yalantis.ucrop.util
 
-public final class CubicEasing {
+import kotlin.jvm.JvmStatic
 
-    public static float easeOut(float time, float start, float end, float duration) {
-        return end * ((time = time / duration - 1.0f) * time * time + 1.0f) + start;
+object CubicEasing {
+    @JvmStatic
+    fun easeOut(time: Float, start: Float, end: Float, duration: Float): Float {
+        val t = time / duration - 1.0f
+        return end * (t * t * t + 1.0f) + start
     }
 
-    public static float easeIn(float time, float start, float end, float duration) {
-        return end * (time /= duration) * time * time + start;
+    @JvmStatic
+    fun easeIn(time: Float, start: Float, end: Float, duration: Float): Float {
+        val t = time / duration
+        return end * t * t * t + start
     }
 
-    public static float easeInOut(float time, float start, float end, float duration) {
-        return (time /= duration / 2.0f) < 1.0f ? end / 2.0f * time * time * time + start : end / 2.0f * ((time -= 2.0f) * time * time + 2.0f) + start;
+    @JvmStatic
+    fun easeInOut(time: Float, start: Float, end: Float, duration: Float): Float {
+        val t = time / (duration / 2.0f)
+        return if (t < 1.0f) {
+            end / 2.0f * t * t * t + start
+        } else {
+            val t2 = t - 2.0f
+            end / 2.0f * (t2 * t2 * t2 + 2.0f) + start
+        }
     }
-
 }
+

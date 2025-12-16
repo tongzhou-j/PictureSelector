@@ -1,13 +1,11 @@
-package com.yalantis.ucrop.callback;
+package com.yalantis.ucrop.callback
 
-import android.net.Uri;
+import android.net.Uri
+import androidx.annotation.NonNull
 
-import androidx.annotation.NonNull;
+interface BitmapCropCallback {
+    fun onBitmapCropped(@NonNull resultUri: Uri, offsetX: Int, offsetY: Int, imageWidth: Int, imageHeight: Int)
 
-public interface BitmapCropCallback {
-
-    void onBitmapCropped(@NonNull Uri resultUri, int offsetX, int offsetY, int imageWidth, int imageHeight);
-
-    void onCropFailure(@NonNull Throwable t);
-
+    fun onCropFailure(@NonNull t: Throwable)
 }
+

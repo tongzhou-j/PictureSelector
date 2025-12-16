@@ -20,7 +20,7 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+ *
  * The views and conclusions contained in the software and documentation are those of the
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of Google, Inc.
@@ -28,524 +28,173 @@
  * Adapted for the uCrop library.
  */
 
-package com.yalantis.ucrop.util;
+package com.yalantis.ucrop.util
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
-import android.os.ParcelFileDescriptor;
-import android.text.TextUtils;
-import android.util.Log;
-
-import androidx.annotation.RequiresApi;
-import androidx.exifinterface.media.ExifInterface;
-
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.text.TextUtils
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.exifinterface.media.ExifInterface
+import java.io.FileDescriptor
+import java.io.IOException
+import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.charset.Charset
+import kotlin.jvm.JvmStatic
 
 /**
  * A class for parsing the exif orientation from an image header.
  */
-public class ImageHeaderParser {
-    private static final String TAG = "ImageHeaderParser";
-    /**
-     * A constant indicating we were unable to parse the orientation from the image either because
-     * no exif segment containing orientation data existed, or because of an I/O error attempting to
-     * read the exif segment.
-     */
-    public static final int UNKNOWN_ORIENTATION = -1;
+class ImageHeaderParser(private val inputStream: InputStream) {
+    companion object {
+        private const val TAG = "ImageHeaderParser"
+        /**
+         * A constant indicating we were unable to parse the orientation from the image either because
+         * no exif segment containing orientation data existed, or because of an I/O error attempting to
+         * read the exif segment.
+         */
+        const val UNKNOWN_ORIENTATION = -1
 
-    private static final int EXIF_MAGIC_NUMBER = 0xFFD8;
-    // "MM".
-    private static final int MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D;
-    // "II".
-    private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;
-    private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
-    private static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
-            JPEG_EXIF_SEGMENT_PREAMBLE.getBytes(Charset.forName("UTF-8"));
-    private static final int SEGMENT_SOS = 0xDA;
-    private static final int MARKER_EOI = 0xD9;
-    private static final int SEGMENT_START_ID = 0xFF;
-    private static final int EXIF_SEGMENT_TYPE = 0xE1;
-    private static final int ORIENTATION_TAG_TYPE = 0x0112;
-    private static final int[] BYTES_PER_FORMAT = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
+        private const val EXIF_MAGIC_NUMBER = 0xFFD8
+        // "MM".
+        private const val MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D
+        // "II".
+        private const val INTEL_TIFF_MAGIC_NUMBER = 0x4949
+        private const val JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\u0000\u0000"
+        private val JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
+            JPEG_EXIF_SEGMENT_PREAMBLE.toByteArray(Charset.forName("UTF-8"))
+        private const val SEGMENT_SOS = 0xDA
+        private const val MARKER_EOI = 0xD9
+        private const val SEGMENT_START_ID = 0xFF
+        private const val EXIF_SEGMENT_TYPE = 0xE1
+        private const val ORIENTATION_TAG_TYPE = 0x0112
+        private val BYTES_PER_FORMAT = intArrayOf(0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8)
 
-    private final Reader reader;
-
-    public ImageHeaderParser(InputStream is) {
-        reader = new StreamReader(is);
-    }
-
-    /**
-     * Parse the orientation from the image header. If it doesn't handle this image type (or this is
-     * not an image) it will return a default value rather than throwing an exception.
-     *
-     * @return The exif orientation if present or -1 if the header couldn't be parsed or doesn't
-     * contain an orientation
-     * @throws IOException
-     */
-    public int getOrientation() throws IOException {
-        final int magicNumber = reader.getUInt16();
-
-        if (!handles(magicNumber)) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Parser doesn't handle magic number: " + magicNumber);
-            }
-            return UNKNOWN_ORIENTATION;
-        } else {
-            int exifSegmentLength = moveToExifSegmentAndGetLength();
-            if (exifSegmentLength == -1) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Failed to parse exif segment length, or exif segment not found");
-                }
-                return UNKNOWN_ORIENTATION;
-            }
-
-            byte[] exifData = new byte[exifSegmentLength];
-            return parseExifSegment(exifData, exifSegmentLength);
-        }
-    }
-
-    private int parseExifSegment(byte[] tempArray, int exifSegmentLength) throws IOException {
-        int read = reader.read(tempArray, exifSegmentLength);
-        if (read != exifSegmentLength) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unable to read exif segment data"
-                        + ", length: " + exifSegmentLength
-                        + ", actually read: " + read);
-            }
-            return UNKNOWN_ORIENTATION;
-        }
-
-        boolean hasJpegExifPreamble = hasJpegExifPreamble(tempArray, exifSegmentLength);
-        if (hasJpegExifPreamble) {
-            return parseExifSegment(new RandomAccessReader(tempArray, exifSegmentLength));
-        } else {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Missing jpeg exif preamble");
-            }
-            return UNKNOWN_ORIENTATION;
-        }
-    }
-
-    private boolean hasJpegExifPreamble(byte[] exifData, int exifSegmentLength) {
-        boolean result =
-                exifData != null && exifSegmentLength > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
-        if (result) {
-            for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {
-                if (exifData[i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
-                    result = false;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Moves reader to the start of the exif segment and returns the length of the exif segment or
-     * {@code -1} if no exif segment is found.
-     */
-    private int moveToExifSegmentAndGetLength() throws IOException {
-        short segmentId, segmentType;
-        int segmentLength;
-        while (true) {
-            segmentId = reader.getUInt8();
-            if (segmentId != SEGMENT_START_ID) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Unknown segmentId=" + segmentId);
-                }
-                return -1;
-            }
-
-            segmentType = reader.getUInt8();
-
-            if (segmentType == SEGMENT_SOS) {
-                return -1;
-            } else if (segmentType == MARKER_EOI) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Found MARKER_EOI in exif segment");
-                }
-                return -1;
-            }
-
-            // Segment length includes bytes for segment length.
-            segmentLength = reader.getUInt16() - 2;
-
-            if (segmentType != EXIF_SEGMENT_TYPE) {
-                long skipped = reader.skip(segmentLength);
-                if (skipped != segmentLength) {
-                    if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, "Unable to skip enough data"
-                                + ", type: " + segmentType
-                                + ", wanted to skip: " + segmentLength
-                                + ", but actually skipped: " + skipped);
-                    }
-                    return -1;
-                }
-            } else {
-                return segmentLength;
-            }
-        }
-    }
-
-    private static int parseExifSegment(RandomAccessReader segmentData) {
-        final int headerOffsetSize = JPEG_EXIF_SEGMENT_PREAMBLE.length();
-
-        short byteOrderIdentifier = segmentData.getInt16(headerOffsetSize);
-        final ByteOrder byteOrder;
-        if (byteOrderIdentifier == MOTOROLA_TIFF_MAGIC_NUMBER) {
-            byteOrder = ByteOrder.BIG_ENDIAN;
-        } else if (byteOrderIdentifier == INTEL_TIFF_MAGIC_NUMBER) {
-            byteOrder = ByteOrder.LITTLE_ENDIAN;
-        } else {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unknown endianness = " + byteOrderIdentifier);
-            }
-            byteOrder = ByteOrder.BIG_ENDIAN;
-        }
-
-        segmentData.order(byteOrder);
-
-        int firstIfdOffset = segmentData.getInt32(headerOffsetSize + 4) + headerOffsetSize;
-        int tagCount = segmentData.getInt16(firstIfdOffset);
-
-        int tagOffset, tagType, formatCode, componentCount;
-        for (int i = 0; i < tagCount; i++) {
-            tagOffset = calcTagOffset(firstIfdOffset, i);
-            tagType = segmentData.getInt16(tagOffset);
-
-            // We only want orientation.
-            if (tagType != ORIENTATION_TAG_TYPE) {
-                continue;
-            }
-
-            formatCode = segmentData.getInt16(tagOffset + 2);
-
-            // 12 is max format code.
-            if (formatCode < 1 || formatCode > 12) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Got invalid format code = " + formatCode);
-                }
-                continue;
-            }
-
-            componentCount = segmentData.getInt32(tagOffset + 4);
-
-            if (componentCount < 0) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Negative tiff component count");
-                }
-                continue;
-            }
-
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Got tagIndex=" + i + " tagType=" + tagType + " formatCode=" + formatCode
-                        + " componentCount=" + componentCount);
-            }
-
-            final int byteCount = componentCount + BYTES_PER_FORMAT[formatCode];
-
-            if (byteCount > 4) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=" + formatCode);
-                }
-                continue;
-            }
-
-            final int tagValueOffset = tagOffset + 8;
-
-            if (tagValueOffset < 0 || tagValueOffset > segmentData.length()) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Illegal tagValueOffset=" + tagValueOffset + " tagType=" + tagType);
-                }
-                continue;
-            }
-
-            if (byteCount < 0 || tagValueOffset + byteCount > segmentData.length()) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Illegal number of bytes for TI tag data tagType=" + tagType);
-                }
-                continue;
-            }
-
-            //assume componentCount == 1 && fmtCode == 3
-            return segmentData.getInt16(tagValueOffset);
-        }
-
-        return -1;
-    }
-
-    private static int calcTagOffset(int ifdOffset, int tagIndex) {
-        return ifdOffset + 2 + 12 * tagIndex;
-    }
-
-    private static boolean handles(int imageMagicNumber) {
-        return (imageMagicNumber & EXIF_MAGIC_NUMBER) == EXIF_MAGIC_NUMBER
-                || imageMagicNumber == MOTOROLA_TIFF_MAGIC_NUMBER
-                || imageMagicNumber == INTEL_TIFF_MAGIC_NUMBER;
-    }
-
-    private static class RandomAccessReader {
-        private final ByteBuffer data;
-
-        public RandomAccessReader(byte[] data, int length) {
-            this.data = (ByteBuffer) ByteBuffer.wrap(data)
-                    .order(ByteOrder.BIG_ENDIAN)
-                    .limit(length);
-        }
-
-        public void order(ByteOrder byteOrder) {
-            this.data.order(byteOrder);
-        }
-
-        public int length() {
-            return data.remaining();
-        }
-
-        public int getInt32(int offset) {
-            return data.getInt(offset);
-        }
-
-        public short getInt16(int offset) {
-            return data.getShort(offset);
-        }
-    }
-
-    private interface Reader {
-        int getUInt16() throws IOException;
-
-        short getUInt8() throws IOException;
-
-        long skip(long total) throws IOException;
-
-        int read(byte[] buffer, int byteCount) throws IOException;
-    }
-
-    private static class StreamReader implements Reader {
-        private final InputStream is;
-
-        // Motorola / big endian byte order.
-        public StreamReader(InputStream is) {
-            this.is = is;
-        }
-
-        @Override
-        public int getUInt16() throws IOException {
-            return (is.read() << 8 & 0xFF00) | (is.read() & 0xFF);
-        }
-
-        @Override
-        public short getUInt8() throws IOException {
-            return (short) (is.read() & 0xFF);
-        }
-
-        @Override
-        public long skip(long total) throws IOException {
-            if (total < 0) {
-                return 0;
-            }
-
-            long toSkip = total;
-            while (toSkip > 0) {
-                long skipped = is.skip(toSkip);
-                if (skipped > 0) {
-                    toSkip -= skipped;
-                } else {
-                    // Skip has no specific contract as to what happens when you reach the end of
-                    // the stream. To differentiate between temporarily not having more data and
-                    // having finished the stream, we read a single byte when we fail to skip any
-                    // amount of data.
-                    int testEofByte = is.read();
-                    if (testEofByte == -1) {
-                        break;
-                    } else {
-                        toSkip--;
-                    }
-                }
-            }
-            return total - toSkip;
-        }
-
-        @Override
-        public int read(byte[] buffer, int byteCount) throws IOException {
-            int toRead = byteCount;
-            int read;
-            while (toRead > 0 && ((read = is.read(buffer, byteCount - toRead, toRead)) != -1)) {
-                toRead -= read;
-            }
-            return byteCount - toRead;
-        }
-    }
-
-    /**
-     * Copy exif information represented by originalExif into the file represented by imageOutputPath.
-     *
-     * @param originalExif The exif info from the original input file
-     * @param width output image new width
-     * @param height output image new height
-     * @param imageOutputPath The path to the output file
-     */
-    public static void copyExif(ExifInterface originalExif, int width, int height, String imageOutputPath) {
-
-        try {
-            ExifInterface newExif = new ExifInterface(imageOutputPath);
-
-            copyExifAttributes(originalExif, newExif, width, height);
-
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
-        }
-    }
-
-    /**
-     * Copy exif information from the file represented by imageInputUri into the file represented by imageOutputPath and
-     * overwrites it's width and height with the given ones.
-     *
-     * @param context The context from which to obtain a content resolver
-     * @param width output image new width
-     * @param height output image new height
-     * @param imageInputUri The {@link Uri} that represents the input file
-     * @param imageOutputPath The path to the output file
-     */
-    public static void copyExif(Context context, int width, int height, Uri imageInputUri, String imageOutputPath) {
-        if(context == null) {
-            Log.d(TAG, "context is null");
-            return;
-        }
-
-        InputStream ins = null;
-        try  {
-            ins = context.getContentResolver().openInputStream(imageInputUri);
-            ExifInterface originalExif = new ExifInterface(ins);
-
-            ExifInterface newExif = new ExifInterface(imageOutputPath);
-
-            copyExifAttributes(originalExif, newExif, width, height);
-
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage(), e);
-        } finally {
-            if (ins != null) {
-                try {
-                    ins.close();
-                } catch (IOException e) {
-                    Log.d(TAG, e.getMessage(), e);
-                }
+        /**
+         * Copy exif information represented by originalExif into the file represented by imageOutputPath.
+         *
+         * @param originalExif The exif info from the original input file
+         * @param width output image new width
+         * @param height output image new height
+         * @param imageOutputPath The path to the output file
+         */
+        @JvmStatic
+        fun copyExif(originalExif: ExifInterface, width: Int, height: Int, imageOutputPath: String) {
+            try {
+                val newExif = ExifInterface(imageOutputPath)
+                copyExifAttributes(originalExif, newExif, width, height)
+            } catch (e: IOException) {
+                Log.d(TAG, e.message ?: "")
             }
         }
 
-    }
-
-    /**
-     * Copy exif information from the file represented by imageInputUri into the file represented by imageOutputUri and
-     * overwrites it's width and height with the given ones.
-     * This is done by {@link ExifInterface} through a seekable {@link FileDescriptor} and this is only possible
-     * starting on Lollipop version of Android.
-     *
-     * @param context The context from which to obtain a content resolver
-     * @param width output image new width
-     * @param height output image new height
-     * @param imageInputUri The {@link Uri} that represents the input file
-     * @param imageOutputUri The {@link Uri} that represents the output file
-     */
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void copyExif(Context context, int width, int height, Uri imageInputUri, Uri imageOutputUri) {
-        if(context == null) {
-            Log.d(TAG, "context is null");
-            return;
-        }
-
-        InputStream ins = null;
-        ParcelFileDescriptor outFd = null;
-        try  {
-            ins = context.getContentResolver().openInputStream(imageInputUri);
-            ExifInterface originalExif = new ExifInterface(ins);
-
-            outFd = context.getContentResolver().openFileDescriptor(imageOutputUri, "rw");
-            ExifInterface newExif = new ExifInterface(outFd.getFileDescriptor());
-            copyExifAttributes(originalExif, newExif, width, height);
-
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage(), e);
-        } finally {
-            if (ins != null) {
-                try {
-                    ins.close();
-                } catch (IOException e) {
-                    Log.d(TAG, e.getMessage(), e);
-                }
+        /**
+         * Copy exif information from the file represented by imageInputUri into the file represented by imageOutputPath and
+         * overwrites it's width and height with the given ones.
+         *
+         * @param context The context from which to obtain a content resolver
+         * @param width output image new width
+         * @param height output image new height
+         * @param imageInputUri The {@link Uri} that represents the input file
+         * @param imageOutputPath The path to the output file
+         */
+        @JvmStatic
+        fun copyExif(context: Context?, width: Int, height: Int, imageInputUri: Uri, imageOutputPath: String) {
+            if (context == null) {
+                Log.d(TAG, "context is null")
+                return
             }
-            if (outFd != null) {
-                try {
-                    outFd.close();
-                } catch (IOException e) {
-                    Log.d(TAG, e.getMessage(), e);
-                }
+
+            var ins: InputStream? = null
+            try {
+                ins = context.contentResolver.openInputStream(imageInputUri)
+                val originalExif = ExifInterface(ins!!)
+                val newExif = ExifInterface(imageOutputPath)
+                copyExifAttributes(originalExif, newExif, width, height)
+            } catch (e: IOException) {
+                Log.d(TAG, e.message ?: "", e)
+            } finally {
+                ins?.close()
             }
         }
 
-    }
+        /**
+         * Copy exif information from the file represented by imageInputUri into the file represented by imageOutputUri and
+         * overwrites it's width and height with the given ones.
+         * This is done by {@link ExifInterface} through a seekable {@link FileDescriptor} and this is only possible
+         * starting on Lollipop version of Android.
+         *
+         * @param context The context from which to obtain a content resolver
+         * @param width output image new width
+         * @param height output image new height
+         * @param imageInputUri The {@link Uri} that represents the input file
+         * @param imageOutputUri The {@link Uri} that represents the output file
+         */
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+        @JvmStatic
+        fun copyExif(context: Context?, width: Int, height: Int, imageInputUri: Uri, imageOutputUri: Uri) {
+            if (context == null) {
+                Log.d(TAG, "context is null")
+                return
+            }
 
-    /**
-     * Copy exif information represented by originalExif into the file represented by imageOutputUri and overwrites it's
-     * width and height with the given ones.
-     * This is done by {@link ExifInterface} through a seekable {@link FileDescriptor} and this is only possible
-     * starting on Lollipop version of Android.
-     *
-     * @param context The context from which to obtain a content resolver
-     * @param originalExif The exif info from the original input file
-     * @param width output image new width
-     * @param height output image new height
-     * @param imageOutputUri The {@link Uri} that represents the output file
-     */
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void copyExif(Context context, ExifInterface originalExif, int width, int height, Uri imageOutputUri) {
-
-        if(context == null) {
-            Log.d(TAG, "context is null");
-            return;
-        }
-
-        ParcelFileDescriptor outFd = null;
-        try {
-
-            // In order to the ExifInterface be able to validate JPEG info from the file, the FileDescriptor must to be
-            // opened en "rw" (read and write) mode
-            outFd = context.getContentResolver().openFileDescriptor(imageOutputUri, "rw");
-            ExifInterface newExif = new ExifInterface(outFd.getFileDescriptor());
-
-            copyExifAttributes(originalExif, newExif, width, height);
-
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
-        } finally {
-            if (outFd != null) {
-                try {
-                    outFd.close();
-                } catch (IOException e) {
-                    Log.d(TAG, e.getMessage(), e);
-                }
+            var ins: InputStream? = null
+            var outFd: ParcelFileDescriptor? = null
+            try {
+                ins = context.contentResolver.openInputStream(imageInputUri)
+                val originalExif = ExifInterface(ins!!)
+                outFd = context.contentResolver.openFileDescriptor(imageOutputUri, "rw")
+                val newExif = ExifInterface(outFd!!.fileDescriptor)
+                copyExifAttributes(originalExif, newExif, width, height)
+            } catch (e: IOException) {
+                Log.d(TAG, e.message ?: "", e)
+            } finally {
+                ins?.close()
+                outFd?.close()
             }
         }
-    }
 
-    /**
-     * Copy Exif attributes from the originalExif to the newExif and overwrites it's width and height with the given ones.
-     *
-     * @param originalExif Original exif information
-     * @param newExif New exif information
-     * @param width Width for overwriting into the newExif
-     * @param height Height for overwriting into the newExif
-     * @throws IOException If it occurs some IO error while trying to save the new exif info.
-     */
-    private static void copyExifAttributes(ExifInterface originalExif, ExifInterface newExif, int width, int height) throws IOException {
+        /**
+         * Copy exif information represented by originalExif into the file represented by imageOutputUri and overwrites it's
+         * width and height with the given ones.
+         * This is done by {@link ExifInterface} through a seekable {@link FileDescriptor} and this is only possible
+         * starting on Lollipop version of Android.
+         *
+         * @param context The context from which to obtain a content resolver
+         * @param originalExif The exif info from the original input file
+         * @param width output image new width
+         * @param height output image new height
+         * @param imageOutputUri The {@link Uri} that represents the output file
+         */
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+        @JvmStatic
+        fun copyExif(context: Context?, originalExif: ExifInterface, width: Int, height: Int, imageOutputUri: Uri) {
+            if (context == null) {
+                Log.d(TAG, "context is null")
+                return
+            }
 
-        String[] attributes = new String[]{
+            var outFd: ParcelFileDescriptor? = null
+            try {
+                // In order to the ExifInterface be able to validate JPEG info from the file, the FileDescriptor must to be
+                // opened en "rw" (read and write) mode
+                outFd = context.contentResolver.openFileDescriptor(imageOutputUri, "rw")
+                val newExif = ExifInterface(outFd!!.fileDescriptor)
+                copyExifAttributes(originalExif, newExif, width, height)
+            } catch (e: IOException) {
+                Log.d(TAG, e.message ?: "")
+            } finally {
+                outFd?.close()
+            }
+        }
+
+        @Throws(IOException::class)
+        private fun copyExifAttributes(originalExif: ExifInterface, newExif: ExifInterface, width: Int, height: Int) {
+            val attributes = arrayOf(
                 ExifInterface.TAG_F_NUMBER,
                 ExifInterface.TAG_DATETIME,
                 ExifInterface.TAG_DATETIME_DIGITIZED,
@@ -568,20 +217,319 @@ public class ImageHeaderParser {
                 ExifInterface.TAG_SUBSEC_TIME_DIGITIZED,
                 ExifInterface.TAG_SUBSEC_TIME_ORIGINAL,
                 ExifInterface.TAG_WHITE_BALANCE
-        };
+            )
 
-        String value;
-        for (String attribute : attributes) {
-            value = originalExif.getAttribute(attribute);
-            if (!TextUtils.isEmpty(value)) {
-                newExif.setAttribute(attribute, value);
+            for (attribute in attributes) {
+                val value = originalExif.getAttribute(attribute)
+                if (!TextUtils.isEmpty(value)) {
+                    newExif.setAttribute(attribute, value)
+                }
+            }
+            newExif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, width.toString())
+            newExif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, height.toString())
+            newExif.setAttribute(ExifInterface.TAG_ORIENTATION, "0")
+            newExif.saveAttributes()
+        }
+    }
+
+    private val reader: Reader = StreamReader(inputStream)
+
+    /**
+     * Parse the orientation from the image header. If it doesn't handle this image type (or this is
+     * not an image) it will return a default value rather than throwing an exception.
+     *
+     * @return The exif orientation if present or -1 if the header couldn't be parsed or doesn't
+     * contain an orientation
+     * @throws IOException
+     */
+    @Throws(IOException::class)
+    fun getOrientation(): Int {
+        val magicNumber = reader.getUInt16()
+
+            if (!handles(magicNumber)) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Parser doesn't handle magic number: $magicNumber")
+                }
+                return UNKNOWN_ORIENTATION
+            } else {
+                val exifSegmentLength = moveToExifSegmentAndGetLength()
+                if (exifSegmentLength == -1) {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Failed to parse exif segment length, or exif segment not found")
+                    }
+                    return UNKNOWN_ORIENTATION
+                }
+
+                val exifData = ByteArray(exifSegmentLength)
+                return parseExifSegment(exifData, exifSegmentLength)
             }
         }
-        newExif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(width));
-        newExif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(height));
-        newExif.setAttribute(ExifInterface.TAG_ORIENTATION, "0");
 
-        newExif.saveAttributes();
+    @Throws(IOException::class)
+    private fun parseExifSegment(tempArray: ByteArray, exifSegmentLength: Int): Int {
+        val read = reader.read(tempArray, exifSegmentLength)
+        if (read != exifSegmentLength) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unable to read exif segment data" +
+                        ", length: $exifSegmentLength" +
+                        ", actually read: $read")
+            }
+            return UNKNOWN_ORIENTATION
+        }
+
+        val hasJpegExifPreamble = hasJpegExifPreamble(tempArray, exifSegmentLength)
+        return if (hasJpegExifPreamble) {
+            parseExifSegment(RandomAccessReader(tempArray, exifSegmentLength))
+        } else {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Missing jpeg exif preamble")
+            }
+            UNKNOWN_ORIENTATION
+        }
+    }
+
+    private fun hasJpegExifPreamble(exifData: ByteArray?, exifSegmentLength: Int): Boolean {
+        var result = exifData != null && exifSegmentLength > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.size
+        if (result) {
+            for (i in JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.indices) {
+                if (exifData!![i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
+                    result = false
+                    break
+                }
+            }
+        }
+        return result
+    }
+
+    /**
+     * Moves reader to the start of the exif segment and returns the length of the exif segment or
+     * {@code -1} if no exif segment is found.
+     */
+    @Throws(IOException::class)
+    private fun moveToExifSegmentAndGetLength(): Int {
+        while (true) {
+            val segmentId = reader.getUInt8().toInt()
+            if (segmentId != SEGMENT_START_ID) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Unknown segmentId=$segmentId")
+                }
+                return -1
+            }
+
+            val segmentType = reader.getUInt8().toInt()
+
+            if (segmentType == SEGMENT_SOS) {
+                return -1
+            } else if (segmentType == MARKER_EOI) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Found MARKER_EOI in exif segment")
+                }
+                return -1
+            }
+
+            // Segment length includes bytes for segment length.
+            val segmentLength = reader.getUInt16() - 2
+
+            if (segmentType != EXIF_SEGMENT_TYPE) {
+                val skipped = reader.skip(segmentLength.toLong())
+                if (skipped != segmentLength.toLong()) {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Unable to skip enough data" +
+                                ", type: $segmentType" +
+                                ", wanted to skip: $segmentLength" +
+                                ", but actually skipped: $skipped")
+                    }
+                    return -1
+                }
+            } else {
+                return segmentLength
+            }
+        }
+    }
+
+    private fun parseExifSegment(segmentData: RandomAccessReader): Int {
+        val headerOffsetSize = JPEG_EXIF_SEGMENT_PREAMBLE.length
+
+        val byteOrderIdentifier = segmentData.getInt16(headerOffsetSize).toInt()
+        val byteOrder = when {
+            byteOrderIdentifier == MOTOROLA_TIFF_MAGIC_NUMBER -> ByteOrder.BIG_ENDIAN
+            byteOrderIdentifier == INTEL_TIFF_MAGIC_NUMBER -> ByteOrder.LITTLE_ENDIAN
+            else -> {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Unknown endianness = $byteOrderIdentifier")
+                }
+                ByteOrder.BIG_ENDIAN
+            }
+        }
+
+        segmentData.order(byteOrder)
+
+        val firstIfdOffset = segmentData.getInt32(headerOffsetSize + 4) + headerOffsetSize
+        val tagCount = segmentData.getInt16(firstIfdOffset)
+
+        for (i in 0 until tagCount) {
+            val tagOffset = calcTagOffset(firstIfdOffset, i)
+            val tagType = segmentData.getInt16(tagOffset).toInt()
+
+            // We only want orientation.
+            if (tagType != ORIENTATION_TAG_TYPE) {
+                continue
+            }
+
+            val formatCode = segmentData.getInt16(tagOffset + 2).toInt()
+
+            // 12 is max format code.
+            if (formatCode < 1 || formatCode > 12) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Got invalid format code = $formatCode")
+                }
+                continue
+            }
+
+            val componentCount = segmentData.getInt32(tagOffset + 4)
+
+            if (componentCount < 0) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Negative tiff component count")
+                }
+                continue
+            }
+
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Got tagIndex=$i tagType=$tagType formatCode=$formatCode" +
+                        " componentCount=$componentCount")
+            }
+
+            val byteCount = componentCount + BYTES_PER_FORMAT[formatCode]
+
+            if (byteCount > 4) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=$formatCode")
+                }
+                continue
+            }
+
+            val tagValueOffset = tagOffset + 8
+
+            if (tagValueOffset < 0 || tagValueOffset > segmentData.length()) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Illegal tagValueOffset=$tagValueOffset tagType=$tagType")
+                }
+                continue
+            }
+
+            if (byteCount < 0 || tagValueOffset + byteCount > segmentData.length()) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "Illegal number of bytes for TI tag data tagType=$tagType")
+                }
+                continue
+            }
+
+            //assume componentCount == 1 && fmtCode == 3
+            return segmentData.getInt16(tagValueOffset).toInt()
+        }
+
+        return -1
+    }
+
+    private fun calcTagOffset(ifdOffset: Int, tagIndex: Int): Int {
+        return ifdOffset + 2 + 12 * tagIndex
+    }
+
+    private fun handles(imageMagicNumber: Int): Boolean {
+        return (imageMagicNumber and EXIF_MAGIC_NUMBER) == EXIF_MAGIC_NUMBER ||
+                imageMagicNumber == MOTOROLA_TIFF_MAGIC_NUMBER ||
+                imageMagicNumber == INTEL_TIFF_MAGIC_NUMBER
+    }
+
+    private class RandomAccessReader(data: ByteArray, length: Int) {
+        private val data = ByteBuffer.wrap(data)
+            .order(ByteOrder.BIG_ENDIAN)
+            .limit(length) as ByteBuffer
+
+        fun order(byteOrder: ByteOrder) {
+            this.data.order(byteOrder)
+        }
+
+        fun length(): Int {
+            return data.remaining()
+        }
+
+        fun getInt32(offset: Int): Int {
+            return data.getInt(offset)
+        }
+
+        fun getInt16(offset: Int): Short {
+            return data.getShort(offset)
+        }
+    }
+
+    private interface Reader {
+        @Throws(IOException::class)
+        fun getUInt16(): Int
+
+        @Throws(IOException::class)
+        fun getUInt8(): Short
+
+        @Throws(IOException::class)
+        fun skip(total: Long): Long
+
+        @Throws(IOException::class)
+        fun read(buffer: ByteArray, byteCount: Int): Int
+    }
+
+    private class StreamReader(private val inputStream: InputStream) : Reader {
+        // Motorola / big endian byte order.
+
+        @Throws(IOException::class)
+        override fun getUInt16(): Int {
+            return (inputStream.read() shl 8 and 0xFF00) or (inputStream.read() and 0xFF)
+        }
+
+        @Throws(IOException::class)
+        override fun getUInt8(): Short {
+            return (inputStream.read() and 0xFF).toShort()
+        }
+
+        @Throws(IOException::class)
+        override fun skip(total: Long): Long {
+            if (total < 0) {
+                return 0
+            }
+
+            var toSkip = total
+            while (toSkip > 0) {
+                val skipped = inputStream.skip(toSkip)
+                if (skipped > 0) {
+                    toSkip -= skipped
+                } else {
+                    // Skip has no specific contract as to what happens when you reach the end of
+                    // the stream. To differentiate between temporarily not having more data and
+                    // having finished the stream, we read a single byte when we fail to skip any
+                    // amount of data.
+                    val testEofByte = inputStream.read()
+                    if (testEofByte == -1) {
+                        break
+                    } else {
+                        toSkip--
+                    }
+                }
+            }
+            return total - toSkip
+        }
+
+        @Throws(IOException::class)
+        override fun read(buffer: ByteArray, byteCount: Int): Int {
+            var toRead = byteCount
+            var read = 0
+            while (toRead > 0) {
+                val result = inputStream.read(buffer, byteCount - toRead, toRead)
+                if (result == -1) break
+                read = result
+                toRead -= read
+            }
+            return byteCount - toRead
+        }
     }
 
 }

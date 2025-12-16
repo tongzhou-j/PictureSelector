@@ -1,67 +1,42 @@
-package com.yalantis.ucrop.model;
+package com.yalantis.ucrop.model
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.Nullable;
+import android.os.Parcel
+import android.os.Parcelable
+import androidx.annotation.Nullable
 
 /**
  * Created by Oleksii Shliama [https://github.com/shliama] on 6/24/16.
  */
-public class AspectRatio implements Parcelable {
+class AspectRatio(
+    @Nullable val aspectRatioTitle: String?,
+    val aspectRatioX: Float,
+    val aspectRatioY: Float
+) : Parcelable {
 
-    @Nullable
-    private final String mAspectRatioTitle;
-    private final float mAspectRatioX;
-    private final float mAspectRatioY;
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readFloat(),
+        parcel.readFloat()
+    )
 
-    public AspectRatio(@Nullable String aspectRatioTitle, float aspectRatioX, float aspectRatioY) {
-        mAspectRatioTitle = aspectRatioTitle;
-        mAspectRatioX = aspectRatioX;
-        mAspectRatioY = aspectRatioY;
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(aspectRatioTitle)
+        parcel.writeFloat(aspectRatioX)
+        parcel.writeFloat(aspectRatioY)
     }
 
-    protected AspectRatio(Parcel in) {
-        mAspectRatioTitle = in.readString();
-        mAspectRatioX = in.readFloat();
-        mAspectRatioY = in.readFloat();
+    override fun describeContents(): Int {
+        return 0
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mAspectRatioTitle);
-        dest.writeFloat(mAspectRatioX);
-        dest.writeFloat(mAspectRatioY);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<AspectRatio> CREATOR = new Creator<AspectRatio>() {
-        @Override
-        public AspectRatio createFromParcel(Parcel in) {
-            return new AspectRatio(in);
+    companion object CREATOR : Parcelable.Creator<AspectRatio> {
+        override fun createFromParcel(parcel: Parcel): AspectRatio {
+            return AspectRatio(parcel)
         }
 
-        @Override
-        public AspectRatio[] newArray(int size) {
-            return new AspectRatio[size];
+        override fun newArray(size: Int): Array<AspectRatio?> {
+            return arrayOfNulls(size)
         }
-    };
-
-    @Nullable
-    public String getAspectRatioTitle() {
-        return mAspectRatioTitle;
     }
-
-    public float getAspectRatioX() {
-        return mAspectRatioX;
-    }
-
-    public float getAspectRatioY() {
-        return mAspectRatioY;
-    }
-
 }
+
