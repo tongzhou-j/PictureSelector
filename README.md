@@ -38,13 +38,13 @@ dependencies {
   implementation 'com.github.tongzhou-j:pictureselector:v1.0.6'
 
   // image compress library (Not necessary)
-  implementation 'io.github.lucksiege:compress:v3.11.2'
+  implementation 'io.github.tongzhou-j:compress:v3.11.2'
 
   // uCrop library (Not necessary)
-  implementation 'io.github.lucksiege:ucrop:v3.11.2'
+  implementation 'io.github.tongzhou-j:ucrop:v3.11.2'
 
   // simple camerax library (Not necessary)
-  implementation 'io.github.lucksiege:camerax:v3.11.2'
+  implementation 'io.github.tongzhou-j:camerax:v3.11.2'
 }
 ```
 
@@ -53,7 +53,7 @@ Kotlin Version [Demo](https://github.com/tongzhou-j/PictureSelector/tree/master)
 ```sh
 dependencies {
   // Please do not upgrade across versions, please check the Kotlin version demo first
-  implementation 'io.github.lucksiege:pictureselector:kotlin-v1.0.0-beta'
+  implementation 'io.github.tongzhou-j:pictureselector:kotlin-v1.0.0-beta'
 }
 ```
 
@@ -67,19 +67,19 @@ Or Maven:
 </dependency>
 
 <dependency>
-  <groupId>io.github.lucksiege</groupId>
+  <groupId>io.github.tongzhou-j</groupId>
   <artifactId>compress</artifactId>
   <version>v3.11.2</version>
 </dependency>
 
 <dependency>
-  <groupId>io.github.lucksiege</groupId>
+  <groupId>io.github.tongzhou-j</groupId>
   <artifactId>ucrop</artifactId>
   <version>v3.11.2</version>
 </dependency>
 
 <dependency>
-  <groupId>io.github.lucksiege</groupId>
+  <groupId>io.github.tongzhou-j</groupId>
   <artifactId>camerax</artifactId>
   <version>v3.11.2</version>
 </dependency>
