@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.player
 
-import android.graphics.Rect;
-import java.lang.String;
+import android.graphics.Rect
 
-public final class IjkTimedText {
-
-    private Rect mTextBounds = null;
-    private String mTextChars = null;
-
-    public IjkTimedText(Rect bounds, String text) {
-        mTextBounds = bounds;
-        mTextChars = text;
+class IjkTimedText(
+    private val mTextBounds: Rect?,
+    private val mTextChars: String?
+) {
+    fun getBounds(): Rect? {
+        return mTextBounds
     }
 
-    public Rect getBounds() {
-        return mTextBounds;
-    }
-
-    public String getText() {
-        return mTextChars;
+    fun getText(): String? {
+        return mTextChars
     }
 }
+

@@ -44,15 +44,19 @@ class IjkPlayerView @JvmOverloads constructor(
         if (_mediaPlayer == null) {
             _mediaPlayer = IjkMediaPlayer()
         }
-        _mediaPlayer!!.setOnVideoSizeChangedListener { mp: IMediaPlayer, width: Int, height: Int, sarNum: Int, sarDen: Int ->
-            textureView.adjustVideoSize(width, height, mVideoRotation)
-        }
-        _mediaPlayer!!.setOnInfoListener { mp: IMediaPlayer, what: Int, extra: Int ->
-            if (what == 10001) {
-                mVideoRotation = extra
+        _mediaPlayer!!.setOnVideoSizeChangedListener(object : IMediaPlayer.OnVideoSizeChangedListener {
+            override fun onVideoSizeChanged(mp: IMediaPlayer, width: Int, height: Int, sarNum: Int, sarDen: Int) {
+                textureView.adjustVideoSize(width, height, mVideoRotation)
             }
-            false
-        }
+        })
+        _mediaPlayer!!.setOnInfoListener(object : IMediaPlayer.OnInfoListener {
+            override fun onInfo(mp: IMediaPlayer, what: Int, extra: Int): Boolean {
+                if (what == 10001) {
+                    mVideoRotation = extra
+                }
+                return false
+            }
+        })
         _mediaPlayer!!.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1)
         return _mediaPlayer!!
     }

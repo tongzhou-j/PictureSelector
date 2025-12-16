@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package tv.danmaku.ijk.media.player.pragma;
+package tv.danmaku.ijk.media.player.pragma
 
 /*-
  * configurated by app project
  */
-public class Pragma {
-    public static final boolean ENABLE_VERBOSE = true;
+object Pragma {
+    const val ENABLE_VERBOSE = true
 }
+

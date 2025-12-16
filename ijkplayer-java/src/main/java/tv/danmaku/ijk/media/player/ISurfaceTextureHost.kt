@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.player
 
-import android.graphics.SurfaceTexture;
+import android.graphics.SurfaceTexture
 
-public interface ISurfaceTextureHost {
-    void releaseSurfaceTexture(SurfaceTexture surfaceTexture);
+interface ISurfaceTextureHost {
+    fun releaseSurfaceTexture(surfaceTexture: SurfaceTexture?)
 }
+

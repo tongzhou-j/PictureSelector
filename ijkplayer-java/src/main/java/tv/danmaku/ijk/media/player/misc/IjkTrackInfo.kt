@@ -15,85 +15,76 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player.misc;
+package tv.danmaku.ijk.media.player.misc
 
-import android.text.TextUtils;
+import android.text.TextUtils
+import tv.danmaku.ijk.media.player.IjkMediaMeta
 
-import tv.danmaku.ijk.media.player.IjkMediaMeta;
+class IjkTrackInfo(private var mStreamMeta: IjkMediaMeta.IjkStreamMeta?) : ITrackInfo {
+    private var mTrackType = ITrackInfo.MEDIA_TRACK_TYPE_UNKNOWN
 
-public class IjkTrackInfo implements ITrackInfo {
-    private int mTrackType = MEDIA_TRACK_TYPE_UNKNOWN;
-    private IjkMediaMeta.IjkStreamMeta mStreamMeta;
-
-    public IjkTrackInfo(IjkMediaMeta.IjkStreamMeta streamMeta) {
-        mStreamMeta = streamMeta;
+    fun setMediaMeta(streamMeta: IjkMediaMeta.IjkStreamMeta?) {
+        mStreamMeta = streamMeta
     }
 
-    public void setMediaMeta(IjkMediaMeta.IjkStreamMeta streamMeta) {
-        mStreamMeta = streamMeta;
+    override fun getFormat(): IMediaFormat {
+        return IjkMediaFormat(mStreamMeta!!)
     }
 
-    @Override
-    public IMediaFormat getFormat() {
-        return new IjkMediaFormat(mStreamMeta);
-    }
-
-    @Override
-    public String getLanguage() {
-        if (mStreamMeta == null || TextUtils.isEmpty(mStreamMeta.mLanguage))
-            return "und";
-
-        return mStreamMeta.mLanguage;
-    }
-
-    @Override
-    public int getTrackType() {
-        return mTrackType;
-    }
-
-    public void setTrackType(int trackType) {
-        mTrackType = trackType;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '{' + getInfoInline() + "}";
-    }
-
-    @Override
-    public String getInfoInline() {
-        StringBuilder out = new StringBuilder(128);
-        switch (mTrackType) {
-            case MEDIA_TRACK_TYPE_VIDEO:
-                out.append("VIDEO");
-                out.append(", ");
-                out.append(mStreamMeta.getCodecShortNameInline());
-                out.append(", ");
-                out.append(mStreamMeta.getBitrateInline());
-                out.append(", ");
-                out.append(mStreamMeta.getResolutionInline());
-                break;
-            case MEDIA_TRACK_TYPE_AUDIO:
-                out.append("AUDIO");
-                out.append(", ");
-                out.append(mStreamMeta.getCodecShortNameInline());
-                out.append(", ");
-                out.append(mStreamMeta.getBitrateInline());
-                out.append(", ");
-                out.append(mStreamMeta.getSampleRateInline());
-                break;
-            case MEDIA_TRACK_TYPE_TIMEDTEXT:
-                out.append("TIMEDTEXT");
-                out.append(", ");
-                out.append(mStreamMeta.mLanguage);
-                break;
-            case MEDIA_TRACK_TYPE_SUBTITLE:
-                out.append("SUBTITLE");
-                break;
-            default:
-                out.append("UNKNOWN");
-                break;
+    override fun getLanguage(): String? {
+        return if (mStreamMeta == null || TextUtils.isEmpty(mStreamMeta!!.mLanguage)) {
+            "und"
+        } else {
+            mStreamMeta!!.mLanguage
         }
-        return out.toString();
+    }
+
+    override fun getTrackType(): Int {
+        return mTrackType
+    }
+
+    fun setTrackType(trackType: Int) {
+        mTrackType = trackType
+    }
+
+    override fun toString(): String {
+        return javaClass.simpleName + '{' + getInfoInline() + "}"
+    }
+
+    override fun getInfoInline(): String? {
+        val out = StringBuilder(128)
+        when (mTrackType) {
+            ITrackInfo.MEDIA_TRACK_TYPE_VIDEO -> {
+                out.append("VIDEO")
+                out.append(", ")
+                out.append(mStreamMeta!!.getCodecShortNameInline())
+                out.append(", ")
+                out.append(mStreamMeta!!.getBitrateInline())
+                out.append(", ")
+                out.append(mStreamMeta!!.getResolutionInline())
+            }
+            ITrackInfo.MEDIA_TRACK_TYPE_AUDIO -> {
+                out.append("AUDIO")
+                out.append(", ")
+                out.append(mStreamMeta!!.getCodecShortNameInline())
+                out.append(", ")
+                out.append(mStreamMeta!!.getBitrateInline())
+                out.append(", ")
+                out.append(mStreamMeta!!.getSampleRateInline())
+            }
+            ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT -> {
+                out.append("TIMEDTEXT")
+                out.append(", ")
+                out.append(mStreamMeta!!.mLanguage)
+            }
+            ITrackInfo.MEDIA_TRACK_TYPE_SUBTITLE -> {
+                out.append("SUBTITLE")
+            }
+            else -> {
+                out.append("UNKNOWN")
+            }
+        }
+        return out.toString()
     }
 }
+

@@ -31,7 +31,7 @@ class IjkPlayerEngine : VideoPlayerEngine<IjkPlayerView> {
         val mediaPlayer = player?.mediaPlayer ?: return
         val path = media?.availablePath ?: return
         val config = SelectorProviders.instance?.selectorConfig
-        mediaPlayer.isLooping = config?.isLoopAutoPlay ?: false
+        mediaPlayer.setLooping(config?.isLoopAutoPlay ?: false)
         player.start(path)
     }
 
@@ -47,7 +47,7 @@ class IjkPlayerEngine : VideoPlayerEngine<IjkPlayerView> {
 
     override fun isPlaying(player: IjkPlayerView?): Boolean {
         val mediaPlayer = player?.mediaPlayer
-        return mediaPlayer != null && mediaPlayer.isPlaying
+        return mediaPlayer != null && mediaPlayer.isPlaying()
     }
 
     override fun addPlayListener(playerListener: OnPlayerListener?) {
@@ -66,29 +66,35 @@ class IjkPlayerEngine : VideoPlayerEngine<IjkPlayerView> {
 
     override fun onPlayerAttachedToWindow(player: IjkPlayerView?) {
         val mediaPlayer = player?.initMediaPlayer() ?: return
-        mediaPlayer.setOnPreparedListener { mp ->
-            mp.start()
-            for (i in listeners.indices) {
-                val playerListener = listeners[i]
-                playerListener.onPlayerReady()
+        mediaPlayer.setOnPreparedListener(object : IMediaPlayer.OnPreparedListener {
+            override fun onPrepared(mp: IMediaPlayer) {
+                mp.start()
+                for (i in listeners.indices) {
+                    val playerListener = listeners[i]
+                    playerListener.onPlayerReady()
+                }
             }
-        }
-        mediaPlayer.setOnCompletionListener { mp ->
-            mp.reset()
-            for (i in listeners.indices) {
-                val playerListener = listeners[i]
-                playerListener.onPlayerEnd()
+        })
+        mediaPlayer.setOnCompletionListener(object : IMediaPlayer.OnCompletionListener {
+            override fun onCompletion(mp: IMediaPlayer) {
+                mp.reset()
+                for (i in listeners.indices) {
+                    val playerListener = listeners[i]
+                    playerListener.onPlayerEnd()
+                }
+                player.clearCanvas()
             }
-            player.clearCanvas()
-        }
+        })
 
-        mediaPlayer.setOnErrorListener { _, what, extra ->
-            for (i in listeners.indices) {
-                val playerListener = listeners[i]
-                playerListener.onPlayerError()
+        mediaPlayer.setOnErrorListener(object : IMediaPlayer.OnErrorListener {
+            override fun onError(mp: IMediaPlayer, what: Int, extra: Int): Boolean {
+                for (i in listeners.indices) {
+                    val playerListener = listeners[i]
+                    playerListener.onPlayerError()
+                }
+                return false
             }
-            false
-        }
+        })
     }
 
     override fun onPlayerDetachedFromWindow(player: IjkPlayerView?) {

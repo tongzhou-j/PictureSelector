@@ -15,107 +15,98 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.player
 
-import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource
 
-@SuppressWarnings("WeakerAccess")
-public abstract class AbstractMediaPlayer implements IMediaPlayer {
-    private OnPreparedListener mOnPreparedListener;
-    private OnCompletionListener mOnCompletionListener;
-    private OnBufferingUpdateListener mOnBufferingUpdateListener;
-    private OnSeekCompleteListener mOnSeekCompleteListener;
-    private OnVideoSizeChangedListener mOnVideoSizeChangedListener;
-    private OnErrorListener mOnErrorListener;
-    private OnInfoListener mOnInfoListener;
-    private OnTimedTextListener mOnTimedTextListener;
+@Suppress("WeakerAccess")
+abstract class AbstractMediaPlayer : IMediaPlayer {
+    private var mOnPreparedListener: IMediaPlayer.OnPreparedListener? = null
+    private var mOnCompletionListener: IMediaPlayer.OnCompletionListener? = null
+    private var mOnBufferingUpdateListener: IMediaPlayer.OnBufferingUpdateListener? = null
+    private var mOnSeekCompleteListener: IMediaPlayer.OnSeekCompleteListener? = null
+    private var mOnVideoSizeChangedListener: IMediaPlayer.OnVideoSizeChangedListener? = null
+    private var mOnErrorListener: IMediaPlayer.OnErrorListener? = null
+    private var mOnInfoListener: IMediaPlayer.OnInfoListener? = null
+    private var mOnTimedTextListener: IMediaPlayer.OnTimedTextListener? = null
 
-    public final void setOnPreparedListener(OnPreparedListener listener) {
-        mOnPreparedListener = listener;
+    final override fun setOnPreparedListener(listener: IMediaPlayer.OnPreparedListener?) {
+        mOnPreparedListener = listener
     }
 
-    public final void setOnCompletionListener(OnCompletionListener listener) {
-        mOnCompletionListener = listener;
+    final override fun setOnCompletionListener(listener: IMediaPlayer.OnCompletionListener?) {
+        mOnCompletionListener = listener
     }
 
-    public final void setOnBufferingUpdateListener(
-            OnBufferingUpdateListener listener) {
-        mOnBufferingUpdateListener = listener;
+    final override fun setOnBufferingUpdateListener(listener: IMediaPlayer.OnBufferingUpdateListener?) {
+        mOnBufferingUpdateListener = listener
     }
 
-    public final void setOnSeekCompleteListener(OnSeekCompleteListener listener) {
-        mOnSeekCompleteListener = listener;
+    final override fun setOnSeekCompleteListener(listener: IMediaPlayer.OnSeekCompleteListener?) {
+        mOnSeekCompleteListener = listener
     }
 
-    public final void setOnVideoSizeChangedListener(
-            OnVideoSizeChangedListener listener) {
-        mOnVideoSizeChangedListener = listener;
+    final override fun setOnVideoSizeChangedListener(listener: IMediaPlayer.OnVideoSizeChangedListener?) {
+        mOnVideoSizeChangedListener = listener
     }
 
-    public final void setOnErrorListener(OnErrorListener listener) {
-        mOnErrorListener = listener;
+    final override fun setOnErrorListener(listener: IMediaPlayer.OnErrorListener?) {
+        mOnErrorListener = listener
     }
 
-    public final void setOnInfoListener(OnInfoListener listener) {
-        mOnInfoListener = listener;
+    final override fun setOnInfoListener(listener: IMediaPlayer.OnInfoListener?) {
+        mOnInfoListener = listener
     }
 
-    public final void setOnTimedTextListener(OnTimedTextListener listener) {
-        mOnTimedTextListener = listener;
+    final override fun setOnTimedTextListener(listener: IMediaPlayer.OnTimedTextListener?) {
+        mOnTimedTextListener = listener
     }
 
-    public void resetListeners() {
-        mOnPreparedListener = null;
-        mOnBufferingUpdateListener = null;
-        mOnCompletionListener = null;
-        mOnSeekCompleteListener = null;
-        mOnVideoSizeChangedListener = null;
-        mOnErrorListener = null;
-        mOnInfoListener = null;
-        mOnTimedTextListener = null;
+    open fun resetListeners() {
+        mOnPreparedListener = null
+        mOnBufferingUpdateListener = null
+        mOnCompletionListener = null
+        mOnSeekCompleteListener = null
+        mOnVideoSizeChangedListener = null
+        mOnErrorListener = null
+        mOnInfoListener = null
+        mOnTimedTextListener = null
     }
 
-    protected final void notifyOnPrepared() {
-        if (mOnPreparedListener != null)
-            mOnPreparedListener.onPrepared(this);
+    protected fun notifyOnPrepared() {
+        mOnPreparedListener?.onPrepared(this)
     }
 
-    protected final void notifyOnCompletion() {
-        if (mOnCompletionListener != null)
-            mOnCompletionListener.onCompletion(this);
+    protected fun notifyOnCompletion() {
+        mOnCompletionListener?.onCompletion(this)
     }
 
-    protected final void notifyOnBufferingUpdate(int percent) {
-        if (mOnBufferingUpdateListener != null)
-            mOnBufferingUpdateListener.onBufferingUpdate(this, percent);
+    protected fun notifyOnBufferingUpdate(percent: Int) {
+        mOnBufferingUpdateListener?.onBufferingUpdate(this, percent)
     }
 
-    protected final void notifyOnSeekComplete() {
-        if (mOnSeekCompleteListener != null)
-            mOnSeekCompleteListener.onSeekComplete(this);
+    protected fun notifyOnSeekComplete() {
+        mOnSeekCompleteListener?.onSeekComplete(this)
     }
 
-    protected final void notifyOnVideoSizeChanged(int width, int height,
-                                                  int sarNum, int sarDen) {
-        if (mOnVideoSizeChangedListener != null)
-            mOnVideoSizeChangedListener.onVideoSizeChanged(this, width, height,
-                    sarNum, sarDen);
+    protected fun notifyOnVideoSizeChanged(width: Int, height: Int, sarNum: Int, sarDen: Int) {
+        mOnVideoSizeChangedListener?.onVideoSizeChanged(this, width, height, sarNum, sarDen)
     }
 
-    protected final boolean notifyOnError(int what, int extra) {
-        return mOnErrorListener != null && mOnErrorListener.onError(this, what, extra);
+    protected fun notifyOnError(what: Int, extra: Int): Boolean {
+        return mOnErrorListener?.onError(this, what, extra) ?: false
     }
 
-    protected final boolean notifyOnInfo(int what, int extra) {
-        return mOnInfoListener != null && mOnInfoListener.onInfo(this, what, extra);
+    protected fun notifyOnInfo(what: Int, extra: Int): Boolean {
+        return mOnInfoListener?.onInfo(this, what, extra) ?: false
     }
 
-    protected final void notifyOnTimedText(IjkTimedText text) {
-        if (mOnTimedTextListener != null)
-            mOnTimedTextListener.onTimedText(this, text);
+    protected fun notifyOnTimedText(text: IjkTimedText?) {
+        mOnTimedTextListener?.onTimedText(this, text)
     }
 
-    public void setDataSource(IMediaDataSource mediaDataSource) {
-        throw new UnsupportedOperationException();
+    override fun setDataSource(mediaDataSource: IMediaDataSource?) {
+        throw UnsupportedOperationException()
     }
 }
+

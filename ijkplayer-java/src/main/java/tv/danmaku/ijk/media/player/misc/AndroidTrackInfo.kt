@@ -15,95 +15,75 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player.misc;
+package tv.danmaku.ijk.media.player.misc
 
-import android.annotation.TargetApi;
-import android.media.MediaFormat;
-import android.media.MediaPlayer;
-import android.os.Build;
+import android.annotation.TargetApi
+import android.media.MediaPlayer
+import android.os.Build
 
-public class AndroidTrackInfo implements ITrackInfo {
-    private final MediaPlayer.TrackInfo mTrackInfo;
-
-    public static AndroidTrackInfo[] fromMediaPlayer(MediaPlayer mp) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-            return fromTrackInfo(mp.getTrackInfo());
-
-        return null;
-    }
-
-    private static AndroidTrackInfo[] fromTrackInfo(MediaPlayer.TrackInfo[] trackInfos) {
-        if (trackInfos == null)
-            return null;
-
-        AndroidTrackInfo androidTrackInfo[] = new AndroidTrackInfo[trackInfos.length];
-        for (int i = 0; i < trackInfos.length; ++i) {
-            androidTrackInfo[i] = new AndroidTrackInfo(trackInfos[i]);
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+class AndroidTrackInfo(private val mTrackInfo: MediaPlayer.TrackInfo?) : ITrackInfo {
+    companion object {
+        @JvmStatic
+        fun fromMediaPlayer(mp: MediaPlayer): Array<AndroidTrackInfo>? {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                fromTrackInfo(mp.trackInfo)
+            } else {
+                null
+            }
         }
 
-        return androidTrackInfo;
-    }
+        private fun fromTrackInfo(trackInfos: Array<MediaPlayer.TrackInfo>?): Array<AndroidTrackInfo>? {
+            if (trackInfos == null) return null
 
-    private AndroidTrackInfo(MediaPlayer.TrackInfo trackInfo) {
-        mTrackInfo = trackInfo;
+            val androidTrackInfo = Array(trackInfos.size) { i ->
+                AndroidTrackInfo(trackInfos[i])
+            }
+            return androidTrackInfo
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    @Override
-    public IMediaFormat getFormat() {
-        if (mTrackInfo == null)
-            return null;
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT)
-            return null;
-
-        MediaFormat mediaFormat = mTrackInfo.getFormat();
-        if (mediaFormat == null)
-            return null;
-
-        return new AndroidMediaFormat(mediaFormat);
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public String getLanguage() {
-        if (mTrackInfo == null)
-            return "und";
-
-        return mTrackInfo.getLanguage();
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public int getTrackType() {
-        if (mTrackInfo == null)
-            return MEDIA_TRACK_TYPE_UNKNOWN;
-
-        return mTrackInfo.getTrackType();
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public String toString() {
-        StringBuilder out = new StringBuilder(128);
-        out.append(getClass().getSimpleName());
-        out.append('{');
-        if (mTrackInfo != null) {
-            out.append(mTrackInfo.toString());
-        } else {
-            out.append("null");
+    override fun getFormat(): IMediaFormat {
+        if (mTrackInfo == null) {
+            throw IllegalStateException("TrackInfo is null")
         }
-        out.append('}');
-        return out.toString();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            throw IllegalStateException("API level too low")
+        }
+
+        val mediaFormat = mTrackInfo!!.format ?: throw IllegalStateException("MediaFormat is null")
+        return AndroidMediaFormat(mediaFormat)
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public String getInfoInline() {
+    override fun getLanguage(): String? {
+        return mTrackInfo?.language ?: "und"
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    override fun getTrackType(): Int {
+        return mTrackInfo?.trackType ?: ITrackInfo.MEDIA_TRACK_TYPE_UNKNOWN
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    override fun toString(): String {
+        val out = StringBuilder(128)
+        out.append(javaClass.simpleName)
+        out.append('{')
         if (mTrackInfo != null) {
-            return mTrackInfo.toString();
+            out.append(mTrackInfo.toString())
         } else {
-            return "null";
+            out.append("null")
         }
+        out.append('}')
+        return out.toString()
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    override fun getInfoInline(): String {
+        return mTrackInfo?.toString() ?: "null"
     }
 }
+

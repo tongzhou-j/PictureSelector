@@ -1,401 +1,405 @@
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.player
 
-import android.os.Bundle;
-import android.text.TextUtils;
+import android.os.Bundle
+import android.text.TextUtils
+import kotlin.jvm.JvmField
+import java.util.ArrayList
+import java.util.Locale
 
-import java.util.ArrayList;
-import java.util.Locale;
+@Suppress("SameParameterValue")
+class IjkMediaMeta {
+    companion object {
+        // media meta
+        const val IJKM_KEY_FORMAT = "format"
+        const val IJKM_KEY_DURATION_US = "duration_us"
+        const val IJKM_KEY_START_US = "start_us"
+        const val IJKM_KEY_BITRATE = "bitrate"
+        const val IJKM_KEY_VIDEO_STREAM = "video"
+        const val IJKM_KEY_AUDIO_STREAM = "audio"
+        const val IJKM_KEY_TIMEDTEXT_STREAM = "timedtext"
 
-@SuppressWarnings("SameParameterValue")
-public class IjkMediaMeta {
-    // media meta
-    public static final String IJKM_KEY_FORMAT = "format";
-    public static final String IJKM_KEY_DURATION_US = "duration_us";
-    public static final String IJKM_KEY_START_US = "start_us";
-    public static final String IJKM_KEY_BITRATE = "bitrate";
-    public static final String IJKM_KEY_VIDEO_STREAM = "video";
-    public static final String IJKM_KEY_AUDIO_STREAM = "audio";
-    public static final String IJKM_KEY_TIMEDTEXT_STREAM = "timedtext";
+        // stream meta
+        const val IJKM_KEY_TYPE = "type"
+        const val IJKM_VAL_TYPE__VIDEO = "video"
+        const val IJKM_VAL_TYPE__AUDIO = "audio"
+        const val IJKM_VAL_TYPE__TIMEDTEXT = "timedtext"
+        const val IJKM_VAL_TYPE__UNKNOWN = "unknown"
+        const val IJKM_KEY_LANGUAGE = "language"
 
-    // stream meta
-    public static final String IJKM_KEY_TYPE = "type";
-    public static final String IJKM_VAL_TYPE__VIDEO = "video";
-    public static final String IJKM_VAL_TYPE__AUDIO = "audio";
-    public static final String IJKM_VAL_TYPE__TIMEDTEXT = "timedtext";
-    public static final String IJKM_VAL_TYPE__UNKNOWN = "unknown";
-    public static final String IJKM_KEY_LANGUAGE = "language";
+        const val IJKM_KEY_CODEC_NAME = "codec_name"
+        const val IJKM_KEY_CODEC_PROFILE = "codec_profile"
+        const val IJKM_KEY_CODEC_LEVEL = "codec_level"
+        const val IJKM_KEY_CODEC_LONG_NAME = "codec_long_name"
+        const val IJKM_KEY_CODEC_PIXEL_FORMAT = "codec_pixel_format"
+        const val IJKM_KEY_CODEC_PROFILE_ID = "codec_profile_id"
 
-    public static final String IJKM_KEY_CODEC_NAME = "codec_name";
-    public static final String IJKM_KEY_CODEC_PROFILE = "codec_profile";
-    public static final String IJKM_KEY_CODEC_LEVEL = "codec_level";
-    public static final String IJKM_KEY_CODEC_LONG_NAME = "codec_long_name";
-    public static final String IJKM_KEY_CODEC_PIXEL_FORMAT = "codec_pixel_format";
-    public static final String IJKM_KEY_CODEC_PROFILE_ID = "codec_profile_id";
+        // stream: video
+        const val IJKM_KEY_WIDTH = "width"
+        const val IJKM_KEY_HEIGHT = "height"
+        const val IJKM_KEY_FPS_NUM = "fps_num"
+        const val IJKM_KEY_FPS_DEN = "fps_den"
+        const val IJKM_KEY_TBR_NUM = "tbr_num"
+        const val IJKM_KEY_TBR_DEN = "tbr_den"
+        const val IJKM_KEY_SAR_NUM = "sar_num"
+        const val IJKM_KEY_SAR_DEN = "sar_den"
+        // stream: audio
+        const val IJKM_KEY_SAMPLE_RATE = "sample_rate"
+        const val IJKM_KEY_CHANNEL_LAYOUT = "channel_layout"
 
-    // stream: video
-    public static final String IJKM_KEY_WIDTH = "width";
-    public static final String IJKM_KEY_HEIGHT = "height";
-    public static final String IJKM_KEY_FPS_NUM = "fps_num";
-    public static final String IJKM_KEY_FPS_DEN = "fps_den";
-    public static final String IJKM_KEY_TBR_NUM = "tbr_num";
-    public static final String IJKM_KEY_TBR_DEN = "tbr_den";
-    public static final String IJKM_KEY_SAR_NUM = "sar_num";
-    public static final String IJKM_KEY_SAR_DEN = "sar_den";
-    // stream: audio
-    public static final String IJKM_KEY_SAMPLE_RATE = "sample_rate";
-    public static final String IJKM_KEY_CHANNEL_LAYOUT = "channel_layout";
+        const val IJKM_KEY_STREAMS = "streams"
 
-    public static final String IJKM_KEY_STREAMS = "streams";
+        const val AV_CH_FRONT_LEFT = 0x00000001L
+        const val AV_CH_FRONT_RIGHT = 0x00000002L
+        const val AV_CH_FRONT_CENTER = 0x00000004L
+        const val AV_CH_LOW_FREQUENCY = 0x00000008L
+        const val AV_CH_BACK_LEFT = 0x00000010L
+        const val AV_CH_BACK_RIGHT = 0x00000020L
+        const val AV_CH_FRONT_LEFT_OF_CENTER = 0x00000040L
+        const val AV_CH_FRONT_RIGHT_OF_CENTER = 0x00000080L
+        const val AV_CH_BACK_CENTER = 0x00000100L
+        const val AV_CH_SIDE_LEFT = 0x00000200L
+        const val AV_CH_SIDE_RIGHT = 0x00000400L
+        const val AV_CH_TOP_CENTER = 0x00000800L
+        const val AV_CH_TOP_FRONT_LEFT = 0x00001000L
+        const val AV_CH_TOP_FRONT_CENTER = 0x00002000L
+        const val AV_CH_TOP_FRONT_RIGHT = 0x00004000L
+        const val AV_CH_TOP_BACK_LEFT = 0x00008000L
+        const val AV_CH_TOP_BACK_CENTER = 0x00010000L
+        const val AV_CH_TOP_BACK_RIGHT = 0x00020000L
+        const val AV_CH_STEREO_LEFT = 0x20000000L
+        const val AV_CH_STEREO_RIGHT = 0x40000000L
+        const val AV_CH_WIDE_LEFT = 0x0000000080000000L
+        const val AV_CH_WIDE_RIGHT = 0x0000000100000000L
+        const val AV_CH_SURROUND_DIRECT_LEFT = 0x0000000200000000L
+        const val AV_CH_SURROUND_DIRECT_RIGHT = 0x0000000400000000L
+        const val AV_CH_LOW_FREQUENCY_2 = 0x0000000800000000L
 
-    public static final long AV_CH_FRONT_LEFT = 0x00000001;
-    public static final long AV_CH_FRONT_RIGHT = 0x00000002;
-    public static final long AV_CH_FRONT_CENTER = 0x00000004;
-    public static final long AV_CH_LOW_FREQUENCY = 0x00000008;
-    public static final long AV_CH_BACK_LEFT = 0x00000010;
-    public static final long AV_CH_BACK_RIGHT = 0x00000020;
-    public static final long AV_CH_FRONT_LEFT_OF_CENTER = 0x00000040;
-    public static final long AV_CH_FRONT_RIGHT_OF_CENTER = 0x00000080;
-    public static final long AV_CH_BACK_CENTER = 0x00000100;
-    public static final long AV_CH_SIDE_LEFT = 0x00000200;
-    public static final long AV_CH_SIDE_RIGHT = 0x00000400;
-    public static final long AV_CH_TOP_CENTER = 0x00000800;
-    public static final long AV_CH_TOP_FRONT_LEFT = 0x00001000;
-    public static final long AV_CH_TOP_FRONT_CENTER = 0x00002000;
-    public static final long AV_CH_TOP_FRONT_RIGHT = 0x00004000;
-    public static final long AV_CH_TOP_BACK_LEFT = 0x00008000;
-    public static final long AV_CH_TOP_BACK_CENTER = 0x00010000;
-    public static final long AV_CH_TOP_BACK_RIGHT = 0x00020000;
-    public static final long AV_CH_STEREO_LEFT = 0x20000000;
-    public static final long AV_CH_STEREO_RIGHT = 0x40000000;
-    public static final long AV_CH_WIDE_LEFT = 0x0000000080000000L;
-    public static final long AV_CH_WIDE_RIGHT = 0x0000000100000000L;
-    public static final long AV_CH_SURROUND_DIRECT_LEFT = 0x0000000200000000L;
-    public static final long AV_CH_SURROUND_DIRECT_RIGHT = 0x0000000400000000L;
-    public static final long AV_CH_LOW_FREQUENCY_2 = 0x0000000800000000L;
+        const val AV_CH_LAYOUT_MONO = AV_CH_FRONT_CENTER
+        const val AV_CH_LAYOUT_STEREO = AV_CH_FRONT_LEFT or AV_CH_FRONT_RIGHT
+        const val AV_CH_LAYOUT_2POINT1 = AV_CH_LAYOUT_STEREO or AV_CH_LOW_FREQUENCY
+        const val AV_CH_LAYOUT_2_1 = AV_CH_LAYOUT_STEREO or AV_CH_BACK_CENTER
+        const val AV_CH_LAYOUT_SURROUND = AV_CH_LAYOUT_STEREO or AV_CH_FRONT_CENTER
+        const val AV_CH_LAYOUT_3POINT1 = AV_CH_LAYOUT_SURROUND or AV_CH_LOW_FREQUENCY
+        const val AV_CH_LAYOUT_4POINT0 = AV_CH_LAYOUT_SURROUND or AV_CH_BACK_CENTER
+        const val AV_CH_LAYOUT_4POINT1 = AV_CH_LAYOUT_4POINT0 or AV_CH_LOW_FREQUENCY
+        const val AV_CH_LAYOUT_2_2 = AV_CH_LAYOUT_STEREO or AV_CH_SIDE_LEFT or AV_CH_SIDE_RIGHT
+        const val AV_CH_LAYOUT_QUAD = AV_CH_LAYOUT_STEREO or AV_CH_BACK_LEFT or AV_CH_BACK_RIGHT
+        const val AV_CH_LAYOUT_5POINT0 = AV_CH_LAYOUT_SURROUND or AV_CH_SIDE_LEFT or AV_CH_SIDE_RIGHT
+        const val AV_CH_LAYOUT_5POINT1 = AV_CH_LAYOUT_5POINT0 or AV_CH_LOW_FREQUENCY
+        const val AV_CH_LAYOUT_5POINT0_BACK = AV_CH_LAYOUT_SURROUND or AV_CH_BACK_LEFT or AV_CH_BACK_RIGHT
+        const val AV_CH_LAYOUT_5POINT1_BACK = AV_CH_LAYOUT_5POINT0_BACK or AV_CH_LOW_FREQUENCY
+        const val AV_CH_LAYOUT_6POINT0 = AV_CH_LAYOUT_5POINT0 or AV_CH_BACK_CENTER
+        const val AV_CH_LAYOUT_6POINT0_FRONT = AV_CH_LAYOUT_2_2 or AV_CH_FRONT_LEFT_OF_CENTER or AV_CH_FRONT_RIGHT_OF_CENTER
+        const val AV_CH_LAYOUT_HEXAGONAL = AV_CH_LAYOUT_5POINT0_BACK or AV_CH_BACK_CENTER
+        const val AV_CH_LAYOUT_6POINT1 = AV_CH_LAYOUT_5POINT1 or AV_CH_BACK_CENTER
+        const val AV_CH_LAYOUT_6POINT1_BACK = AV_CH_LAYOUT_5POINT1_BACK or AV_CH_BACK_CENTER
+        const val AV_CH_LAYOUT_6POINT1_FRONT = AV_CH_LAYOUT_6POINT0_FRONT or AV_CH_LOW_FREQUENCY
+        const val AV_CH_LAYOUT_7POINT0 = AV_CH_LAYOUT_5POINT0 or AV_CH_BACK_LEFT or AV_CH_BACK_RIGHT
+        const val AV_CH_LAYOUT_7POINT0_FRONT = AV_CH_LAYOUT_5POINT0 or AV_CH_FRONT_LEFT_OF_CENTER or AV_CH_FRONT_RIGHT_OF_CENTER
+        const val AV_CH_LAYOUT_7POINT1 = AV_CH_LAYOUT_5POINT1 or AV_CH_BACK_LEFT or AV_CH_BACK_RIGHT
+        const val AV_CH_LAYOUT_7POINT1_WIDE = AV_CH_LAYOUT_5POINT1 or AV_CH_FRONT_LEFT_OF_CENTER or AV_CH_FRONT_RIGHT_OF_CENTER
+        const val AV_CH_LAYOUT_7POINT1_WIDE_BACK = AV_CH_LAYOUT_5POINT1_BACK or AV_CH_FRONT_LEFT_OF_CENTER or AV_CH_FRONT_RIGHT_OF_CENTER
+        const val AV_CH_LAYOUT_OCTAGONAL = AV_CH_LAYOUT_5POINT0 or AV_CH_BACK_LEFT or AV_CH_BACK_CENTER or AV_CH_BACK_RIGHT
+        const val AV_CH_LAYOUT_STEREO_DOWNMIX = AV_CH_STEREO_LEFT or AV_CH_STEREO_RIGHT
 
-    public static final long AV_CH_LAYOUT_MONO = (AV_CH_FRONT_CENTER);
-    public static final long AV_CH_LAYOUT_STEREO = (AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT);
-    public static final long AV_CH_LAYOUT_2POINT1 = (AV_CH_LAYOUT_STEREO | AV_CH_LOW_FREQUENCY);
-    public static final long AV_CH_LAYOUT_2_1 = (AV_CH_LAYOUT_STEREO | AV_CH_BACK_CENTER);
-    public static final long AV_CH_LAYOUT_SURROUND = (AV_CH_LAYOUT_STEREO | AV_CH_FRONT_CENTER);
-    public static final long AV_CH_LAYOUT_3POINT1 = (AV_CH_LAYOUT_SURROUND | AV_CH_LOW_FREQUENCY);
-    public static final long AV_CH_LAYOUT_4POINT0 = (AV_CH_LAYOUT_SURROUND | AV_CH_BACK_CENTER);
-    public static final long AV_CH_LAYOUT_4POINT1 = (AV_CH_LAYOUT_4POINT0 | AV_CH_LOW_FREQUENCY);
-    public static final long AV_CH_LAYOUT_2_2 = (AV_CH_LAYOUT_STEREO
-            | AV_CH_SIDE_LEFT | AV_CH_SIDE_RIGHT);
-    public static final long AV_CH_LAYOUT_QUAD = (AV_CH_LAYOUT_STEREO
-            | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT);
-    public static final long AV_CH_LAYOUT_5POINT0 = (AV_CH_LAYOUT_SURROUND
-            | AV_CH_SIDE_LEFT | AV_CH_SIDE_RIGHT);
-    public static final long AV_CH_LAYOUT_5POINT1 = (AV_CH_LAYOUT_5POINT0 | AV_CH_LOW_FREQUENCY);
-    public static final long AV_CH_LAYOUT_5POINT0_BACK = (AV_CH_LAYOUT_SURROUND
-            | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT);
-    public static final long AV_CH_LAYOUT_5POINT1_BACK = (AV_CH_LAYOUT_5POINT0_BACK | AV_CH_LOW_FREQUENCY);
-    public static final long AV_CH_LAYOUT_6POINT0 = (AV_CH_LAYOUT_5POINT0 | AV_CH_BACK_CENTER);
-    public static final long AV_CH_LAYOUT_6POINT0_FRONT = (AV_CH_LAYOUT_2_2
-            | AV_CH_FRONT_LEFT_OF_CENTER | AV_CH_FRONT_RIGHT_OF_CENTER);
-    public static final long AV_CH_LAYOUT_HEXAGONAL = (AV_CH_LAYOUT_5POINT0_BACK | AV_CH_BACK_CENTER);
-    public static final long AV_CH_LAYOUT_6POINT1 = (AV_CH_LAYOUT_5POINT1 | AV_CH_BACK_CENTER);
-    public static final long AV_CH_LAYOUT_6POINT1_BACK = (AV_CH_LAYOUT_5POINT1_BACK | AV_CH_BACK_CENTER);
-    public static final long AV_CH_LAYOUT_6POINT1_FRONT = (AV_CH_LAYOUT_6POINT0_FRONT | AV_CH_LOW_FREQUENCY);
-    public static final long AV_CH_LAYOUT_7POINT0 = (AV_CH_LAYOUT_5POINT0
-            | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT);
-    public static final long AV_CH_LAYOUT_7POINT0_FRONT = (AV_CH_LAYOUT_5POINT0
-            | AV_CH_FRONT_LEFT_OF_CENTER | AV_CH_FRONT_RIGHT_OF_CENTER);
-    public static final long AV_CH_LAYOUT_7POINT1 = (AV_CH_LAYOUT_5POINT1
-            | AV_CH_BACK_LEFT | AV_CH_BACK_RIGHT);
-    public static final long AV_CH_LAYOUT_7POINT1_WIDE = (AV_CH_LAYOUT_5POINT1
-            | AV_CH_FRONT_LEFT_OF_CENTER | AV_CH_FRONT_RIGHT_OF_CENTER);
-    public static final long AV_CH_LAYOUT_7POINT1_WIDE_BACK = (AV_CH_LAYOUT_5POINT1_BACK
-            | AV_CH_FRONT_LEFT_OF_CENTER | AV_CH_FRONT_RIGHT_OF_CENTER);
-    public static final long AV_CH_LAYOUT_OCTAGONAL = (AV_CH_LAYOUT_5POINT0
-            | AV_CH_BACK_LEFT | AV_CH_BACK_CENTER | AV_CH_BACK_RIGHT);
-    public static final long AV_CH_LAYOUT_STEREO_DOWNMIX = (AV_CH_STEREO_LEFT | AV_CH_STEREO_RIGHT);
+        const val FF_PROFILE_H264_CONSTRAINED = 1 shl 9  // 8+1; constraint_set1_flag
+        const val FF_PROFILE_H264_INTRA = 1 shl 11       // 8+3; constraint_set3_flag
 
-    public static final int FF_PROFILE_H264_CONSTRAINED = (1<<9);  // 8+1; constraint_set1_flag
-    public static final int FF_PROFILE_H264_INTRA = (1<<11);       // 8+3; constraint_set3_flag
+        const val FF_PROFILE_H264_BASELINE = 66
+        const val FF_PROFILE_H264_CONSTRAINED_BASELINE = 66 or FF_PROFILE_H264_CONSTRAINED
+        const val FF_PROFILE_H264_MAIN = 77
+        const val FF_PROFILE_H264_EXTENDED = 88
+        const val FF_PROFILE_H264_HIGH = 100
+        const val FF_PROFILE_H264_HIGH_10 = 110
+        const val FF_PROFILE_H264_HIGH_10_INTRA = 110 or FF_PROFILE_H264_INTRA
+        const val FF_PROFILE_H264_HIGH_422 = 122
+        const val FF_PROFILE_H264_HIGH_422_INTRA = 122 or FF_PROFILE_H264_INTRA
+        const val FF_PROFILE_H264_HIGH_444 = 144
+        const val FF_PROFILE_H264_HIGH_444_PREDICTIVE = 244
+        const val FF_PROFILE_H264_HIGH_444_INTRA = 244 or FF_PROFILE_H264_INTRA
+        const val FF_PROFILE_H264_CAVLC_444 = 44
 
-    public static final int FF_PROFILE_H264_BASELINE = 66;
-    public static final int FF_PROFILE_H264_CONSTRAINED_BASELINE = (66|FF_PROFILE_H264_CONSTRAINED);
-    public static final int FF_PROFILE_H264_MAIN = 77;
-    public static final int FF_PROFILE_H264_EXTENDED = 88;
-    public static final int FF_PROFILE_H264_HIGH = 100;
-    public static final int FF_PROFILE_H264_HIGH_10 = 110;
-    public static final int FF_PROFILE_H264_HIGH_10_INTRA = (110|FF_PROFILE_H264_INTRA);
-    public static final int FF_PROFILE_H264_HIGH_422 = 122;
-    public static final int FF_PROFILE_H264_HIGH_422_INTRA = (122|FF_PROFILE_H264_INTRA);
-    public static final int FF_PROFILE_H264_HIGH_444 = 144;
-    public static final int FF_PROFILE_H264_HIGH_444_PREDICTIVE = 244;
-    public static final int FF_PROFILE_H264_HIGH_444_INTRA = (244|FF_PROFILE_H264_INTRA);
-    public static final int FF_PROFILE_H264_CAVLC_444 = 44;
-
-    public Bundle mMediaMeta;
-
-    public String mFormat;
-    public long mDurationUS;
-    public long mStartUS;
-    public long mBitrate;
-
-    public final ArrayList<IjkStreamMeta> mStreams = new ArrayList<IjkStreamMeta>();
-    public IjkStreamMeta mVideoStream;
-    public IjkStreamMeta mAudioStream;
-
-    public String getString(String key) {
-        return mMediaMeta.getString(key);
-    }
-
-    public int getInt(String key) {
-        return getInt(key, 0);
-    }
-
-    public int getInt(String key, int defaultValue) {
-        String value = getString(key);
-        if (TextUtils.isEmpty(value))
-            return defaultValue;
-
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    public long getLong(String key) {
-        return getLong(key, 0);
-    }
-
-    public long getLong(String key, long defaultValue) {
-        String value = getString(key);
-        if (TextUtils.isEmpty(value))
-            return defaultValue;
-
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    public ArrayList<Bundle> getParcelableArrayList(String key) {
-        return mMediaMeta.getParcelableArrayList(key);
-    }
-
-    public String getDurationInline() {
-        long duration = mDurationUS + 5000;
-        long secs = duration / 1000000;
-        long mins = secs / 60;
-        secs %= 60;
-        long hours = mins / 60;
-        mins %= 60;
-        return String.format(Locale.US, "%02d:%02d:%02d", hours, mins, secs);
-    }
-
-    public static IjkMediaMeta parse(Bundle mediaMeta) {
-        if (mediaMeta == null)
-            return null;
-
-        IjkMediaMeta meta = new IjkMediaMeta();
-        meta.mMediaMeta = mediaMeta;
-
-        meta.mFormat = meta.getString(IJKM_KEY_FORMAT);
-        meta.mDurationUS = meta.getLong(IJKM_KEY_DURATION_US);
-        meta.mStartUS = meta.getLong(IJKM_KEY_START_US);
-        meta.mBitrate = meta.getLong(IJKM_KEY_BITRATE);
-
-        int videoStreamIndex = meta.getInt(IJKM_KEY_VIDEO_STREAM, -1);
-        int audioStreamIndex = meta.getInt(IJKM_KEY_AUDIO_STREAM, -1);
-        int subtitleStreamIndex = meta.getInt(IJKM_KEY_TIMEDTEXT_STREAM, -1);
-
-        ArrayList<Bundle> streams = meta
-                .getParcelableArrayList(IJKM_KEY_STREAMS);
-        if (streams == null)
-            return meta;
-
-        int index = -1;
-        for (Bundle streamBundle : streams) {
-            index++;
-
-            if (streamBundle == null) {
-                continue;
+        @JvmStatic
+        fun parse(mediaMeta: Bundle?): IjkMediaMeta? {
+            if (mediaMeta == null) {
+                return null
             }
 
-            IjkStreamMeta streamMeta = new IjkStreamMeta(index);
-            streamMeta.mMeta = streamBundle;
-            streamMeta.mType = streamMeta.getString(IJKM_KEY_TYPE);
-            streamMeta.mLanguage = streamMeta.getString(IJKM_KEY_LANGUAGE);
-            if (TextUtils.isEmpty(streamMeta.mType))
-                continue;
+            val meta = IjkMediaMeta()
+            meta.mMediaMeta = mediaMeta
 
-            streamMeta.mCodecName = streamMeta.getString(IJKM_KEY_CODEC_NAME);
-            streamMeta.mCodecProfile = streamMeta
-                    .getString(IJKM_KEY_CODEC_PROFILE);
-            streamMeta.mCodecLongName = streamMeta
-                    .getString(IJKM_KEY_CODEC_LONG_NAME);
-            streamMeta.mBitrate = streamMeta.getInt(IJKM_KEY_BITRATE);
+            meta.mFormat = meta.getString(IJKM_KEY_FORMAT)
+            meta.mDurationUS = meta.getLong(IJKM_KEY_DURATION_US)
+            meta.mStartUS = meta.getLong(IJKM_KEY_START_US)
+            meta.mBitrate = meta.getLong(IJKM_KEY_BITRATE)
 
-            if (streamMeta.mType.equalsIgnoreCase(IJKM_VAL_TYPE__VIDEO)) {
-                streamMeta.mWidth = streamMeta.getInt(IJKM_KEY_WIDTH);
-                streamMeta.mHeight = streamMeta.getInt(IJKM_KEY_HEIGHT);
-                streamMeta.mFpsNum = streamMeta.getInt(IJKM_KEY_FPS_NUM);
-                streamMeta.mFpsDen = streamMeta.getInt(IJKM_KEY_FPS_DEN);
-                streamMeta.mTbrNum = streamMeta.getInt(IJKM_KEY_TBR_NUM);
-                streamMeta.mTbrDen = streamMeta.getInt(IJKM_KEY_TBR_DEN);
-                streamMeta.mSarNum = streamMeta.getInt(IJKM_KEY_SAR_NUM);
-                streamMeta.mSarDen = streamMeta.getInt(IJKM_KEY_SAR_DEN);
+            val videoStreamIndex = meta.getInt(IJKM_KEY_VIDEO_STREAM, -1)
+            val audioStreamIndex = meta.getInt(IJKM_KEY_AUDIO_STREAM, -1)
+            val subtitleStreamIndex = meta.getInt(IJKM_KEY_TIMEDTEXT_STREAM, -1)
 
-                if (videoStreamIndex == index) {
-                    meta.mVideoStream = streamMeta;
-                }
-            } else if (streamMeta.mType.equalsIgnoreCase(IJKM_VAL_TYPE__AUDIO)) {
-                streamMeta.mSampleRate = streamMeta
-                        .getInt(IJKM_KEY_SAMPLE_RATE);
-                streamMeta.mChannelLayout = streamMeta
-                        .getLong(IJKM_KEY_CHANNEL_LAYOUT);
-
-                if (audioStreamIndex == index) {
-                    meta.mAudioStream = streamMeta;
-                }
+            @Suppress("UNCHECKED_CAST")
+            val streams = meta.getParcelableArrayList(IJKM_KEY_STREAMS) as? ArrayList<Bundle>
+            if (streams == null) {
+                return meta
             }
-            meta.mStreams.add(streamMeta);
-        }
 
-        return meta;
+            var index = -1
+            for (streamBundle in streams) {
+                index++
+
+                if (streamBundle == null) {
+                    continue
+                }
+
+                val streamMeta = IjkStreamMeta(index)
+                streamMeta.mMeta = streamBundle
+                streamMeta.mType = streamMeta.getString(IJKM_KEY_TYPE)
+                streamMeta.mLanguage = streamMeta.getString(IJKM_KEY_LANGUAGE)
+                if (TextUtils.isEmpty(streamMeta.mType)) {
+                    continue
+                }
+
+                streamMeta.mCodecName = streamMeta.getString(IJKM_KEY_CODEC_NAME)
+                streamMeta.mCodecProfile = streamMeta.getString(IJKM_KEY_CODEC_PROFILE)
+                streamMeta.mCodecLongName = streamMeta.getString(IJKM_KEY_CODEC_LONG_NAME)
+                streamMeta.mBitrate = streamMeta.getInt(IJKM_KEY_BITRATE).toLong()
+
+                if (streamMeta.mType.equals(IJKM_VAL_TYPE__VIDEO, ignoreCase = true)) {
+                    streamMeta.mWidth = streamMeta.getInt(IJKM_KEY_WIDTH)
+                    streamMeta.mHeight = streamMeta.getInt(IJKM_KEY_HEIGHT)
+                    streamMeta.mFpsNum = streamMeta.getInt(IJKM_KEY_FPS_NUM)
+                    streamMeta.mFpsDen = streamMeta.getInt(IJKM_KEY_FPS_DEN)
+                    streamMeta.mTbrNum = streamMeta.getInt(IJKM_KEY_TBR_NUM)
+                    streamMeta.mTbrDen = streamMeta.getInt(IJKM_KEY_TBR_DEN)
+                    streamMeta.mSarNum = streamMeta.getInt(IJKM_KEY_SAR_NUM)
+                    streamMeta.mSarDen = streamMeta.getInt(IJKM_KEY_SAR_DEN)
+
+                    if (videoStreamIndex == index) {
+                        meta.mVideoStream = streamMeta
+                    }
+                } else if (streamMeta.mType.equals(IJKM_VAL_TYPE__AUDIO, ignoreCase = true)) {
+                    streamMeta.mSampleRate = streamMeta.getInt(IJKM_KEY_SAMPLE_RATE)
+                    streamMeta.mChannelLayout = streamMeta.getLong(IJKM_KEY_CHANNEL_LAYOUT)
+
+                    if (audioStreamIndex == index) {
+                        meta.mAudioStream = streamMeta
+                    }
+                }
+                meta.mStreams.add(streamMeta)
+            }
+
+            return meta
+        }
     }
 
-    public static class IjkStreamMeta {
-        public Bundle mMeta;
+    @JvmField
+    var mMediaMeta: Bundle? = null
 
-        public final int mIndex;
-        public String mType;
-        public String mLanguage;
+    @JvmField
+    var mFormat: String? = null
+    @JvmField
+    var mDurationUS: Long = 0
+    @JvmField
+    var mStartUS: Long = 0
+    @JvmField
+    var mBitrate: Long = 0
+
+    @JvmField
+    val mStreams = ArrayList<IjkStreamMeta>()
+    @JvmField
+    var mVideoStream: IjkStreamMeta? = null
+    @JvmField
+    var mAudioStream: IjkStreamMeta? = null
+
+    fun getString(key: String): String? {
+        return mMediaMeta?.getString(key)
+    }
+
+    fun getInt(key: String): Int {
+        return getInt(key, 0)
+    }
+
+    fun getInt(key: String, defaultValue: Int): Int {
+        val value = getString(key)
+        if (TextUtils.isEmpty(value)) {
+            return defaultValue
+        }
+
+        return try {
+            value!!.toInt()
+        } catch (e: NumberFormatException) {
+            defaultValue
+        }
+    }
+
+    fun getLong(key: String): Long {
+        return getLong(key, 0)
+    }
+
+    fun getLong(key: String, defaultValue: Long): Long {
+        val value = getString(key)
+        if (TextUtils.isEmpty(value)) {
+            return defaultValue
+        }
+
+        return try {
+            value!!.toLong()
+        } catch (e: NumberFormatException) {
+            defaultValue
+        }
+    }
+
+    fun getParcelableArrayList(key: String): ArrayList<Bundle>? {
+        return mMediaMeta?.getParcelableArrayList(key)
+    }
+
+    fun getDurationInline(): String {
+        val duration = mDurationUS + 5000
+        val secs = duration / 1000000
+        val mins = secs / 60
+        val secsRemainder = secs % 60
+        val hours = mins / 60
+        val minsRemainder = mins % 60
+        return String.format(Locale.US, "%02d:%02d:%02d", hours, minsRemainder, secsRemainder)
+    }
+
+    class IjkStreamMeta(@JvmField val mIndex: Int) {
+        @JvmField
+        var mMeta: Bundle? = null
+
+        @JvmField
+        var mType: String? = null
+        @JvmField
+        var mLanguage: String? = null
 
         // common
-        public String mCodecName;
-        public String mCodecProfile;
-        public String mCodecLongName;
-        public long mBitrate;
+        @JvmField
+        var mCodecName: String? = null
+        @JvmField
+        var mCodecProfile: String? = null
+        @JvmField
+        var mCodecLongName: String? = null
+        @JvmField
+        var mBitrate: Long = 0
 
         // video
-        public int mWidth;
-        public int mHeight;
-        public int mFpsNum;
-        public int mFpsDen;
-        public int mTbrNum;
-        public int mTbrDen;
-        public int mSarNum;
-        public int mSarDen;
+        @JvmField
+        var mWidth: Int = 0
+        @JvmField
+        var mHeight: Int = 0
+        @JvmField
+        var mFpsNum: Int = 0
+        @JvmField
+        var mFpsDen: Int = 0
+        @JvmField
+        var mTbrNum: Int = 0
+        @JvmField
+        var mTbrDen: Int = 0
+        @JvmField
+        var mSarNum: Int = 0
+        @JvmField
+        var mSarDen: Int = 0
 
         // audio
-        public int mSampleRate;
-        public long mChannelLayout;
+        @JvmField
+        var mSampleRate: Int = 0
+        @JvmField
+        var mChannelLayout: Long = 0
 
-        public IjkStreamMeta(int index) {
-            mIndex = index;
+        fun getString(key: String): String? {
+            return mMeta?.getString(key)
         }
 
-        public String getString(String key) {
-            return mMeta.getString(key);
+        fun getInt(key: String): Int {
+            return getInt(key, 0)
         }
 
-        public int getInt(String key) {
-            return getInt(key, 0);
-        }
+        fun getInt(key: String, defaultValue: Int): Int {
+            val value = getString(key)
+            if (TextUtils.isEmpty(value)) {
+                return defaultValue
+            }
 
-        public int getInt(String key, int defaultValue) {
-            String value = getString(key);
-            if (TextUtils.isEmpty(value))
-                return defaultValue;
-
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                return defaultValue;
+            return try {
+                value!!.toInt()
+            } catch (e: NumberFormatException) {
+                defaultValue
             }
         }
 
-        public long getLong(String key) {
-            return getLong(key, 0);
+        fun getLong(key: String): Long {
+            return getLong(key, 0)
         }
 
-        public long getLong(String key, long defaultValue) {
-            String value = getString(key);
-            if (TextUtils.isEmpty(value))
-                return defaultValue;
+        fun getLong(key: String, defaultValue: Long): Long {
+            val value = getString(key)
+            if (TextUtils.isEmpty(value)) {
+                return defaultValue
+            }
 
-            try {
-                return Long.parseLong(value);
-            } catch (NumberFormatException e) {
-                return defaultValue;
+            return try {
+                value!!.toLong()
+            } catch (e: NumberFormatException) {
+                defaultValue
             }
         }
 
-        public String getCodecLongNameInline() {
-            if (!TextUtils.isEmpty(mCodecLongName)) {
-                return mCodecLongName;
-            } else if (!TextUtils.isEmpty(mCodecName)) {
-                return mCodecName;
+        fun getCodecLongNameInline(): String {
+            return when {
+                !TextUtils.isEmpty(mCodecLongName) -> mCodecLongName!!
+                !TextUtils.isEmpty(mCodecName) -> mCodecName!!
+                else -> "N/A"
+            }
+        }
+
+        fun getCodecShortNameInline(): String {
+            return if (!TextUtils.isEmpty(mCodecName)) {
+                mCodecName!!
             } else {
-                return "N/A";
+                "N/A"
             }
         }
 
-        public String getCodecShortNameInline() {
-            if (!TextUtils.isEmpty(mCodecName)) {
-                return mCodecName;
-            } else {
-                return "N/A";
+        fun getResolutionInline(): String {
+            return when {
+                mWidth <= 0 || mHeight <= 0 -> "N/A"
+                mSarNum <= 0 || mSarDen <= 0 -> String.format(Locale.US, "%d x %d", mWidth, mHeight)
+                else -> String.format(Locale.US, "%d x %d [SAR %d:%d]", mWidth, mHeight, mSarNum, mSarDen)
             }
         }
 
-        public String getResolutionInline() {
-            if (mWidth <= 0 || mHeight <= 0) {
-                return "N/A";
-            } else if (mSarNum <= 0 || mSarDen <= 0) {
-                return String.format(Locale.US, "%d x %d", mWidth, mHeight);
+        fun getFpsInline(): String {
+            return if (mFpsNum <= 0 || mFpsDen <= 0) {
+                "N/A"
             } else {
-                return String.format(Locale.US, "%d x %d [SAR %d:%d]", mWidth,
-                        mHeight, mSarNum, mSarDen);
+                ((mFpsNum.toFloat()) / mFpsDen).toString()
             }
         }
 
-        public String getFpsInline() {
-            if (mFpsNum <= 0 || mFpsDen <= 0) {
-                return "N/A";
-            } else {
-                return String.valueOf(((float) (mFpsNum)) / mFpsDen);
+        fun getBitrateInline(): String {
+            return when {
+                mBitrate <= 0 -> "N/A"
+                mBitrate < 1000 -> String.format(Locale.US, "%d bit/s", mBitrate)
+                else -> String.format(Locale.US, "%d kb/s", mBitrate / 1000)
             }
         }
 
-        public String getBitrateInline() {
-            if (mBitrate <= 0) {
-                return "N/A";
-            } else if (mBitrate < 1000) {
-                return String.format(Locale.US, "%d bit/s", mBitrate);
+        fun getSampleRateInline(): String {
+            return if (mSampleRate <= 0) {
+                "N/A"
             } else {
-                return String.format(Locale.US, "%d kb/s", mBitrate / 1000);
+                String.format(Locale.US, "%d Hz", mSampleRate)
             }
         }
 
-        public String getSampleRateInline() {
-            if (mSampleRate <= 0) {
-                return "N/A";
-            } else {
-                return String.format(Locale.US, "%d Hz", mSampleRate);
-            }
-        }
-
-        public String getChannelLayoutInline() {
-            if (mChannelLayout <= 0) {
-                return "N/A";
-            } else {
-                if (mChannelLayout == AV_CH_LAYOUT_MONO) {
-                    return "mono";
-                } else if (mChannelLayout == AV_CH_LAYOUT_STEREO) {
-                    return "stereo";
-                } else {
-                    return String.format(Locale.US, "%x", mChannelLayout);
-                }
+        fun getChannelLayoutInline(): String {
+            return when {
+                mChannelLayout <= 0 -> "N/A"
+                mChannelLayout == AV_CH_LAYOUT_MONO -> "mono"
+                mChannelLayout == AV_CH_LAYOUT_STEREO -> "stereo"
+                else -> String.format(Locale.US, "%x", mChannelLayout)
             }
         }
     }
 }
+

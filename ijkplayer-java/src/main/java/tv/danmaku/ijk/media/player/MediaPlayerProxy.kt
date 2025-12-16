@@ -15,325 +15,278 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.player
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
-import android.view.Surface;
-import android.view.SurfaceHolder;
+import android.annotation.TargetApi
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.view.Surface
+import android.view.SurfaceHolder
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource
+import tv.danmaku.ijk.media.player.misc.ITrackInfo
+import java.io.FileDescriptor
+import java.io.IOException
+import java.util.Map
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.util.Map;
-
-import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
-import tv.danmaku.ijk.media.player.misc.ITrackInfo;
-
-public class MediaPlayerProxy implements IMediaPlayer {
-    protected final IMediaPlayer mBackEndMediaPlayer;
-
-    public MediaPlayerProxy(IMediaPlayer backEndMediaPlayer) {
-        mBackEndMediaPlayer = backEndMediaPlayer;
+open class MediaPlayerProxy(protected val mBackEndMediaPlayer: IMediaPlayer) : IMediaPlayer {
+    fun getInternalMediaPlayer(): IMediaPlayer {
+        return mBackEndMediaPlayer
     }
 
-    public IMediaPlayer getInternalMediaPlayer() {
-        return mBackEndMediaPlayer;
-    }
-
-    @Override
-    public void setDisplay(SurfaceHolder sh) {
-        mBackEndMediaPlayer.setDisplay(sh);
+    override fun setDisplay(sh: SurfaceHolder?) {
+        mBackEndMediaPlayer.setDisplay(sh)
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    @Override
-    public void setSurface(Surface surface) {
-        mBackEndMediaPlayer.setSurface(surface);
+    override fun setSurface(surface: Surface?) {
+        mBackEndMediaPlayer.setSurface(surface)
     }
 
-    @Override
-    public void setDataSource(Context context, Uri uri)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        mBackEndMediaPlayer.setDataSource(context, uri);
+    @Throws(IOException::class, IllegalArgumentException::class, SecurityException::class, IllegalStateException::class)
+    override fun setDataSource(context: Context, uri: Uri) {
+        mBackEndMediaPlayer.setDataSource(context, uri)
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    @Override
-    public void setDataSource(Context context, Uri uri, Map<String, String> headers)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        mBackEndMediaPlayer.setDataSource(context, uri, headers);
+    @Throws(IOException::class, IllegalArgumentException::class, SecurityException::class, IllegalStateException::class)
+    override fun setDataSource(context: Context, uri: Uri, headers: Map<String, String>?) {
+        mBackEndMediaPlayer.setDataSource(context, uri, headers)
     }
 
-    @Override
-    public void setDataSource(FileDescriptor fd)
-            throws IOException, IllegalArgumentException, IllegalStateException {
-        mBackEndMediaPlayer.setDataSource(fd);
+    @Throws(IOException::class, IllegalArgumentException::class, IllegalStateException::class)
+    override fun setDataSource(fd: FileDescriptor) {
+        mBackEndMediaPlayer.setDataSource(fd)
     }
 
-    @Override
-    public void setDataSource(String path) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        mBackEndMediaPlayer.setDataSource(path);
+    @Throws(IOException::class, IllegalArgumentException::class, SecurityException::class, IllegalStateException::class)
+    override fun setDataSource(path: String) {
+        mBackEndMediaPlayer.setDataSource(path)
     }
 
-    @Override
-    public void setDataSource(IMediaDataSource mediaDataSource)  {
-        mBackEndMediaPlayer.setDataSource(mediaDataSource);
+    override fun setDataSource(mediaDataSource: IMediaDataSource?) {
+        mBackEndMediaPlayer.setDataSource(mediaDataSource)
     }
 
-    @Override
-    public String getDataSource() {
-        return mBackEndMediaPlayer.getDataSource();
+    override fun getDataSource(): String? {
+        return mBackEndMediaPlayer.getDataSource()
     }
 
-    @Override
-    public void prepareAsync() throws IllegalStateException {
-        mBackEndMediaPlayer.prepareAsync();
+    @Throws(IllegalStateException::class)
+    override fun prepareAsync() {
+        mBackEndMediaPlayer.prepareAsync()
     }
 
-    @Override
-    public void start() throws IllegalStateException {
-        mBackEndMediaPlayer.start();
+    @Throws(IllegalStateException::class)
+    override fun start() {
+        mBackEndMediaPlayer.start()
     }
 
-    @Override
-    public void stop() throws IllegalStateException {
-        mBackEndMediaPlayer.stop();
+    @Throws(IllegalStateException::class)
+    override fun stop() {
+        mBackEndMediaPlayer.stop()
     }
 
-    @Override
-    public void pause() throws IllegalStateException {
-        mBackEndMediaPlayer.pause();
+    @Throws(IllegalStateException::class)
+    override fun pause() {
+        mBackEndMediaPlayer.pause()
     }
 
-    @Override
-    public void setScreenOnWhilePlaying(boolean screenOn) {
-        mBackEndMediaPlayer.setScreenOnWhilePlaying(screenOn);
+    override fun setScreenOnWhilePlaying(screenOn: Boolean) {
+        mBackEndMediaPlayer.setScreenOnWhilePlaying(screenOn)
     }
 
-    @Override
-    public int getVideoWidth() {
-        return mBackEndMediaPlayer.getVideoWidth();
+    override fun getVideoWidth(): Int {
+        return mBackEndMediaPlayer.getVideoWidth()
     }
 
-    @Override
-    public int getVideoHeight() {
-        return mBackEndMediaPlayer.getVideoHeight();
+    override fun getVideoHeight(): Int {
+        return mBackEndMediaPlayer.getVideoHeight()
     }
 
-    @Override
-    public boolean isPlaying() {
-        return mBackEndMediaPlayer.isPlaying();
+    override fun isPlaying(): Boolean {
+        return mBackEndMediaPlayer.isPlaying()
     }
 
-    @Override
-    public void seekTo(long msec) throws IllegalStateException {
-        mBackEndMediaPlayer.seekTo(msec);
+    @Throws(IllegalStateException::class)
+    override fun seekTo(msec: Long) {
+        mBackEndMediaPlayer.seekTo(msec)
     }
 
-    @Override
-    public long getCurrentPosition() {
-        return mBackEndMediaPlayer.getCurrentPosition();
+    override fun getCurrentPosition(): Long {
+        return mBackEndMediaPlayer.getCurrentPosition()
     }
 
-    @Override
-    public long getDuration() {
-        return mBackEndMediaPlayer.getDuration();
+    override fun getDuration(): Long {
+        return mBackEndMediaPlayer.getDuration()
     }
 
-    @Override
-    public void release() {
-        mBackEndMediaPlayer.release();
+    override fun release() {
+        mBackEndMediaPlayer.release()
     }
 
-    @Override
-    public void reset() {
-        mBackEndMediaPlayer.reset();
+    override fun reset() {
+        mBackEndMediaPlayer.reset()
     }
 
-    @Override
-    public void setVolume(float leftVolume, float rightVolume) {
-        mBackEndMediaPlayer.setVolume(leftVolume, rightVolume);
+    override fun setVolume(leftVolume: Float, rightVolume: Float) {
+        mBackEndMediaPlayer.setVolume(leftVolume, rightVolume)
     }
 
-    @Override
-    public int getAudioSessionId() {
-        return mBackEndMediaPlayer.getAudioSessionId();
+    override fun getAudioSessionId(): Int {
+        return mBackEndMediaPlayer.getAudioSessionId()
     }
 
-    @Override
-    public MediaInfo getMediaInfo() {
-        return mBackEndMediaPlayer.getMediaInfo();
+    override fun getMediaInfo(): MediaInfo? {
+        return mBackEndMediaPlayer.getMediaInfo()
     }
 
-    @Override
-    public void setLogEnabled(boolean enable) {
-
+    @Deprecated("")
+    override fun setLogEnabled(enable: Boolean) {
+        // Empty implementation
     }
 
-    @Override
-    public boolean isPlayable() {
-        return false;
+    @Deprecated("")
+    override fun isPlayable(): Boolean {
+        return false
     }
 
-    @Override
-    public void setOnPreparedListener(OnPreparedListener listener) {
+    override fun setOnPreparedListener(listener: IMediaPlayer.OnPreparedListener?) {
         if (listener != null) {
-            final OnPreparedListener finalListener = listener;
-            mBackEndMediaPlayer.setOnPreparedListener(new OnPreparedListener() {
-                @Override
-                public void onPrepared(IMediaPlayer mp) {
-                    finalListener.onPrepared(MediaPlayerProxy.this);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnPreparedListener(object : IMediaPlayer.OnPreparedListener {
+                override fun onPrepared(mp: IMediaPlayer) {
+                    finalListener.onPrepared(this@MediaPlayerProxy)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnPreparedListener(null);
+            mBackEndMediaPlayer.setOnPreparedListener(null)
         }
     }
 
-    @Override
-    public void setOnCompletionListener(OnCompletionListener listener) {
+    override fun setOnCompletionListener(listener: IMediaPlayer.OnCompletionListener?) {
         if (listener != null) {
-            final OnCompletionListener finalListener = listener;
-            mBackEndMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-                @Override
-                public void onCompletion(IMediaPlayer mp) {
-                    finalListener.onCompletion(MediaPlayerProxy.this);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnCompletionListener(object : IMediaPlayer.OnCompletionListener {
+                override fun onCompletion(mp: IMediaPlayer) {
+                    finalListener.onCompletion(this@MediaPlayerProxy)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnCompletionListener(null);
+            mBackEndMediaPlayer.setOnCompletionListener(null)
         }
     }
 
-    @Override
-    public void setOnBufferingUpdateListener(OnBufferingUpdateListener listener) {
+    override fun setOnBufferingUpdateListener(listener: IMediaPlayer.OnBufferingUpdateListener?) {
         if (listener != null) {
-            final OnBufferingUpdateListener finalListener = listener;
-            mBackEndMediaPlayer.setOnBufferingUpdateListener(new OnBufferingUpdateListener() {
-                @Override
-                public void onBufferingUpdate(IMediaPlayer mp, int percent) {
-                    finalListener.onBufferingUpdate(MediaPlayerProxy.this, percent);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnBufferingUpdateListener(object : IMediaPlayer.OnBufferingUpdateListener {
+                override fun onBufferingUpdate(mp: IMediaPlayer, percent: Int) {
+                    finalListener.onBufferingUpdate(this@MediaPlayerProxy, percent)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnBufferingUpdateListener(null);
+            mBackEndMediaPlayer.setOnBufferingUpdateListener(null)
         }
     }
 
-    @Override
-    public void setOnSeekCompleteListener(OnSeekCompleteListener listener) {
+    override fun setOnSeekCompleteListener(listener: IMediaPlayer.OnSeekCompleteListener?) {
         if (listener != null) {
-            final OnSeekCompleteListener finalListener = listener;
-            mBackEndMediaPlayer.setOnSeekCompleteListener(new OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(IMediaPlayer mp) {
-                    finalListener.onSeekComplete(MediaPlayerProxy.this);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnSeekCompleteListener(object : IMediaPlayer.OnSeekCompleteListener {
+                override fun onSeekComplete(mp: IMediaPlayer) {
+                    finalListener.onSeekComplete(this@MediaPlayerProxy)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnSeekCompleteListener(null);
+            mBackEndMediaPlayer.setOnSeekCompleteListener(null)
         }
     }
 
-    @Override
-    public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener) {
+    override fun setOnVideoSizeChangedListener(listener: IMediaPlayer.OnVideoSizeChangedListener?) {
         if (listener != null) {
-            final OnVideoSizeChangedListener finalListener = listener;
-            mBackEndMediaPlayer.setOnVideoSizeChangedListener(new OnVideoSizeChangedListener() {
-                @Override
-                public void onVideoSizeChanged(IMediaPlayer mp, int width, int height, int sar_num, int sar_den) {
-                    finalListener.onVideoSizeChanged(MediaPlayerProxy.this, width, height, sar_num, sar_den);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnVideoSizeChangedListener(object : IMediaPlayer.OnVideoSizeChangedListener {
+                override fun onVideoSizeChanged(mp: IMediaPlayer, width: Int, height: Int, sar_num: Int, sar_den: Int) {
+                    finalListener.onVideoSizeChanged(this@MediaPlayerProxy, width, height, sar_num, sar_den)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnVideoSizeChangedListener(null);
+            mBackEndMediaPlayer.setOnVideoSizeChangedListener(null)
         }
     }
 
-    @Override
-    public void setOnErrorListener(OnErrorListener listener) {
+    override fun setOnErrorListener(listener: IMediaPlayer.OnErrorListener?) {
         if (listener != null) {
-            final OnErrorListener finalListener = listener;
-            mBackEndMediaPlayer.setOnErrorListener(new OnErrorListener() {
-                @Override
-                public boolean onError(IMediaPlayer mp, int what, int extra) {
-                    return finalListener.onError(MediaPlayerProxy.this, what, extra);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnErrorListener(object : IMediaPlayer.OnErrorListener {
+                override fun onError(mp: IMediaPlayer, what: Int, extra: Int): Boolean {
+                    return finalListener.onError(this@MediaPlayerProxy, what, extra)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnErrorListener(null);
+            mBackEndMediaPlayer.setOnErrorListener(null)
         }
     }
 
-    @Override
-    public void setOnInfoListener(OnInfoListener listener) {
+    override fun setOnInfoListener(listener: IMediaPlayer.OnInfoListener?) {
         if (listener != null) {
-            final OnInfoListener finalListener = listener;
-            mBackEndMediaPlayer.setOnInfoListener(new OnInfoListener() {
-                @Override
-                public boolean onInfo(IMediaPlayer mp, int what, int extra) {
-                    return finalListener.onInfo(MediaPlayerProxy.this, what, extra);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnInfoListener(object : IMediaPlayer.OnInfoListener {
+                override fun onInfo(mp: IMediaPlayer, what: Int, extra: Int): Boolean {
+                    return finalListener.onInfo(this@MediaPlayerProxy, what, extra)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnInfoListener(null);
+            mBackEndMediaPlayer.setOnInfoListener(null)
         }
     }
 
-    @Override
-    public void setOnTimedTextListener(OnTimedTextListener listener) {
+    override fun setOnTimedTextListener(listener: IMediaPlayer.OnTimedTextListener?) {
         if (listener != null) {
-            final OnTimedTextListener finalListener = listener;
-            mBackEndMediaPlayer.setOnTimedTextListener(new OnTimedTextListener() {
-                @Override
-                public void onTimedText(IMediaPlayer mp, IjkTimedText text) {
-                    finalListener.onTimedText(MediaPlayerProxy.this, text);
+            val finalListener = listener
+            mBackEndMediaPlayer.setOnTimedTextListener(object : IMediaPlayer.OnTimedTextListener {
+                override fun onTimedText(mp: IMediaPlayer, text: IjkTimedText?) {
+                    finalListener.onTimedText(this@MediaPlayerProxy, text)
                 }
-            });
+            })
         } else {
-            mBackEndMediaPlayer.setOnTimedTextListener(null);
+            mBackEndMediaPlayer.setOnTimedTextListener(null)
         }
     }
 
-    @Override
-    public void setAudioStreamType(int streamtype) {
-        mBackEndMediaPlayer.setAudioStreamType(streamtype);
+    override fun setAudioStreamType(streamtype: Int) {
+        mBackEndMediaPlayer.setAudioStreamType(streamtype)
     }
 
-    @Override
-    public void setKeepInBackground(boolean keepInBackground) {
-        mBackEndMediaPlayer.setKeepInBackground(keepInBackground);
+    @Deprecated("")
+    override fun setKeepInBackground(keepInBackground: Boolean) {
+        mBackEndMediaPlayer.setKeepInBackground(keepInBackground)
     }
 
-    @Override
-    public int getVideoSarNum() {
-        return mBackEndMediaPlayer.getVideoSarNum();
+    override fun getVideoSarNum(): Int {
+        return mBackEndMediaPlayer.getVideoSarNum()
     }
 
-    @Override
-    public int getVideoSarDen() {
-        return mBackEndMediaPlayer.getVideoSarDen();
+    override fun getVideoSarDen(): Int {
+        return mBackEndMediaPlayer.getVideoSarDen()
     }
 
-    @Override
-    public void setWakeMode(Context context, int mode) {
-        mBackEndMediaPlayer.setWakeMode(context, mode);
+    @Deprecated("")
+    override fun setWakeMode(context: Context, mode: Int) {
+        mBackEndMediaPlayer.setWakeMode(context, mode)
     }
 
-    @Override
-    public ITrackInfo[] getTrackInfo() {
-        return mBackEndMediaPlayer.getTrackInfo();
+    override fun getTrackInfo(): Array<ITrackInfo>? {
+        return mBackEndMediaPlayer.getTrackInfo()
     }
 
-    @Override
-    public void setLooping(boolean looping) {
-        mBackEndMediaPlayer.setLooping(looping);
+    override fun setLooping(looping: Boolean) {
+        mBackEndMediaPlayer.setLooping(looping)
     }
 
-    @Override
-    public boolean isLooping() {
-        return mBackEndMediaPlayer.isLooping();
+    override fun isLooping(): Boolean {
+        return mBackEndMediaPlayer.isLooping()
     }
 }
+

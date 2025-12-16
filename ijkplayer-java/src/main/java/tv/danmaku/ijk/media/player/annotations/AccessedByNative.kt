@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player.annotations;
+package tv.danmaku.ijk.media.player.annotations
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.ElementType
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+import java.lang.annotation.Target
 
 /**
  * is used by the JNI generator to create the necessary JNI
@@ -28,5 +28,5 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.CLASS)
-public @interface AccessedByNative {
-}
+annotation class AccessedByNative
+

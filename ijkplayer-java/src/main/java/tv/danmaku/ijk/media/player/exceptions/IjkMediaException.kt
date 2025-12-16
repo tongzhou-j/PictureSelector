@@ -15,8 +15,16 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player.exceptions;
+package tv.danmaku.ijk.media.player.exceptions
 
-public class IjkMediaException extends Exception {
-    private static final long serialVersionUID = 7234796519009099506L;
+class IjkMediaException : Exception {
+    companion object {
+        private const val serialVersionUID = 7234796519009099506L
+    }
+
+    constructor() : super()
+    constructor(message: String?) : super(message)
+    constructor(message: String?, cause: Throwable?) : super(message, cause)
+    constructor(cause: Throwable?) : super(cause)
 }
+

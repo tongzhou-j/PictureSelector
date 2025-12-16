@@ -15,129 +15,144 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player.pragma;
+package tv.danmaku.ijk.media.player.pragma
 
-import java.util.Locale;
+import android.util.Log
+import java.util.Locale
+import kotlin.jvm.JvmStatic
 
+@Suppress("SameParameterValue", "WeakerAccess")
+object DebugLog {
+    const val ENABLE_ERROR = Pragma.ENABLE_VERBOSE
+    const val ENABLE_INFO = Pragma.ENABLE_VERBOSE
+    const val ENABLE_WARN = Pragma.ENABLE_VERBOSE
+    const val ENABLE_DEBUG = Pragma.ENABLE_VERBOSE
+    const val ENABLE_VERBOSE = Pragma.ENABLE_VERBOSE
 
-import android.util.Log;
-
-@SuppressWarnings({"SameParameterValue", "WeakerAccess"})
-public class DebugLog {
-    public static final boolean ENABLE_ERROR = Pragma.ENABLE_VERBOSE;
-    public static final boolean ENABLE_INFO = Pragma.ENABLE_VERBOSE;
-    public static final boolean ENABLE_WARN = Pragma.ENABLE_VERBOSE;
-    public static final boolean ENABLE_DEBUG = Pragma.ENABLE_VERBOSE;
-    public static final boolean ENABLE_VERBOSE = Pragma.ENABLE_VERBOSE;
-
-    public static void e(String tag, String msg) {
+    @JvmStatic
+    fun e(tag: String, msg: String) {
         if (ENABLE_ERROR) {
-            Log.e(tag, msg);
+            Log.e(tag, msg)
         }
     }
 
-    public static void e(String tag, String msg, Throwable tr) {
+    @JvmStatic
+    fun e(tag: String, msg: String, tr: Throwable) {
         if (ENABLE_ERROR) {
-            Log.e(tag, msg, tr);
+            Log.e(tag, msg, tr)
         }
     }
 
-    public static void efmt(String tag, String fmt, Object... args) {
+    @JvmStatic
+    fun efmt(tag: String, fmt: String, vararg args: Any) {
         if (ENABLE_ERROR) {
-            String msg = String.format(Locale.US, fmt, args);
-            Log.e(tag, msg);
+            val msg = String.format(Locale.US, fmt, *args)
+            Log.e(tag, msg)
         }
     }
 
-    public static void i(String tag, String msg) {
+    @JvmStatic
+    fun i(tag: String, msg: String) {
         if (ENABLE_INFO) {
-            Log.i(tag, msg);
+            Log.i(tag, msg)
         }
     }
 
-    public static void i(String tag, String msg, Throwable tr) {
+    @JvmStatic
+    fun i(tag: String, msg: String, tr: Throwable) {
         if (ENABLE_INFO) {
-            Log.i(tag, msg, tr);
+            Log.i(tag, msg, tr)
         }
     }
 
-    public static void ifmt(String tag, String fmt, Object... args) {
+    @JvmStatic
+    fun ifmt(tag: String, fmt: String, vararg args: Any) {
         if (ENABLE_INFO) {
-            String msg = String.format(Locale.US, fmt, args);
-            Log.i(tag, msg);
+            val msg = String.format(Locale.US, fmt, *args)
+            Log.i(tag, msg)
         }
     }
 
-    public static void w(String tag, String msg) {
+    @JvmStatic
+    fun w(tag: String, msg: String) {
         if (ENABLE_WARN) {
-            Log.w(tag, msg);
+            Log.w(tag, msg)
         }
     }
 
-    public static void w(String tag, String msg, Throwable tr) {
+    @JvmStatic
+    fun w(tag: String, msg: String, tr: Throwable) {
         if (ENABLE_WARN) {
-            Log.w(tag, msg, tr);
+            Log.w(tag, msg, tr)
         }
     }
 
-    public static void wfmt(String tag, String fmt, Object... args) {
+    @JvmStatic
+    fun wfmt(tag: String, fmt: String, vararg args: Any) {
         if (ENABLE_WARN) {
-            String msg = String.format(Locale.US, fmt, args);
-            Log.w(tag, msg);
+            val msg = String.format(Locale.US, fmt, *args)
+            Log.w(tag, msg)
         }
     }
 
-    public static void d(String tag, String msg) {
+    @JvmStatic
+    fun d(tag: String, msg: String) {
         if (ENABLE_DEBUG) {
-            Log.d(tag, msg);
+            Log.d(tag, msg)
         }
     }
 
-    public static void d(String tag, String msg, Throwable tr) {
+    @JvmStatic
+    fun d(tag: String, msg: String, tr: Throwable) {
         if (ENABLE_DEBUG) {
-            Log.d(tag, msg, tr);
+            Log.d(tag, msg, tr)
         }
     }
 
-    public static void dfmt(String tag, String fmt, Object... args) {
+    @JvmStatic
+    fun dfmt(tag: String, fmt: String, vararg args: Any) {
         if (ENABLE_DEBUG) {
-            String msg = String.format(Locale.US, fmt, args);
-            Log.d(tag, msg);
+            val msg = String.format(Locale.US, fmt, *args)
+            Log.d(tag, msg)
         }
     }
 
-    public static void v(String tag, String msg) {
+    @JvmStatic
+    fun v(tag: String, msg: String) {
         if (ENABLE_VERBOSE) {
-            Log.v(tag, msg);
+            Log.v(tag, msg)
         }
     }
 
-    public static void v(String tag, String msg, Throwable tr) {
+    @JvmStatic
+    fun v(tag: String, msg: String, tr: Throwable) {
         if (ENABLE_VERBOSE) {
-            Log.v(tag, msg, tr);
+            Log.v(tag, msg, tr)
         }
     }
 
-    public static void vfmt(String tag, String fmt, Object... args) {
+    @JvmStatic
+    fun vfmt(tag: String, fmt: String, vararg args: Any) {
         if (ENABLE_VERBOSE) {
-            String msg = String.format(Locale.US, fmt, args);
-            Log.v(tag, msg);
+            val msg = String.format(Locale.US, fmt, *args)
+            Log.v(tag, msg)
         }
     }
 
-    public static void printStackTrace(Throwable e) {
+    @JvmStatic
+    fun printStackTrace(e: Throwable) {
         if (ENABLE_WARN) {
-            e.printStackTrace();
+            e.printStackTrace()
         }
     }
 
-    public static void printCause(Throwable e) {
+    @JvmStatic
+    fun printCause(e: Throwable) {
         if (ENABLE_WARN) {
-            Throwable cause = e.getCause();
-            if (cause != null)
-                e = cause;
-
-            printStackTrace(e);
+            var cause = e.cause
+            val throwable = cause ?: e
+            printStackTrace(throwable)
         }
     }
 }
+

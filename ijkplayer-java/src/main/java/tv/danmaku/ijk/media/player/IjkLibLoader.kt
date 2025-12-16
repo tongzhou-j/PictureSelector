@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.player
 
-public interface IjkLibLoader {
-    void loadLibrary(String libName) throws UnsatisfiedLinkError,
-            SecurityException;
+interface IjkLibLoader {
+    @Throws(UnsatisfiedLinkError::class, SecurityException::class)
+    fun loadLibrary(libName: String)
 }
+

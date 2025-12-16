@@ -15,16 +15,25 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package tv.danmaku.ijk.media.player
 
-public class MediaInfo {
-    public String mMediaPlayerName;
+import kotlin.jvm.JvmField
 
-    public String mVideoDecoder;
-    public String mVideoDecoderImpl;
+class MediaInfo {
+    @JvmField
+    var mMediaPlayerName: String? = null
 
-    public String mAudioDecoder;
-    public String mAudioDecoderImpl;
+    @JvmField
+    var mVideoDecoder: String? = null
+    @JvmField
+    var mVideoDecoderImpl: String? = null
 
-    public IjkMediaMeta mMeta;
+    @JvmField
+    var mAudioDecoder: String? = null
+    @JvmField
+    var mAudioDecoderImpl: String? = null
+
+    @JvmField
+    var mMeta: IjkMediaMeta? = null
 }
+
