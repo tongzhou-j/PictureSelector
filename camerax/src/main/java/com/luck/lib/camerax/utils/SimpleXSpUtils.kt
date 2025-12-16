@@ -1,30 +1,38 @@
-package com.luck.lib.camerax.utils;
+package com.luck.lib.camerax.utils
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import com.luck.lib.camerax.CustomCameraConfig;
+import android.content.Context
+import android.content.SharedPreferences
+import com.luck.lib.camerax.CustomCameraConfig
+import kotlin.jvm.JvmStatic
 
 /**
  * @author：luck
  * @date：2022/3/15 6:26 下午
  * @describe：SimpleXSpUtils
  */
-public class SimpleXSpUtils {
-    private static SharedPreferences pictureSpUtils;
+object SimpleXSpUtils {
+    @Volatile
+    private var pictureSpUtils: SharedPreferences? = null
 
-    private static SharedPreferences getSp(Context context) {
+    private fun getSp(context: Context): SharedPreferences {
         if (pictureSpUtils == null) {
-            pictureSpUtils = context.getSharedPreferences(CustomCameraConfig.SP_NAME, Context.MODE_PRIVATE);
+            synchronized(SimpleXSpUtils) {
+                if (pictureSpUtils == null) {
+                    pictureSpUtils = context.getSharedPreferences(CustomCameraConfig.SP_NAME, Context.MODE_PRIVATE)
+                }
+            }
         }
-        return pictureSpUtils;
+        return pictureSpUtils!!
     }
 
-    public static void putBoolean(Context context, String key, boolean value) {
-        getSp(context).edit().putBoolean(key, value).apply();
+    @JvmStatic
+    fun putBoolean(context: Context, key: String, value: Boolean) {
+        getSp(context).edit().putBoolean(key, value).apply()
     }
 
-    public static boolean getBoolean(Context context, String key, boolean defValue) {
-        return getSp(context).getBoolean(key, defValue);
+    @JvmStatic
+    fun getBoolean(context: Context, key: String, defValue: Boolean): Boolean {
+        return getSp(context).getBoolean(key, defValue)
     }
 }
+

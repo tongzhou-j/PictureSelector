@@ -1,15 +1,15 @@
-package com.luck.lib.camerax.utils;
+package com.luck.lib.camerax.utils
 
-import java.text.SimpleDateFormat;
+import java.text.SimpleDateFormat
+import kotlin.jvm.JvmStatic
 
 /**
  * @author：luck
  * @date：2021/11/29 8:33 下午
  * @describe：DateUtils
  */
-public class DateUtils {
-
-    private static final SimpleDateFormat sf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+object DateUtils {
+    private val sf = SimpleDateFormat("yyyyMMddHHmmssSSS")
 
     /**
      * 根据时间戳创建文件名
@@ -17,8 +17,10 @@ public class DateUtils {
      * @param prefix 前缀名
      * @return
      */
-    public static String getCreateFileName(String prefix) {
-        long millis = System.currentTimeMillis();
-        return prefix + sf.format(millis);
+    @JvmStatic
+    fun getCreateFileName(prefix: String): String {
+        val millis = System.currentTimeMillis()
+        return prefix + sf.format(millis)
     }
 }
+

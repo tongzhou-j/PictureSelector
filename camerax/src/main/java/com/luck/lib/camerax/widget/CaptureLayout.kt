@@ -1,403 +1,341 @@
-package com.luck.lib.camerax.widget;
+package com.luck.lib.camerax.widget
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.ColorFilter;
-import android.util.AttributeSet;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-
-import androidx.core.graphics.BlendModeColorFilterCompat;
-import androidx.core.graphics.BlendModeCompat;
-
-import com.luck.lib.camerax.CustomCameraConfig;
-import com.luck.lib.camerax.R;
-import com.luck.lib.camerax.listener.CaptureListener;
-import com.luck.lib.camerax.listener.ClickListener;
-import com.luck.lib.camerax.listener.TypeListener;
-import com.luck.lib.camerax.utils.DensityUtil;
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.content.Context
+import android.content.res.Configuration
+import android.graphics.ColorFilter
+import android.util.AttributeSet
+import android.view.Gravity
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
+import com.luck.lib.camerax.CustomCameraConfig
+import com.luck.lib.camerax.R
+import com.luck.lib.camerax.listener.CaptureListener
+import com.luck.lib.camerax.listener.ClickListener
+import com.luck.lib.camerax.listener.TypeListener
+import com.luck.lib.camerax.utils.DensityUtil
 
 /**
  * @author：luck
  * @date：2019-01-04 13:41
  * @describe：CaptureLayout
  */
-public class CaptureLayout extends FrameLayout {
+class CaptureLayout @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private CaptureListener captureListener;    //拍照按钮监听
-    private TypeListener typeListener;          //拍照或录制后接结果按钮监听
-    private ClickListener leftClickListener;    //左边按钮监听
-    private ClickListener rightClickListener;   //右边按钮监听
+    private var captureListener: CaptureListener? = null    //拍照按钮监听
+    private var typeListener: TypeListener? = null          //拍照或录制后接结果按钮监听
+    private var leftClickListener: ClickListener? = null    //左边按钮监听
+    private var rightClickListener: ClickListener? = null   //右边按钮监听
 
-    public void setTypeListener(TypeListener typeListener) {
-        this.typeListener = typeListener;
+    fun setTypeListener(typeListener: TypeListener?) {
+        this.typeListener = typeListener
     }
 
-    public void setCaptureListener(CaptureListener captureListener) {
-        this.captureListener = captureListener;
+    fun setCaptureListener(captureListener: CaptureListener?) {
+        this.captureListener = captureListener
     }
 
-    private ProgressBar progress_bar;       // 拍照等待loading
-    private CaptureButton btn_capture;      //拍照按钮
-    private TypeButton btn_confirm;         //确认按钮
-    private TypeButton btn_cancel;          //取消按钮
-    private ReturnButton btn_return;        //返回按钮
-    private ImageView iv_custom_left;            //左边自定义按钮
-    private ImageView iv_custom_right;            //右边自定义按钮
-    private TextView txt_tip;               //提示文本
+    private lateinit var progress_bar: ProgressBar       // 拍照等待loading
+    private lateinit var btn_capture: CaptureButton      //拍照按钮
+    private lateinit var btn_confirm: TypeButton         //确认按钮
+    private lateinit var btn_cancel: TypeButton          //取消按钮
+    private lateinit var btn_return: ReturnButton        //返回按钮
+    private lateinit var iv_custom_left: ImageView            //左边自定义按钮
+    private lateinit var iv_custom_right: ImageView            //右边自定义按钮
+    private lateinit var txt_tip: TextView               //提示文本
 
-    private final int layout_width;
-    private final int layout_height;
-    private final int button_size;
-    private int iconLeft = 0;
-    private int iconRight = 0;
+    private val layout_width: Int
+    private val layout_height: Int
+    private val button_size: Int
+    private var iconLeft: Int = 0
+    private var iconRight: Int = 0
 
-    public CaptureLayout(Context context) {
-        this(context, null);
-    }
-
-    public CaptureLayout(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public CaptureLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-
-        int screenWidth = DensityUtil.getScreenWidth(getContext());
-        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            layout_width = screenWidth;
+    init {
+        val screenWidth = DensityUtil.getScreenWidth(context)
+        layout_width = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            screenWidth
         } else {
-            layout_width = screenWidth / 2;
+            screenWidth / 2
         }
-        button_size = (int) (layout_width / 4.5f);
-        layout_height = button_size + (button_size / 5) * 2 + 100;
+        button_size = (layout_width / 4.5f).toInt()
+        layout_height = button_size + (button_size / 5) * 2 + 100
 
-        initView();
-        initEvent();
+        initView()
+        initEvent()
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(layout_width, layout_height);
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        setMeasuredDimension(layout_width, layout_height)
     }
 
-    public void initEvent() {
+    fun initEvent() {
         //默认TypeButton为隐藏
-        iv_custom_right.setVisibility(GONE);
-        btn_cancel.setVisibility(GONE);
-        btn_confirm.setVisibility(GONE);
+        iv_custom_right.visibility = GONE
+        btn_cancel.visibility = GONE
+        btn_confirm.visibility = GONE
     }
 
-    public void startTypeBtnAnimator() {
+    fun startTypeBtnAnimator() {
         //拍照录制结果后的动画
         if (this.iconLeft != 0)
-            iv_custom_left.setVisibility(GONE);
+            iv_custom_left.visibility = GONE
         else
-            btn_return.setVisibility(GONE);
+            btn_return.visibility = GONE
         if (this.iconRight != 0)
-            iv_custom_right.setVisibility(GONE);
-        btn_capture.setVisibility(GONE);
-        btn_cancel.setVisibility(VISIBLE);
-        btn_confirm.setVisibility(VISIBLE);
-        btn_cancel.setClickable(false);
-        btn_confirm.setClickable(false);
-        iv_custom_left.setVisibility(GONE);
-        ObjectAnimator animator_cancel = ObjectAnimator.ofFloat(btn_cancel, "translationX", layout_width / 4, 0);
-        ObjectAnimator animator_confirm = ObjectAnimator.ofFloat(btn_confirm, "translationX", -layout_width / 4, 0);
+            iv_custom_right.visibility = GONE
+        btn_capture.visibility = GONE
+        btn_cancel.visibility = VISIBLE
+        btn_confirm.visibility = VISIBLE
+        btn_cancel.isClickable = false
+        btn_confirm.isClickable = false
+        iv_custom_left.visibility = GONE
+        val animator_cancel = ObjectAnimator.ofFloat(btn_cancel, "translationX", layout_width / 4f, 0f)
+        val animator_confirm = ObjectAnimator.ofFloat(btn_confirm, "translationX", -layout_width / 4f, 0f)
 
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(animator_cancel, animator_confirm);
-        set.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                btn_cancel.setClickable(true);
-                btn_confirm.setClickable(true);
+        val set = AnimatorSet()
+        set.playTogether(animator_cancel, animator_confirm)
+        set.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                super.onAnimationEnd(animation)
+                btn_cancel.isClickable = true
+                btn_confirm.isClickable = true
             }
-        });
-        set.setDuration(500);
-        set.start();
+        })
+        set.duration = 500
+        set.start()
     }
 
-
-    private void initView() {
-        setWillNotDraw(false);
+    private fun initView() {
+        setWillNotDraw(false)
         //拍照按钮
-        progress_bar = new ProgressBar(getContext());
-        LayoutParams progress_bar_param = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        progress_bar_param.gravity = Gravity.CENTER;
-        progress_bar.setLayoutParams(progress_bar_param);
-        progress_bar.setVisibility(GONE);
+        progress_bar = ProgressBar(context)
+        val progress_bar_param = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        progress_bar_param.gravity = Gravity.CENTER
+        progress_bar.layoutParams = progress_bar_param
+        progress_bar.visibility = GONE
 
-        btn_capture = new CaptureButton(getContext(), button_size);
-        LayoutParams btn_capture_param = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        btn_capture_param.gravity = Gravity.CENTER;
-        btn_capture.setLayoutParams(btn_capture_param);
-        btn_capture.setCaptureListener(new CaptureListener() {
-            @Override
-            public void takePictures() {
-                if (captureListener != null) {
-                    captureListener.takePictures();
-                }
-                startAlphaAnimation();
+        btn_capture = CaptureButton(context, button_size)
+        val btn_capture_param = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        btn_capture_param.gravity = Gravity.CENTER
+        btn_capture.layoutParams = btn_capture_param
+        btn_capture.setCaptureListener(object : CaptureListener {
+            override fun takePictures() {
+                captureListener?.takePictures()
+                startAlphaAnimation()
             }
 
-            @Override
-            public void recordShort(long time) {
-                if (captureListener != null) {
-                    captureListener.recordShort(time);
-                }
+            override fun recordShort(time: Long) {
+                captureListener?.recordShort(time)
             }
 
-            @Override
-            public void recordStart() {
-                if (captureListener != null) {
-                    captureListener.recordStart();
-                }
-                startAlphaAnimation();
+            override fun recordStart() {
+                captureListener?.recordStart()
+                startAlphaAnimation()
             }
 
-            @Override
-            public void recordEnd(long time) {
-                if (captureListener != null) {
-                    captureListener.recordEnd(time);
-                }
-                startTypeBtnAnimator();
+            override fun recordEnd(time: Long) {
+                captureListener?.recordEnd(time)
+                startTypeBtnAnimator()
             }
 
-            @Override
-            public void changeTime(long time) {
-                if (captureListener != null) {
-                    captureListener.changeTime(time);
-                }
+            override fun changeTime(time: Long) {
+                captureListener?.changeTime(time)
             }
 
-            @Override
-            public void recordZoom(float zoom) {
-                if (captureListener != null) {
-                    captureListener.recordZoom(zoom);
-                }
+            override fun recordZoom(zoom: Float) {
+                captureListener?.recordZoom(zoom)
             }
 
-            @Override
-            public void recordError() {
-                if (captureListener != null) {
-                    captureListener.recordError();
-                }
+            override fun recordError() {
+                captureListener?.recordError()
             }
-        });
+        })
 
         //取消按钮
-        btn_cancel = new TypeButton(getContext(), TypeButton.TYPE_CANCEL, button_size);
-        final LayoutParams btn_cancel_param = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        btn_cancel_param.gravity = Gravity.CENTER_VERTICAL;
-        btn_cancel_param.setMargins((layout_width / 4) - button_size / 2, 0, 0, 0);
-        btn_cancel.setLayoutParams(btn_cancel_param);
-        btn_cancel.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (typeListener != null) {
-                    typeListener.cancel();
-                }
-            }
-        });
+        btn_cancel = TypeButton(context, TypeButton.TYPE_CANCEL, button_size)
+        val btn_cancel_param = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        btn_cancel_param.gravity = Gravity.CENTER_VERTICAL
+        btn_cancel_param.setMargins((layout_width / 4) - button_size / 2, 0, 0, 0)
+        btn_cancel.layoutParams = btn_cancel_param
+        btn_cancel.setOnClickListener {
+            typeListener?.cancel()
+        }
 
         //确认按钮
-        btn_confirm = new TypeButton(getContext(), TypeButton.TYPE_CONFIRM, button_size);
-        LayoutParams btn_confirm_param = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        btn_confirm_param.gravity = Gravity.CENTER_VERTICAL | Gravity.RIGHT;
-        btn_confirm_param.setMargins(0, 0, (layout_width / 4) - button_size / 2, 0);
-        btn_confirm.setLayoutParams(btn_confirm_param);
-        btn_confirm.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (typeListener != null) {
-                    typeListener.confirm();
-                }
-            }
-        });
+        btn_confirm = TypeButton(context, TypeButton.TYPE_CONFIRM, button_size)
+        val btn_confirm_param = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        btn_confirm_param.gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
+        btn_confirm_param.setMargins(0, 0, (layout_width / 4) - button_size / 2, 0)
+        btn_confirm.layoutParams = btn_confirm_param
+        btn_confirm.setOnClickListener {
+            typeListener?.confirm()
+        }
 
         //返回按钮
-        btn_return = new ReturnButton(getContext(), (int) (button_size / 2.5f));
-        LayoutParams btn_return_param = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        btn_return_param.gravity = Gravity.CENTER_VERTICAL;
-        btn_return_param.setMargins(layout_width / 6, 0, 0, 0);
-        btn_return.setLayoutParams(btn_return_param);
-        btn_return.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (leftClickListener != null) {
-                    leftClickListener.onClick();
-                }
-            }
-        });
+        btn_return = ReturnButton(context, (button_size / 2.5f).toInt())
+        val btn_return_param = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        btn_return_param.gravity = Gravity.CENTER_VERTICAL
+        btn_return_param.setMargins(layout_width / 6, 0, 0, 0)
+        btn_return.layoutParams = btn_return_param
+        btn_return.setOnClickListener {
+            leftClickListener?.onClick()
+        }
         //左边自定义按钮
-        iv_custom_left = new ImageView(getContext());
-        LayoutParams iv_custom_param_left = new LayoutParams((int) (button_size / 2.5f), (int) (button_size / 2.5f));
-        iv_custom_param_left.gravity = Gravity.CENTER_VERTICAL;
-        iv_custom_param_left.setMargins(layout_width / 6, 0, 0, 0);
-        iv_custom_left.setLayoutParams(iv_custom_param_left);
-        iv_custom_left.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (leftClickListener != null) {
-                    leftClickListener.onClick();
-                }
-            }
-        });
+        iv_custom_left = ImageView(context)
+        val iv_custom_param_left = LayoutParams((button_size / 2.5f).toInt(), (button_size / 2.5f).toInt())
+        iv_custom_param_left.gravity = Gravity.CENTER_VERTICAL
+        iv_custom_param_left.setMargins(layout_width / 6, 0, 0, 0)
+        iv_custom_left.layoutParams = iv_custom_param_left
+        iv_custom_left.setOnClickListener {
+            leftClickListener?.onClick()
+        }
 
         //右边自定义按钮
-        iv_custom_right = new ImageView(getContext());
-        LayoutParams iv_custom_param_right = new LayoutParams((int) (button_size / 2.5f), (int) (button_size / 2.5f));
-        iv_custom_param_right.gravity = Gravity.CENTER_VERTICAL | Gravity.RIGHT;
-        iv_custom_param_right.setMargins(0, 0, layout_width / 6, 0);
-        iv_custom_right.setLayoutParams(iv_custom_param_right);
-        iv_custom_right.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (rightClickListener != null) {
-                    rightClickListener.onClick();
-                }
-            }
-        });
+        iv_custom_right = ImageView(context)
+        val iv_custom_param_right = LayoutParams((button_size / 2.5f).toInt(), (button_size / 2.5f).toInt())
+        iv_custom_param_right.gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
+        iv_custom_param_right.setMargins(0, 0, layout_width / 6, 0)
+        iv_custom_right.layoutParams = iv_custom_param_right
+        iv_custom_right.setOnClickListener {
+            rightClickListener?.onClick()
+        }
 
-        txt_tip = new TextView(getContext());
-        LayoutParams txt_param = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        txt_param.gravity = Gravity.CENTER_HORIZONTAL;
-        txt_param.setMargins(0, 0, 0, 0);
+        txt_tip = TextView(context)
+        val txt_param = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        txt_param.gravity = Gravity.CENTER_HORIZONTAL
+        txt_param.setMargins(0, 0, 0, 0)
 
-        txt_tip.setText(getCaptureTip());
+        txt_tip.text = getCaptureTip()
 
-        txt_tip.setTextColor(0xFFFFFFFF);
-        txt_tip.setGravity(Gravity.CENTER);
-        txt_tip.setLayoutParams(txt_param);
+        txt_tip.setTextColor(0xFFFFFFFF.toInt())
+        txt_tip.gravity = Gravity.CENTER
+        txt_tip.layoutParams = txt_param
 
-        this.addView(btn_capture);
-        this.addView(progress_bar);
-        this.addView(btn_cancel);
-        this.addView(btn_confirm);
-        this.addView(btn_return);
-        this.addView(iv_custom_left);
-        this.addView(iv_custom_right);
-        this.addView(txt_tip);
-
+        this.addView(btn_capture)
+        this.addView(progress_bar)
+        this.addView(btn_cancel)
+        this.addView(btn_confirm)
+        this.addView(btn_return)
+        this.addView(iv_custom_left)
+        this.addView(iv_custom_right)
+        this.addView(txt_tip)
     }
 
-    private String getCaptureTip() {
-        int buttonFeatures = btn_capture.getButtonFeatures();
-        switch (buttonFeatures) {
-            case CustomCameraConfig.BUTTON_STATE_ONLY_CAPTURE:
-                return getContext().getString(R.string.picture_photo_pictures);
-            case CustomCameraConfig.BUTTON_STATE_ONLY_RECORDER:
-                return getContext().getString(R.string.picture_photo_recording);
-            default:
-                return getContext().getString(R.string.picture_photo_camera);
+    private fun getCaptureTip(): String {
+        val buttonFeatures = btn_capture.getButtonFeatures()
+        return when (buttonFeatures) {
+            CustomCameraConfig.BUTTON_STATE_ONLY_CAPTURE -> context.getString(R.string.picture_photo_pictures)
+            CustomCameraConfig.BUTTON_STATE_ONLY_RECORDER -> context.getString(R.string.picture_photo_recording)
+            else -> context.getString(R.string.picture_photo_camera)
         }
     }
 
-    public void setButtonCaptureEnabled(boolean enabled) {
-        this.progress_bar.setVisibility(enabled ? GONE : VISIBLE);
-        this.btn_capture.setButtonCaptureEnabled(enabled);
+    fun setButtonCaptureEnabled(enabled: Boolean) {
+        this.progress_bar.visibility = if (enabled) GONE else VISIBLE
+        this.btn_capture.setButtonCaptureEnabled(enabled)
     }
 
-    public void setCaptureLoadingColor(int color) {
-        ColorFilter colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(color, BlendModeCompat.SRC_IN);
-        progress_bar.getIndeterminateDrawable().setColorFilter(colorFilter);
+    fun setCaptureLoadingColor(color: Int) {
+        val colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(color, BlendModeCompat.SRC_IN)
+        progress_bar.indeterminateDrawable?.colorFilter = colorFilter
     }
 
-    public void setProgressColor(int color) {
-        this.btn_capture.setProgressColor(color);
+    fun setProgressColor(color: Int) {
+        this.btn_capture.setProgressColor(color)
     }
 
-    public void resetCaptureLayout() {
-        btn_capture.resetState();
-        btn_cancel.setVisibility(GONE);
-        btn_confirm.setVisibility(GONE);
-        btn_capture.setVisibility(VISIBLE);
-        txt_tip.setText(getCaptureTip());
-        txt_tip.setVisibility(View.VISIBLE);
+    fun resetCaptureLayout() {
+        btn_capture.resetState()
+        btn_cancel.visibility = GONE
+        btn_confirm.visibility = GONE
+        btn_capture.visibility = VISIBLE
+        txt_tip.text = getCaptureTip()
+        txt_tip.visibility = View.VISIBLE
         if (this.iconLeft != 0)
-            iv_custom_left.setVisibility(VISIBLE);
+            iv_custom_left.visibility = VISIBLE
         else
-            btn_return.setVisibility(VISIBLE);
+            btn_return.visibility = VISIBLE
         if (this.iconRight != 0)
-            iv_custom_right.setVisibility(VISIBLE);
+            iv_custom_right.visibility = VISIBLE
     }
 
-
-    public void startAlphaAnimation() {
-        txt_tip.setVisibility(View.INVISIBLE);
+    fun startAlphaAnimation() {
+        txt_tip.visibility = View.INVISIBLE
     }
 
-    public void setTextWithAnimation(String tip) {
-        txt_tip.setText(tip);
-        ObjectAnimator animator_txt_tip = ObjectAnimator.ofFloat(txt_tip, "alpha", 0f, 1f, 1f, 0f);
-        animator_txt_tip.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                txt_tip.setText(getCaptureTip());
-                txt_tip.setAlpha(1f);
+    fun setTextWithAnimation(tip: String) {
+        txt_tip.text = tip
+        val animator_txt_tip = ObjectAnimator.ofFloat(txt_tip, "alpha", 0f, 1f, 1f, 0f)
+        animator_txt_tip.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                super.onAnimationEnd(animation)
+                txt_tip.text = getCaptureTip()
+                txt_tip.alpha = 1f
             }
-        });
-        animator_txt_tip.setDuration(2500);
-        animator_txt_tip.start();
+        })
+        animator_txt_tip.duration = 2500
+        animator_txt_tip.start()
     }
 
-    public void setDuration(int duration) {
-        btn_capture.setMaxDuration(duration);
+    fun setDuration(duration: Int) {
+        btn_capture.setMaxDuration(duration)
     }
 
-    public void setMinDuration(int duration) {
-        btn_capture.setMinDuration(duration);
+    fun setMinDuration(duration: Int) {
+        btn_capture.setMinDuration(duration)
     }
 
-    public void setButtonFeatures(int state) {
-        btn_capture.setButtonFeatures(state);
-        txt_tip.setText(getCaptureTip());
+    fun setButtonFeatures(state: Int) {
+        btn_capture.setButtonFeatures(state)
+        txt_tip.text = getCaptureTip()
     }
 
-    public void setTip(String tip) {
-        txt_tip.setText(tip);
+    fun setTip(tip: String) {
+        txt_tip.text = tip
     }
 
-    public void showTip() {
-        txt_tip.setVisibility(VISIBLE);
+    fun showTip() {
+        txt_tip.visibility = VISIBLE
     }
 
-    public void setIconSrc(int iconLeft, int iconRight) {
-        this.iconLeft = iconLeft;
-        this.iconRight = iconRight;
+    fun setIconSrc(iconLeft: Int, iconRight: Int) {
+        this.iconLeft = iconLeft
+        this.iconRight = iconRight
         if (this.iconLeft != 0) {
-            iv_custom_left.setImageResource(iconLeft);
-            iv_custom_left.setVisibility(VISIBLE);
-            btn_return.setVisibility(GONE);
+            iv_custom_left.setImageResource(iconLeft)
+            iv_custom_left.visibility = VISIBLE
+            btn_return.visibility = GONE
         } else {
-            iv_custom_left.setVisibility(GONE);
-            btn_return.setVisibility(VISIBLE);
+            iv_custom_left.visibility = GONE
+            btn_return.visibility = VISIBLE
         }
         if (this.iconRight != 0) {
-            iv_custom_right.setImageResource(iconRight);
-            iv_custom_right.setVisibility(VISIBLE);
+            iv_custom_right.setImageResource(iconRight)
+            iv_custom_right.visibility = VISIBLE
         } else {
-            iv_custom_right.setVisibility(GONE);
+            iv_custom_right.visibility = GONE
         }
     }
 
-    public void setLeftClickListener(ClickListener leftClickListener) {
-        this.leftClickListener = leftClickListener;
+    fun setLeftClickListener(leftClickListener: ClickListener?) {
+        this.leftClickListener = leftClickListener
     }
 
-    public void setRightClickListener(ClickListener rightClickListener) {
-        this.rightClickListener = rightClickListener;
+    fun setRightClickListener(rightClickListener: ClickListener?) {
+        this.rightClickListener = rightClickListener
     }
 }
+

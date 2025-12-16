@@ -7,13 +7,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.text.TextUtils
 import android.util.Log
 import top.zibin.luban.io.ArrayPoolProvide
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.util.ArrayList
 
 @Suppress("unused")
 class Luban private constructor(builder: Builder) : Handler.Callback {
@@ -49,20 +47,20 @@ class Luban private constructor(builder: Builder) : Handler.Callback {
      * @param context A context.
      */
     private fun getImageCacheFile(context: Context, suffix: String?): File {
-        if (TextUtils.isEmpty(mTargetDir)) {
+        if (mTargetDir.isNullOrEmpty()) {
             mTargetDir = getImageCacheDir(context)?.absolutePath
         }
 
         val cacheBuilder = mTargetDir + "/" +
                 System.currentTimeMillis() +
                 (Math.random() * 1000).toInt() +
-                (if (TextUtils.isEmpty(suffix)) ".jpg" else suffix)
+                (if (suffix.isNullOrEmpty()) ".jpg" else suffix)
 
         return File(cacheBuilder)
     }
 
     private fun getImageCustomFile(context: Context, filename: String): File {
-        if (TextUtils.isEmpty(mTargetDir)) {
+        if (mTargetDir.isNullOrEmpty()) {
             mTargetDir = getImageCacheDir(context)?.absolutePath
         }
 
@@ -160,7 +158,7 @@ class Luban private constructor(builder: Builder) : Handler.Callback {
 
     @Throws(IOException::class)
     private fun get(context: Context): List<File> {
-        val results = ArrayList<File>()
+        val results = mutableListOf<File>()
         val iterator = mStreamProviders.iterator()
 
         while (iterator.hasNext()) {
@@ -239,7 +237,7 @@ class Luban private constructor(builder: Builder) : Handler.Callback {
         var mCompressListener: OnCompressListener? = null
         var mNewCompressListener: OnNewCompressListener? = null
         var mCompressionPredicate: CompressionPredicate? = null
-        val mStreamProviders: MutableList<InputStreamProvider> = ArrayList()
+        val mStreamProviders: MutableList<InputStreamProvider> = mutableListOf()
 
         private fun build(): Luban {
             return Luban(this)

@@ -1203,20 +1203,20 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
      * SimpleCameraX添加权限说明
      */
     private class MeOnSimpleXPermissionDeniedListener : OnSimpleXPermissionDeniedListener {
-        override fun onDenied(context: Context?, permission: String?, requestCode: Int) {
-            val tips: String?
+        override fun onDenied(context: Context, permission: String, requestCode: Int) {
+            val tips: String
             if (TextUtils.equals(permission, Manifest.permission.RECORD_AUDIO)) {
                 tips = "缺少麦克风权限\n可能会导致录视频无法采集声音"
             } else {
                 tips = "缺少相机权限\n可能会导致不能使用摄像头功能"
             }
-            val dialog = RemindDialog.buildDialog(context ?: return, tips)
+            val dialog = RemindDialog.buildDialog(context, tips)
             dialog.setButtonText("去设置")
             dialog.setButtonTextColor(-0x828201)
             dialog.setContentTextColor(-0xcccccd)
             dialog.setOnDialogClickListener(object : OnDialogClickListener {
                 override fun onClick(view: View?) {
-                    SimpleXPermissionUtil.goIntentSetting(context as Activity?, requestCode)
+                    SimpleXPermissionUtil.goIntentSetting(context as Activity, requestCode)
                     dialog.dismiss()
                 }
             })
@@ -1234,11 +1234,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
     private class MeOnSimpleXPermissionDescriptionListener :
         OnSimpleXPermissionDescriptionListener {
         override fun onPermissionDescription(
-            context: Context?,
+            context: Context,
             viewGroup: ViewGroup,
-            permission: String?
+            permission: String
         ) {
-            addPermissionDescription(true, viewGroup, arrayOf<String?>(permission))
+            addPermissionDescription(true, viewGroup, arrayOf(permission))
         }
 
         override fun onDismiss(viewGroup: ViewGroup) {
@@ -1510,7 +1510,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             camera.setPermissionDeniedListener(this@MainActivity.getSimpleXPermissionDeniedListener())
             camera.setPermissionDescriptionListener(this@MainActivity.getSimpleXPermissionDescriptionListener())
             camera.setImageEngine(object : CameraImageEngine {
-                override fun loadImage(context: Context, url: String?, imageView: ImageView) {
+                override fun loadImage(context: Context, url: String, imageView: ImageView) {
                     Glide.with(context).load(url).into(imageView)
                 }
             })

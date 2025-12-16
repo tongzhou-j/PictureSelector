@@ -2,7 +2,6 @@ package top.zibin.luban.io
 
 import android.annotation.SuppressLint
 import android.util.Log
-import java.util.HashMap
 import java.util.NavigableMap
 import java.util.TreeMap
 
@@ -29,8 +28,8 @@ class LruArrayPool : ArrayPool {
 
     private val groupedMap = GroupedLinkedMap<Key, Any>()
     private val keyPool = KeyPool()
-    private val sortedSizes = HashMap<Class<*>, NavigableMap<Int, Int>>()
-    private val adapters = HashMap<Class<*>, ArrayAdapterInterface<*>>()
+    private val sortedSizes = hashMapOf<Class<*>, NavigableMap<Int, Int>>()
+    private val adapters = hashMapOf<Class<*>, ArrayAdapterInterface<*>>()
     private val maxSize: Int
     private var currentSize: Int = 0
 

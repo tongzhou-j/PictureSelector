@@ -1,7 +1,6 @@
 package top.zibin.luban
 
 import android.graphics.BitmapFactory
-import android.text.TextUtils
 import android.util.Log
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -49,10 +48,7 @@ enum class Checker {
      * @return
      */
     fun isContent(url: String?): Boolean {
-        if (TextUtils.isEmpty(url)) {
-            return false
-        }
-        return url!!.startsWith("content://")
+        return !url.isNullOrEmpty() && url.startsWith("content://")
     }
 
     private fun getOrientation(jpeg: ByteArray?): Int {

@@ -1,8 +1,5 @@
 package top.zibin.luban.io
 
-import java.util.ArrayList
-import java.util.HashMap
-
 /**
  * @author：luck
  * @date：2021/8/26 3:16 下午
@@ -10,7 +7,7 @@ import java.util.HashMap
  */
 class GroupedLinkedMap<K : PoolAble, V> {
     private val head = LinkedEntry<K, V>()
-    private val keyToEntry = HashMap<K, LinkedEntry<K, V>>()
+    private val keyToEntry = hashMapOf<K, LinkedEntry<K, V>>()
 
     fun put(key: K, value: V) {
         var entry = keyToEntry[key]
@@ -136,7 +133,7 @@ class GroupedLinkedMap<K : PoolAble, V> {
 
         fun add(value: V) {
             if (values == null) {
-                values = ArrayList()
+                values = mutableListOf()
             }
             values!!.add(value)
         }

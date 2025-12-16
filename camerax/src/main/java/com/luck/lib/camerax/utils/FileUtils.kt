@@ -1,36 +1,31 @@
-package com.luck.lib.camerax.utils;
+package com.luck.lib.camerax.utils
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.text.TextUtils;
-
-import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Objects;
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import androidx.annotation.Nullable
+import androidx.core.content.FileProvider
+import kotlin.jvm.JvmStatic
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.ByteArrayOutputStream
+import java.io.Closeable
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * @author：luck
  * @date：2021/11/29 8:17 下午
  * @describe：FileUtils
  */
-public class FileUtils {
-
-    public static final String POSTFIX = ".jpeg";
-
-    public static final String POST_VIDEO = ".mp4";
+object FileUtils {
+    const val POSTFIX = ".jpeg"
+    const val POST_VIDEO = ".mp4"
 
     /**
      * @param context
@@ -39,8 +34,15 @@ public class FileUtils {
      * @param outCameraDirectory
      * @return
      */
-    public static File createCameraFile(Context context, int chooseMode, String fileName, String format, String outCameraDirectory) {
-        return createMediaFile(context, chooseMode, fileName, format, outCameraDirectory);
+    @JvmStatic
+    fun createCameraFile(
+        context: Context,
+        chooseMode: Int,
+        fileName: String?,
+        format: String?,
+        outCameraDirectory: String?
+    ): File {
+        return createMediaFile(context, chooseMode, fileName, format, outCameraDirectory)
     }
 
     /**
@@ -53,8 +55,14 @@ public class FileUtils {
      * @param outCameraDirectory
      * @return
      */
-    private static File createMediaFile(Context context, int chooseMode, String fileName, String format, String outCameraDirectory) {
-        return createOutFile(context, chooseMode, fileName, format, outCameraDirectory);
+    private fun createMediaFile(
+        context: Context,
+        chooseMode: Int,
+        fileName: String?,
+        format: String?,
+        outCameraDirectory: String?
+    ): File {
+        return createOutFile(context, chooseMode, fileName, format, outCameraDirectory)
     }
 
     /**
@@ -67,41 +75,49 @@ public class FileUtils {
      * @param outCameraDirectory 输出目录
      * @return
      */
-    private static File createOutFile(Context ctx, int chooseMode, String fileName, String format, String outCameraDirectory) {
-        Context context = ctx.getApplicationContext();
-        File folderDir;
-        if (TextUtils.isEmpty(outCameraDirectory)) {
+    private fun createOutFile(
+        ctx: Context,
+        chooseMode: Int,
+        fileName: String?,
+        format: String?,
+        outCameraDirectory: String?
+    ): File {
+        val context = ctx.applicationContext
+        val folderDir: File
+        if (outCameraDirectory.isNullOrEmpty()) {
             // 外部没有自定义拍照存储路径使用默认
-            File rootDir;
-            if (TextUtils.equals(Environment.MEDIA_MOUNTED, Environment.getExternalStorageState())) {
-                rootDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-                folderDir = new File(rootDir.getAbsolutePath() + File.separator + CameraUtils.CAMERA + File.separator);
+            val rootDir: File
+            if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+                rootDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+                folderDir = File(rootDir.absolutePath + File.separator + CameraUtils.CAMERA + File.separator)
             } else {
-                rootDir = getRootDirFile(context, chooseMode);
-                folderDir = new File(rootDir.getAbsolutePath() + File.separator);
+                rootDir = getRootDirFile(context, chooseMode) ?: context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+                folderDir = File(rootDir.absolutePath + File.separator)
             }
             if (!rootDir.exists()) {
-                rootDir.mkdirs();
+                rootDir.mkdirs()
             }
         } else {
             // 自定义存储路径
-            folderDir = new File(outCameraDirectory);
-            if (!Objects.requireNonNull(folderDir.getParentFile()).exists()) {
-                folderDir.getParentFile().mkdirs();
+            folderDir = File(outCameraDirectory)
+            folderDir.parentFile?.let { parent ->
+                if (!parent.exists()) {
+                    parent.mkdirs()
+                }
             }
         }
         if (!folderDir.exists()) {
-            folderDir.mkdirs();
+            folderDir.mkdirs()
         }
 
-        boolean isOutFileNameEmpty = TextUtils.isEmpty(fileName);
+        val isOutFileNameEmpty = fileName.isNullOrEmpty()
         if (chooseMode == CameraUtils.TYPE_VIDEO) {
-            String newFileVideoName = isOutFileNameEmpty ? DateUtils.getCreateFileName("VID_") + POST_VIDEO : fileName;
-            return new File(folderDir, newFileVideoName);
+            val newFileVideoName = if (isOutFileNameEmpty) DateUtils.getCreateFileName("VID_") + POST_VIDEO else fileName
+            return File(folderDir, newFileVideoName)
         }
-        String suffix = TextUtils.isEmpty(format) ? POSTFIX : format;
-        String newFileImageName = isOutFileNameEmpty ? DateUtils.getCreateFileName("IMG_") + suffix : fileName;
-        return new File(folderDir, newFileImageName);
+        val suffix = format ?: POSTFIX
+        val newFileImageName = if (isOutFileNameEmpty) DateUtils.getCreateFileName("IMG_") + suffix else fileName
+        return File(folderDir, newFileImageName)
     }
 
     /**
@@ -111,13 +127,13 @@ public class FileUtils {
      * @param type
      * @return
      */
-    private static File getRootDirFile(Context context, int type) {
-        if (type == CameraUtils.TYPE_VIDEO) {
-            return context.getExternalFilesDir(Environment.DIRECTORY_MOVIES);
+    private fun getRootDirFile(context: Context, type: Int): File? {
+        return if (type == CameraUtils.TYPE_VIDEO) {
+            context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+        } else {
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         }
-        return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     }
-
 
     /**
      * 创建一个临时路径，主要是解决华为手机放弃拍照后会弹出相册图片被删除的提示
@@ -125,14 +141,15 @@ public class FileUtils {
      * @param isVideo
      * @return
      */
-    public static File createTempFile(Context context, boolean isVideo) {
-        File externalFilesDir = context.getExternalFilesDir("");
-        File tempCameraFile = new File(externalFilesDir.getAbsolutePath(), ".TemporaryCamera");
+    @JvmStatic
+    fun createTempFile(context: Context, isVideo: Boolean): File {
+        val externalFilesDir = context.getExternalFilesDir("")
+        val tempCameraFile = File(externalFilesDir?.absolutePath ?: "", ".TemporaryCamera")
         if (!tempCameraFile.exists()) {
-            tempCameraFile.mkdirs();
+            tempCameraFile.mkdirs()
         }
-        String fileName = System.currentTimeMillis() + (isVideo ? CameraUtils.MP4 : CameraUtils.JPEG);
-        return new File(tempCameraFile.getAbsolutePath(), fileName);
+        val fileName = System.currentTimeMillis().toString() + if (isVideo) CameraUtils.MP4 else CameraUtils.JPEG
+        return File(tempCameraFile.absolutePath, fileName)
     }
 
     /**
@@ -142,16 +159,15 @@ public class FileUtils {
      * @param cameraFile
      * @return
      */
-    public static Uri parUri(Context context, File cameraFile) {
-        Uri imageUri;
-        String authority = context.getPackageName() + ".luckProvider";
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+    @JvmStatic
+    fun parUri(context: Context, cameraFile: File): Uri {
+        val authority = context.packageName + ".luckProvider"
+        return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
             //通过FileProvider创建一个content类型的Uri
-            imageUri = FileProvider.getUriForFile(context, authority, cameraFile);
+            FileProvider.getUriForFile(context, authority, cameraFile)
         } else {
-            imageUri = Uri.fromFile(cameraFile);
+            Uri.fromFile(cameraFile)
         }
-        return imageUri;
     }
 
     /**
@@ -160,13 +176,10 @@ public class FileUtils {
      * @param url
      * @return
      */
-    public static boolean isContent(String url) {
-        if (TextUtils.isEmpty(url)) {
-            return false;
-        }
-        return url.startsWith("content://");
+    @JvmStatic
+    fun isContent(url: String?): Boolean {
+        return !url.isNullOrEmpty() && url.startsWith("content://")
     }
-
 
     /**
      * 文件复制
@@ -176,59 +189,67 @@ public class FileUtils {
      * @param newPath
      * @return
      */
-    public static boolean copyPath(Context context, String originalPath, String newPath) {
-        FileOutputStream fos = null;
-        ByteArrayOutputStream stream = null;
+    @JvmStatic
+    fun copyPath(context: Context, originalPath: String, newPath: String): Boolean {
+        var fos: FileOutputStream? = null
+        var stream: ByteArrayOutputStream? = null
         try {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(originalPath, options);
-            options.inSampleSize = BitmapUtils.computeSize(options.outWidth, options.outHeight);
-            options.inJustDecodeBounds = false;
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = true
+            BitmapFactory.decodeFile(originalPath, options)
+            options.inSampleSize = BitmapUtils.computeSize(options.outWidth, options.outHeight)
+            options.inJustDecodeBounds = false
 
-            Bitmap newBitmap = BitmapUtils.toHorizontalMirror(BitmapFactory.decodeFile(originalPath, options));
-            stream = new ByteArrayOutputStream();
-            newBitmap.compress(newBitmap.hasAlpha() ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, 90, stream);
-            newBitmap.recycle();
-            fos = new FileOutputStream(newPath);
-            fos.write(stream.toByteArray());
-            fos.flush();
-            FileUtils.deleteFile(context, originalPath);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+            val newBitmap = BitmapUtils.toHorizontalMirror(BitmapFactory.decodeFile(originalPath, options))
+            stream = ByteArrayOutputStream()
+            newBitmap.compress(
+                if (newBitmap.hasAlpha()) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG,
+                90,
+                stream
+            )
+            newBitmap.recycle()
+            fos = FileOutputStream(newPath)
+            fos.write(stream.toByteArray())
+            fos.flush()
+            deleteFile(context, originalPath)
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
         } finally {
-            FileUtils.close(fos);
-            FileUtils.close(stream);
+            close(fos)
+            close(stream)
         }
-        return false;
+        return false
     }
 
     /**
      * 复制文件
      *
-     * @param is 文件输入流
-     * @param os 文件输出流
+     * @param inputStream 文件输入流
+     * @param outputStream 文件输出流
      * @return
      */
-    public static boolean writeFileFromIS(final InputStream is, final OutputStream os) {
-        OutputStream osBuffer = null;
-        BufferedInputStream isBuffer = null;
+    @JvmStatic
+    fun writeFileFromIS(inputStream: InputStream, outputStream: OutputStream): Boolean {
+        var osBuffer: BufferedOutputStream? = null
+        var isBuffer: BufferedInputStream? = null
         try {
-            isBuffer = new BufferedInputStream(is);
-            osBuffer = new BufferedOutputStream(os);
-            byte[] data = new byte[1024];
-            for (int len; (len = isBuffer.read(data)) != -1; ) {
-                os.write(data, 0, len);
+            isBuffer = BufferedInputStream(inputStream)
+            osBuffer = BufferedOutputStream(outputStream)
+            val data = ByteArray(1024)
+            var len = isBuffer.read(data)
+            while (len != -1) {
+                outputStream.write(data, 0, len)
+                len = isBuffer.read(data)
             }
-            os.flush();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            outputStream.flush()
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         } finally {
-            close(isBuffer);
-            close(osBuffer);
+            close(isBuffer)
+            close(osBuffer)
         }
     }
 
@@ -238,30 +259,33 @@ public class FileUtils {
      * @param context Context
      * @param path    path
      */
-    public static void deleteFile(Context context, String path) {
+    @JvmStatic
+    fun deleteFile(context: Context, path: String) {
         try {
             if (isContent(path)) {
-                context.getContentResolver().delete(Uri.parse(path), null, null);
+                context.contentResolver.delete(Uri.parse(path), null, null)
             } else {
-                File file = new File(path);
+                val file = File(path)
                 if (file.exists()) {
-                    file.delete();
+                    file.delete()
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static void close(@Nullable Closeable c) {
+    @JvmStatic
+    fun close(@Nullable c: Closeable?) {
         // java.lang.IncompatibleClassChangeError: interface not implemented
-        if (c instanceof Closeable) {
+        if (c is Closeable) {
             try {
-                c.close();
-            } catch (Exception e) {
+                c.close()
+            } catch (e: Exception) {
                 // silence
             }
         }
     }
 }
+

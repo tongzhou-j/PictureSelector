@@ -1,22 +1,23 @@
-package com.luck.lib.camerax.listener;
+package com.luck.lib.camerax.listener
 
 /**
  * @author：luck
  * @date：2020-01-04 13:38
  * @describe：CaptureListener
  */
-public interface CaptureListener {
-    void takePictures();
+interface CaptureListener {
+    fun takePictures()
 
-    void recordShort(long time);
+    fun recordShort(time: Long)
 
-    void recordStart();
+    fun recordStart()
 
-    void recordEnd(long time);
+    fun recordEnd(time: Long)
 
-    void changeTime(long duration);
+    fun changeTime(duration: Long)
 
-    void recordZoom(float zoom);
+    fun recordZoom(zoom: Float)
 
-    void recordError();
+    fun recordError()
 }
+
