@@ -1,6 +1,8 @@
 # PictureSelector 3.0
    一款针对Android平台下的图片选择器，支持从相册获取图片、视频、音频&拍照，支持裁剪(单图or多图裁剪)、压缩、主题自定义配置等功能，支持动态获取权限&适配Android 5.0+系统的开源图片选择框架。<br>
    
+   **📝 本项目基于 [LuckSiege/PictureSelector](https://github.com/LuckSiege/PictureSelector) 翻译和修改而来，将所有 Java 代码转换为 Kotlin，以获得更好的性能和现代化的 Android 开发体验。**<br>
+   
    **✨ 现已完全迁移至 Kotlin！** 所有模块（compress、camerax、ucrop、ijkplayer）已转换为 Kotlin，以获得更好的性能和现代化的 Android 开发体验。<br>
     
    [English🇺🇸](README.md)

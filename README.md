@@ -1,6 +1,8 @@
 # PictureSelector 3.0 
    A PictureSelector for Android platform, which supports obtaining pictures, videos, audio & photos from photo albums, cutting (single picture or multi picture cutting), compression, theme custom configuration and other functions, and supports dynamic access & an open source picture selection framework suitable for Android 5.0 + system.<br>
    
+   **📝 This project is translated and modified from [LuckSiege/PictureSelector](https://github.com/LuckSiege/PictureSelector), with all Java code converted to Kotlin for better performance and modern Android development.**<br>
+   
    **✨ Now fully migrated to Kotlin!** All modules (compress, camerax, ucrop, ijkplayer) have been converted to Kotlin for better performance and modern Android development.<br> 
    
    [简体中文🇨🇳](README_CN.md)
