@@ -28,6 +28,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
+import androidx.annotation.RequiresPermission
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
@@ -42,6 +43,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.MeteringPoint
 import androidx.camera.core.MeteringPointFactory
 import androidx.camera.core.Preview
+import androidx.camera.core.UseCase
 import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.VideoCapture
 import androidx.camera.core.ZoomState
@@ -287,9 +289,11 @@ class CustomCameraView @JvmOverloads constructor(
                 )
             }
 
+            @RequiresPermission(Manifest.permission.RECORD_AUDIO)
+            @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
             override fun recordStart() {
                 val videoCapture = mVideoCapture
-                if (videoCapture != null && mCameraProvider?.isBound(videoCapture as androidx.camera.core.UseCase) != true) {
+                if (videoCapture != null && mCameraProvider?.isBound(videoCapture as UseCase) != true) {
                     bindCameraVideoUseCases()
                 }
                 useCameraCases = LifecycleCameraController.VIDEO_CAPTURE
