@@ -470,6 +470,11 @@ PictureSelector.create(this)
 -keep class com.yalantis.ucrop** { *; }
 -keep interface com.yalantis.ucrop** { *; }
 ```
+
+## 致谢
+
+特别感谢 [LuckSiege](https://github.com/LuckSiege) 和原 [PictureSelector](https://github.com/LuckSiege/PictureSelector) 项目提供了如此优秀的开源图片选择库。本项目是基于原项目的 Kotlin 迁移版本。
+
 ## License
 ```sh
 Copyright 2016 Luck

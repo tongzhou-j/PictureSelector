@@ -466,6 +466,11 @@ The advanced use cases are as follow：
 -keep class com.yalantis.ucrop** { *; }
 -keep interface com.yalantis.ucrop** { *; }
 ```
+
+## Acknowledgments
+
+Special thanks to [LuckSiege](https://github.com/LuckSiege) and the original [PictureSelector](https://github.com/LuckSiege/PictureSelector) project for providing such an excellent open-source image selection library. This project is a Kotlin migration based on the original work.
+
 ## License
 ```sh
 Copyright 2016 Luck
