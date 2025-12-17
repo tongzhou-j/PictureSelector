@@ -1,16 +1,16 @@
-package com.yalantis.ucrop;
+package com.yalantis.ucrop
 
-import androidx.annotation.NonNull;
+import androidx.annotation.NonNull
+import okhttp3.OkHttpClient
 
-import okhttp3.OkHttpClient;
+class OkHttpClientStore private constructor() {
+    companion object {
+        @JvmField
+        val INSTANCE = OkHttpClientStore()
+    }
 
-public class OkHttpClientStore {
-
-    private OkHttpClientStore() {}
-
-    public final static OkHttpClientStore INSTANCE = new OkHttpClientStore();
-
-    private OkHttpClient client;
+    @JvmField
+    internal var client: OkHttpClient? = null
 
     /**
      * @return stored OkHttpClient if it was already set,
@@ -18,18 +18,19 @@ public class OkHttpClientStore {
      *         and store it
      */
     @NonNull
-    public OkHttpClient getClient() {
+    fun getClient(): OkHttpClient {
         if (client == null) {
-            client = new OkHttpClient();
+            client = OkHttpClient()
         }
-        return client;
+        return client!!
     }
 
     /**
      * @param client OkHttpClient for downloading bitmap form remote Uri,
      *               it may contain any preferences you need
      */
-    void setClient(@NonNull OkHttpClient client) {
-        this.client = client;
+    internal fun setClient(@NonNull client: OkHttpClient) {
+        this.client = client
     }
 }
+

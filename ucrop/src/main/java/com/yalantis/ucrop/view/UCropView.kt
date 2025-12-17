@@ -1,87 +1,79 @@
-package com.yalantis.ucrop.view;
+package com.yalantis.ucrop.view
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.RectF;
-import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.widget.FrameLayout;
+import android.content.Context
+import android.content.res.TypedArray
+import android.graphics.RectF
+import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.widget.FrameLayout
+import androidx.annotation.NonNull
+import com.yalantis.ucrop.R
+import com.yalantis.ucrop.callback.CropBoundsChangeListener
+import com.yalantis.ucrop.callback.OverlayViewChangeListener
 
-import androidx.annotation.NonNull;
+class UCropView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : FrameLayout(context, attrs, defStyleAttr) {
 
-import com.yalantis.ucrop.R;
-import com.yalantis.ucrop.callback.CropBoundsChangeListener;
-import com.yalantis.ucrop.callback.OverlayViewChangeListener;
+    private var mGestureCropImageView: GestureCropImageView
+    private val mViewOverlay: OverlayView
 
-public class UCropView extends FrameLayout {
+    init {
+        LayoutInflater.from(context).inflate(R.layout.ucrop_view, this, true)
+        mGestureCropImageView = findViewById(R.id.image_view_crop)
+        mViewOverlay = findViewById(R.id.view_overlay)
 
-    private GestureCropImageView mGestureCropImageView;
-    private final OverlayView mViewOverlay;
+        val a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_UCropView)
+        mViewOverlay.processStyledAttributes(a)
+        mGestureCropImageView.processStyledAttributes(a)
+        a.recycle()
 
-    public UCropView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        setListenersToViews()
     }
 
-    public UCropView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    private fun setListenersToViews() {
+        mGestureCropImageView.setCropBoundsChangeListener(object : CropBoundsChangeListener {
+            override fun onCropAspectRatioChanged(cropRatio: Float) {
+                mViewOverlay.setTargetAspectRatio(cropRatio)
+            }
+        })
+        mViewOverlay.setOverlayViewChangeListener(object : OverlayViewChangeListener {
+            override fun onCropRectUpdated(cropRect: RectF) {
+                mGestureCropImageView.setCropRect(cropRect)
+            }
 
-        LayoutInflater.from(context).inflate(R.layout.ucrop_view, this, true);
-        mGestureCropImageView = findViewById(R.id.image_view_crop);
-        mViewOverlay = findViewById(R.id.view_overlay);
-
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_UCropView);
-        mViewOverlay.processStyledAttributes(a);
-        mGestureCropImageView.processStyledAttributes(a);
-        a.recycle();
-
-
-        setListenersToViews();
+            override fun postTranslate(deltaX: Float, deltaY: Float) {
+                mGestureCropImageView.postTranslate(deltaX, deltaY)
+            }
+        })
     }
 
-    private void setListenersToViews() {
-        mGestureCropImageView.setCropBoundsChangeListener(new CropBoundsChangeListener() {
-            @Override
-            public void onCropAspectRatioChanged(float cropRatio) {
-                mViewOverlay.setTargetAspectRatio(cropRatio);
-            }
-        });
-        mViewOverlay.setOverlayViewChangeListener(new OverlayViewChangeListener() {
-            @Override
-            public void onCropRectUpdated(RectF cropRect) {
-                mGestureCropImageView.setCropRect(cropRect);
-            }
-
-            @Override
-            public void postTranslate(float deltaX, float deltaY) {
-                mGestureCropImageView.postTranslate(deltaX, deltaY);
-            }
-        });
-    }
-
-    @Override
-    public boolean shouldDelayChildPressedState() {
-        return false;
+    override fun shouldDelayChildPressedState(): Boolean {
+        return false
     }
 
     @NonNull
-    public GestureCropImageView getCropImageView() {
-        return mGestureCropImageView;
+    fun getCropImageView(): GestureCropImageView {
+        return mGestureCropImageView
     }
 
     @NonNull
-    public OverlayView getOverlayView() {
-        return mViewOverlay;
+    fun getOverlayView(): OverlayView {
+        return mViewOverlay
     }
 
     /**
      * Method for reset state for UCropImageView such as rotation, scale, translation.
      * Be careful: this method recreate UCropImageView instance and reattach it to layout.
      */
-    public void resetCropImageView() {
-        removeView(mGestureCropImageView);
-        mGestureCropImageView = new GestureCropImageView(getContext());
-        setListenersToViews();
-        mGestureCropImageView.setCropRect(getOverlayView().getCropViewRect());
-        addView(mGestureCropImageView, 0);
+    fun resetCropImageView() {
+        removeView(mGestureCropImageView)
+        mGestureCropImageView = GestureCropImageView(context)
+        setListenersToViews()
+        mGestureCropImageView.setCropRect(getOverlayView().getCropViewRect())
+        addView(mGestureCropImageView, 0)
     }
 }
+

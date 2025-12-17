@@ -1,168 +1,159 @@
-package com.yalantis.ucrop.view.widget;
+package com.yalantis.ucrop.view.widget
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.os.Build;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.view.Gravity;
-
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.core.content.ContextCompat;
-
-import com.yalantis.ucrop.R;
-import com.yalantis.ucrop.model.AspectRatio;
-import com.yalantis.ucrop.view.CropImageView;
-
-import java.util.Locale;
+import android.annotation.TargetApi
+import android.content.Context
+import android.content.res.ColorStateList
+import android.content.res.TypedArray
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.os.Build
+import android.text.TextUtils
+import android.util.AttributeSet
+import android.view.Gravity
+import androidx.annotation.ColorInt
+import androidx.annotation.NonNull
+import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.content.ContextCompat
+import com.yalantis.ucrop.R
+import com.yalantis.ucrop.model.AspectRatio
+import com.yalantis.ucrop.view.CropImageView
+import java.util.Locale
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
  */
-public class AspectRatioTextView extends AppCompatTextView {
-
-    private final float MARGIN_MULTIPLIER = 1.5f;
-    private final Rect mCanvasClipBounds = new Rect();
-    private Paint mDotPaint;
-    private int mDotSize;
-    private float mAspectRatio;
-
-    private String mAspectRatioTitle;
-    private float mAspectRatioX, mAspectRatioY;
-
-    public AspectRatioTextView(Context context) {
-        this(context, null);
-    }
-
-    public AspectRatioTextView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public AspectRatioTextView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView);
-        init(a);
-    }
+class AspectRatioTextView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public AspectRatioTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView);
-        init(a);
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : this(context, attrs, defStyleAttr) {
+        val a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView)
+        init(a)
+    }
+
+    private val MARGIN_MULTIPLIER = 1.5f
+    private val mCanvasClipBounds = Rect()
+    private var mDotPaint: Paint? = null
+    private var mDotSize: Int = 0
+    private var mAspectRatio: Float = 0f
+
+    private var mAspectRatioTitle: String? = null
+    private var mAspectRatioX: Float = 0f
+    private var mAspectRatioY: Float = 0f
+
+    init {
+        val a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView)
+        init(a)
     }
 
     /**
      * @param activeColor the resolved color for active elements
      */
-
-    public void setActiveColor(@ColorInt int activeColor) {
-        applyActiveColor(activeColor);
-        invalidate();
+    fun setActiveColor(@ColorInt activeColor: Int) {
+        applyActiveColor(activeColor)
+        invalidate()
     }
 
-    public void setAspectRatio(@NonNull AspectRatio aspectRatio) {
-        mAspectRatioTitle = aspectRatio.getAspectRatioTitle();
-        mAspectRatioX = aspectRatio.getAspectRatioX();
-        mAspectRatioY = aspectRatio.getAspectRatioY();
+    fun setAspectRatio(@NonNull aspectRatio: AspectRatio) {
+        mAspectRatioTitle = aspectRatio.aspectRatioTitle
+        mAspectRatioX = aspectRatio.aspectRatioX
+        mAspectRatioY = aspectRatio.aspectRatioY
 
-        if (mAspectRatioX == CropImageView.SOURCE_IMAGE_ASPECT_RATIO || mAspectRatioY == CropImageView.SOURCE_IMAGE_ASPECT_RATIO) {
-            mAspectRatio = CropImageView.SOURCE_IMAGE_ASPECT_RATIO;
+        mAspectRatio = if (mAspectRatioX == CropImageView.SOURCE_IMAGE_ASPECT_RATIO || mAspectRatioY == CropImageView.SOURCE_IMAGE_ASPECT_RATIO) {
+            CropImageView.SOURCE_IMAGE_ASPECT_RATIO
         } else {
-            mAspectRatio = mAspectRatioX / mAspectRatioY;
+            mAspectRatioX / mAspectRatioY
         }
 
-        setTitle();
+        setTitle()
     }
 
-    public float getAspectRatio(boolean toggleRatio) {
+    fun getAspectRatio(toggleRatio: Boolean): Float {
         if (toggleRatio) {
-            toggleAspectRatio();
-            setTitle();
+            toggleAspectRatio()
+            setTitle()
         }
-        return mAspectRatio;
+        return mAspectRatio
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
 
-        if (isSelected()) {
-            canvas.getClipBounds(mCanvasClipBounds);
+        if (isSelected) {
+            canvas.getClipBounds(mCanvasClipBounds)
 
-            float x = (mCanvasClipBounds.right - mCanvasClipBounds.left) / 2.0f;
-            float y = (mCanvasClipBounds.bottom - mCanvasClipBounds.top / 2f) - mDotSize * MARGIN_MULTIPLIER;
+            val x = (mCanvasClipBounds.right - mCanvasClipBounds.left) / 2.0f
+            val y = (mCanvasClipBounds.bottom - mCanvasClipBounds.top / 2f) - mDotSize * MARGIN_MULTIPLIER
 
-            canvas.drawCircle(x, y, mDotSize / 2f, mDotPaint);
+            mDotPaint?.let {
+                canvas.drawCircle(x, y, mDotSize / 2f, it)
+            }
         }
     }
 
-    @SuppressWarnings("deprecation")
-    private void init(@NonNull TypedArray a) {
-        setGravity(Gravity.CENTER_HORIZONTAL);
+    @Suppress("deprecation")
+    private fun init(@NonNull a: TypedArray) {
+        gravity = Gravity.CENTER_HORIZONTAL
 
-        mAspectRatioTitle = a.getString(R.styleable.ucrop_AspectRatioTextView_ucrop_artv_ratio_title);
-        mAspectRatioX = a.getFloat(R.styleable.ucrop_AspectRatioTextView_ucrop_artv_ratio_x, CropImageView.SOURCE_IMAGE_ASPECT_RATIO);
-        mAspectRatioY = a.getFloat(R.styleable.ucrop_AspectRatioTextView_ucrop_artv_ratio_y, CropImageView.SOURCE_IMAGE_ASPECT_RATIO);
+        mAspectRatioTitle = a.getString(R.styleable.ucrop_AspectRatioTextView_ucrop_artv_ratio_title)
+        mAspectRatioX = a.getFloat(R.styleable.ucrop_AspectRatioTextView_ucrop_artv_ratio_x, CropImageView.SOURCE_IMAGE_ASPECT_RATIO)
+        mAspectRatioY = a.getFloat(R.styleable.ucrop_AspectRatioTextView_ucrop_artv_ratio_y, CropImageView.SOURCE_IMAGE_ASPECT_RATIO)
 
-        if (mAspectRatioX == CropImageView.SOURCE_IMAGE_ASPECT_RATIO || mAspectRatioY == CropImageView.SOURCE_IMAGE_ASPECT_RATIO) {
-            mAspectRatio = CropImageView.SOURCE_IMAGE_ASPECT_RATIO;
+        mAspectRatio = if (mAspectRatioX == CropImageView.SOURCE_IMAGE_ASPECT_RATIO || mAspectRatioY == CropImageView.SOURCE_IMAGE_ASPECT_RATIO) {
+            CropImageView.SOURCE_IMAGE_ASPECT_RATIO
         } else {
-            mAspectRatio = mAspectRatioX / mAspectRatioY;
+            mAspectRatioX / mAspectRatioY
         }
 
-        mDotSize = getContext().getResources().getDimensionPixelSize(R.dimen.ucrop_size_dot_scale_text_view);
-        mDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mDotPaint.setStyle(Paint.Style.FILL);
+        mDotSize = context.resources.getDimensionPixelSize(R.dimen.ucrop_size_dot_scale_text_view)
+        mDotPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        mDotPaint!!.style = Paint.Style.FILL
 
-        setTitle();
+        setTitle()
 
-        int activeColor = getResources().getColor(R.color.ucrop_color_widget_active);
-        applyActiveColor(activeColor);
+        val activeColor = resources.getColor(R.color.ucrop_color_widget_active)
+        applyActiveColor(activeColor)
 
-        a.recycle();
+        a.recycle()
     }
 
-    private void applyActiveColor(@ColorInt int activeColor) {
-        if (mDotPaint != null) {
-            mDotPaint.setColor(activeColor);
-        }
-        ColorStateList textViewColorStateList = new ColorStateList(
-                new int[][]{
-                        new int[]{android.R.attr.state_selected},
-                        new int[]{0}
-                },
-                new int[]{
-                        activeColor,
-                        ContextCompat.getColor(getContext(), R.color.ucrop_color_widget)
-                }
-        );
+    private fun applyActiveColor(@ColorInt activeColor: Int) {
+        mDotPaint?.color = activeColor
 
-        setTextColor(textViewColorStateList);
+        val textViewColorStateList = ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_selected),
+                intArrayOf(0)
+            ),
+            intArrayOf(
+                activeColor,
+                ContextCompat.getColor(context, R.color.ucrop_color_widget)
+            )
+        )
+
+        setTextColor(textViewColorStateList)
     }
 
-    private void toggleAspectRatio() {
+    private fun toggleAspectRatio() {
         if (mAspectRatio != CropImageView.SOURCE_IMAGE_ASPECT_RATIO) {
-            float tempRatioW = mAspectRatioX;
-            mAspectRatioX = mAspectRatioY;
-            mAspectRatioY = tempRatioW;
+            val tempRatioW = mAspectRatioX
+            mAspectRatioX = mAspectRatioY
+            mAspectRatioY = tempRatioW
 
-            mAspectRatio = mAspectRatioX / mAspectRatioY;
+            mAspectRatio = mAspectRatioX / mAspectRatioY
         }
     }
 
-    private void setTitle() {
+    private fun setTitle() {
         if (!TextUtils.isEmpty(mAspectRatioTitle)) {
-            setText(mAspectRatioTitle);
+            text = mAspectRatioTitle
         } else {
-            setText(String.format(Locale.US, "%d:%d", (int) mAspectRatioX, (int) mAspectRatioY));
+            text = String.format(Locale.US, "%d:%d", mAspectRatioX.toInt(), mAspectRatioY.toInt())
         }
     }
-
 }
+

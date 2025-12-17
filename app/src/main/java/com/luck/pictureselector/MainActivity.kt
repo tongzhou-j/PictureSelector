@@ -682,12 +682,14 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
 //        clearCache();
     }
 
-    private fun getNotSupportCrop(): Array<String?>? {
+    private fun getNotSupportCrop(): Array<String>? {
         if (cb_skip_not_gif!!.isChecked()) {
-            return arrayOf<String?>(
-                PictureMimeType.ofGIF(),
-                PictureMimeType.ofWEBP()
-            )
+            val gif = PictureMimeType.ofGIF()
+            val webp = PictureMimeType.ofWEBP()
+            val list = mutableListOf<String>()
+            if (gif != null) list.add(gif)
+            if (webp != null) list.add(webp)
+            return if (list.isNotEmpty()) list.toTypedArray() else null
         }
         return null
     }
@@ -1428,7 +1430,7 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             options.setHideBottomControls(false)
             uCrop.withOptions(options)
             uCrop.setImageEngine(object : UCropImageEngine {
-                override fun loadImage(context: Context, url: String?, imageView: ImageView) {
+                override fun loadImage(context: Context, url: String, imageView: ImageView) {
                     if (!assertValidRequest(context)) {
                         return
                     }
@@ -1437,10 +1439,10 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
 
                 override fun loadImage(
                     context: Context,
-                    url: Uri?,
+                    url: Uri,
                     maxWidth: Int,
                     maxHeight: Int,
-                    call: UCropImageEngine.OnCallbackListener<Bitmap?>?
+                    call: UCropImageEngine.OnCallbackListener<Bitmap>
                 ) {
                     Glide.with(context).asBitmap().load(url).override(maxWidth, maxHeight)
                         .into(object : CustomTarget<Bitmap?>() {
@@ -1448,15 +1450,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                                 resource: Bitmap,
                                 transition: Transition<in Bitmap?>?
                             ) {
-                                if (call != null) {
-                                    call.onCall(resource)
-                                }
+                                call.onCall(resource)
                             }
 
                             override fun onLoadCleared(placeholder: Drawable?) {
-                                if (call != null) {
-                                    call.onCall(null)
-                                }
+                                call.onCall(null)
                             }
                         })
                 }
@@ -1550,10 +1548,12 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
         ) {
             if (fragment == null || srcUri == null || destinationUri == null) return
             val options = buildOptions()
-            val uCrop = UCrop.of(srcUri, destinationUri, dataSource)
+            val dataSourceNonNull = ArrayList<String>()
+            dataSource?.forEach { if (it != null) dataSourceNonNull.add(it) }
+            val uCrop = UCrop.of(srcUri, destinationUri, dataSourceNonNull)
             uCrop.withOptions(options)
             uCrop.setImageEngine(object : UCropImageEngine {
-                override fun loadImage(context: Context, url: String?, imageView: ImageView) {
+                override fun loadImage(context: Context, url: String, imageView: ImageView) {
                     if (!assertValidRequest(context)) {
                         return
                     }
@@ -1562,10 +1562,10 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
 
                 override fun loadImage(
                     context: Context,
-                    url: Uri?,
+                    url: Uri,
                     maxWidth: Int,
                     maxHeight: Int,
-                    call: UCropImageEngine.OnCallbackListener<Bitmap?>?
+                    call: UCropImageEngine.OnCallbackListener<Bitmap>
                 ) {
                     Glide.with(context).asBitmap().load(url).override(maxWidth, maxHeight)
                         .into(object : CustomTarget<Bitmap?>() {
@@ -1573,15 +1573,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                                 resource: Bitmap,
                                 transition: Transition<in Bitmap?>?
                             ) {
-                                if (call != null) {
-                                    call.onCall(resource)
-                                }
+                                call.onCall(resource)
                             }
 
                             override fun onLoadCleared(placeholder: Drawable?) {
-                                if (call != null) {
-                                    call.onCall(null)
-                                }
+                                call.onCall(null)
                             }
                         })
                 }
@@ -1612,18 +1608,18 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
             val fileName = DateUtils.getCreateFileName("CROP_") + ".jpg"
             val destinationUri = Uri.fromFile(File(this@MainActivity.getSandboxPath(), fileName))
             val options = buildOptions()
-            val dataCropSource = ArrayList<String?>()
+            val dataCropSource = ArrayList<String>()
             for (i in dataSource.indices) {
                 val media = dataSource[i]
                 if (media != null) {
-                    dataCropSource.add(media.availablePath)
+                    media.availablePath?.let { dataCropSource.add(it) }
                 }
             }
             val uCrop = UCrop.of(inputUri, destinationUri, dataCropSource)
             //options.setMultipleCropAspectRatio(buildAspectRatios(dataSource.size()));
             uCrop.withOptions(options)
             uCrop.setImageEngine(object : UCropImageEngine {
-                override fun loadImage(context: Context, url: String?, imageView: ImageView) {
+                override fun loadImage(context: Context, url: String, imageView: ImageView) {
                     if (!assertValidRequest(context)) {
                         return
                     }
@@ -1631,11 +1627,11 @@ class MainActivity : AppCompatActivity(), IBridgePictureBehavior, View.OnClickLi
                 }
 
                 override fun loadImage(
-                    context: Context?,
-                    url: Uri?,
+                    context: Context,
+                    url: Uri,
                     maxWidth: Int,
                     maxHeight: Int,
-                    call: UCropImageEngine.OnCallbackListener<Bitmap?>?
+                    call: UCropImageEngine.OnCallbackListener<Bitmap>
                 ) {
                 }
             })

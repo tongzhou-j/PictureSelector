@@ -1,141 +1,120 @@
-package com.yalantis.ucrop.statusbar;
+package com.yalantis.ucrop.statusbar
 
-import android.os.Build;
-import android.text.TextUtils;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.regex.Pattern;
+import android.os.Build
+import android.text.TextUtils
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.regex.Pattern
+import kotlin.jvm.JvmStatic
 
 /**
  * @author：luck
  * @data：2018/3/28 下午1:02
  * @描述: Rom版本管理
  */
+object RomUtils {
+    private val ROM_SAMSUNG = arrayOf("samsung")
+    private const val UNKNOWN = "unknown"
 
-public class RomUtils {
-
-    private static final String[] ROM_SAMSUNG = {"samsung"};
-    private final static String UNKNOWN = "unknown";
-
-    public static class AvailableRomType {
-        public static final int MIUI = 1;
-        public static final int FLYME = 2;
-        public static final int ANDROID_NATIVE = 3;
-        public static final int NA = 4;
+    object AvailableRomType {
+        const val MIUI = 1
+        const val FLYME = 2
+        const val ANDROID_NATIVE = 3
+        const val NA = 4
     }
 
+    @Volatile
+    private var romType: Int? = null
 
-    private static Integer romType;
-
-    public static int getLightStatausBarAvailableRomType() {
+    @JvmStatic
+    fun getLightStatausBarAvailableRomType(): Int {
         if (romType != null) {
-            return romType;
+            return romType!!
         }
 
-        if (isMIUIV6OrAbove()) {
-            romType = AvailableRomType.MIUI;
-            return romType;
+        romType = when {
+            isMIUIV6OrAbove() -> AvailableRomType.MIUI
+            isFlymeV4OrAbove() -> AvailableRomType.FLYME
+            isAndroid5OrAbove() -> AvailableRomType.ANDROID_NATIVE
+            else -> AvailableRomType.NA
         }
-
-        if (isFlymeV4OrAbove()) {
-            romType = AvailableRomType.FLYME;
-            return romType;
-        }
-
-        if (isAndroid5OrAbove()) {
-            romType = AvailableRomType.ANDROID_NATIVE;
-            return romType;
-        }
-
-        romType = AvailableRomType.NA;
-        return romType;
+        return romType!!
     }
 
     //Flyme V4的displayId格式为 [Flyme OS 4.x.x.xA]
     //Flyme V5的displayId格式为 [Flyme 5.x.x.x beta]
-    private static boolean isFlymeV4OrAbove() {
-        return (getFlymeVersion() >= 4);
+    private fun isFlymeV4OrAbove(): Boolean {
+        return getFlymeVersion() >= 4
     }
-
 
     //Flyme V4的displayId格式为 [Flyme OS 4.x.x.xA]
     //Flyme V5的displayId格式为 [Flyme 5.x.x.x beta]
-    public static int getFlymeVersion() {
-        String displayId = Build.DISPLAY;
+    @JvmStatic
+    fun getFlymeVersion(): Int {
+        var displayId = Build.DISPLAY
         if (!TextUtils.isEmpty(displayId) && displayId.contains("Flyme")) {
-            displayId = displayId.replaceAll("Flyme", "");
-            displayId = displayId.replaceAll("OS", "");
-            displayId = displayId.replaceAll(" ", "");
+            displayId = displayId.replace("Flyme", "")
+            displayId = displayId.replace("OS", "")
+            displayId = displayId.replace(" ", "")
 
-
-            String version = displayId.substring(0, 1);
-
-            return stringToInt(version);
+            val version = displayId.substring(0, 1)
+            return stringToInt(version)
         }
-        return 0;
+        return 0
     }
 
     //MIUI V6对应的versionCode是4
     //MIUI V7对应的versionCode是5
-    private static boolean isMIUIV6OrAbove() {
-        String miuiVersionCodeStr = getSystemProperty();
+    private fun isMIUIV6OrAbove(): Boolean {
+        val miuiVersionCodeStr = getSystemProperty()
         if (!TextUtils.isEmpty(miuiVersionCodeStr)) {
             try {
-                int miuiVersionCode = toInt(miuiVersionCodeStr);
+                val miuiVersionCode = toInt(miuiVersionCodeStr)
                 if (miuiVersionCode >= 4) {
-                    return true;
+                    return true
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
-        return false;
+        return false
     }
 
-
-    public static int getMIUIVersionCode() {
-        String miuiVersionCodeStr = getSystemProperty();
-        int miuiVersionCode = 0;
+    @JvmStatic
+    fun getMIUIVersionCode(): Int {
+        val miuiVersionCodeStr = getSystemProperty()
+        var miuiVersionCode = 0
         if (!TextUtils.isEmpty(miuiVersionCodeStr)) {
             try {
-                miuiVersionCode = toInt(miuiVersionCodeStr);
-                return miuiVersionCode;
-            } catch (Exception e) {
-                e.printStackTrace();
+                miuiVersionCode = toInt(miuiVersionCodeStr)
+                return miuiVersionCode
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
-        return miuiVersionCode;
+        return miuiVersionCode
     }
-
 
     //Android Api 23以上
-    private static boolean isAndroid5OrAbove() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    private fun isAndroid5OrAbove(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
     }
 
-
-    private static String getSystemProperty() {
-        String line;
-        BufferedReader input = null;
+    private fun getSystemProperty(): String? {
+        var line: String?
+        var input: BufferedReader? = null
         try {
-            Process p = Runtime.getRuntime().exec("getprop " + "ro.miui.ui.version.code");
-            input = new BufferedReader(new InputStreamReader(p.getInputStream()), 1024);
-            line = input.readLine();
-            input.close();
-        } catch (IOException ex) {
-            return null;
+            val p = Runtime.getRuntime().exec("getprop ro.miui.ui.version.code")
+            input = BufferedReader(InputStreamReader(p.inputStream), 1024)
+            line = input.readLine()
+            input.close()
+        } catch (ex: IOException) {
+            return null
         } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            input?.close()
         }
-        return line;
+        return line
     }
 
     /**
@@ -143,39 +122,46 @@ public class RomUtils {
      *
      * @return {@code true}: yes<br>{@code false}: no
      */
-    public static boolean isSamsung() {
-        final String brand = getBrand();
-        final String manufacturer = getManufacturer();
-        return isRightRom(brand, manufacturer, ROM_SAMSUNG);
+    @JvmStatic
+    fun isSamsung(): Boolean {
+        val brand = getBrand()
+        val manufacturer = getManufacturer()
+        return isRightRom(brand, manufacturer, *ROM_SAMSUNG)
     }
 
-    private static boolean isRightRom(final String brand, final String manufacturer, final String... names) {
-        for (String name : names) {
+    private fun isRightRom(brand: String, manufacturer: String, vararg names: String): Boolean {
+        for (name in names) {
             if (brand.contains(name) || manufacturer.contains(name)) {
-                return true;
+                return true
             }
         }
-        return false;
+        return false
     }
 
-    private static String getManufacturer() {
-        try {
-            String manufacturer = Build.MANUFACTURER;
+    private fun getManufacturer(): String {
+        return try {
+            val manufacturer = Build.MANUFACTURER
             if (!TextUtils.isEmpty(manufacturer)) {
-                return manufacturer.toLowerCase();
+                manufacturer.lowercase()
+            } else {
+                UNKNOWN
             }
-        } catch (Throwable ignore) {/**/}
-        return UNKNOWN;
+        } catch (ignore: Throwable) {
+            UNKNOWN
+        }
     }
 
-    private static String getBrand() {
-        try {
-            String brand = Build.BRAND;
+    private fun getBrand(): String {
+        return try {
+            val brand = Build.BRAND
             if (!TextUtils.isEmpty(brand)) {
-                return brand.toLowerCase();
+                brand.lowercase()
+            } else {
+                UNKNOWN
             }
-        } catch (Throwable ignore) {/**/}
-        return UNKNOWN;
+        } catch (ignore: Throwable) {
+            UNKNOWN
+        }
     }
 
     /**
@@ -184,32 +170,38 @@ public class RomUtils {
      * @param str
      * @return
      */
-    public static int stringToInt(String str) {
-        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]+$");
-        return pattern.matcher(str).matches() ? toInt(str) : 0;
+    @JvmStatic
+    fun stringToInt(str: String): Int {
+        val pattern = Pattern.compile("^[-\\+]?[\\d]+$")
+        return if (pattern.matcher(str).matches()) {
+            toInt(str)
+        } else {
+            0
+        }
     }
 
-
-    public static int toInt(Object o) {
-        return toInt(o, 0);
+    @JvmStatic
+    fun toInt(o: Any?): Int {
+        return toInt(o, 0)
     }
 
-    public static int toInt(Object o, int defaultValue) {
+    @JvmStatic
+    fun toInt(o: Any?, defaultValue: Int): Int {
         if (o == null) {
-            return defaultValue;
+            return defaultValue
         }
-        int value;
-        try {
-            String s = o.toString().trim();
+        val value: Int
+        value = try {
+            val s = o.toString().trim()
             if (s.contains(".")) {
-                value = Integer.parseInt(s.substring(0, s.lastIndexOf(".")));
+                Integer.parseInt(s.substring(0, s.lastIndexOf(".")))
             } else {
-                value = Integer.parseInt(s);
+                Integer.parseInt(s)
             }
-        } catch (Exception e) {
-            value = defaultValue;
+        } catch (e: Exception) {
+            defaultValue
         }
-
-        return value;
+        return value
     }
 }
+

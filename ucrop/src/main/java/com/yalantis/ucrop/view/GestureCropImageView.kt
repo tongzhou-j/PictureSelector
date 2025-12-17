@@ -1,71 +1,68 @@
-package com.yalantis.ucrop.view;
+package com.yalantis.ucrop.view
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-
-import com.yalantis.ucrop.util.RotationGestureDetector;
+import android.content.Context
+import android.util.AttributeSet
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import com.yalantis.ucrop.util.RotationGestureDetector
+import kotlin.math.pow
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
  */
-public class GestureCropImageView extends CropImageView {
+class GestureCropImageView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyle: Int = 0
+) : CropImageView(context, attrs, defStyle) {
 
-    private static final int DOUBLE_TAP_ZOOM_DURATION = 200;
-
-    private ScaleGestureDetector mScaleDetector;
-    private RotationGestureDetector mRotateDetector;
-    private GestureDetector mGestureDetector;
-
-    private float mMidPntX, mMidPntY;
-
-    private boolean mIsRotateEnabled = true, mIsScaleEnabled = true, mIsGestureEnabled = true;
-    private int mDoubleTapScaleSteps = 5;
-
-    public GestureCropImageView(Context context) {
-        super(context);
+    companion object {
+        private const val DOUBLE_TAP_ZOOM_DURATION = 200
     }
 
-    public GestureCropImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+    private var mScaleDetector: ScaleGestureDetector? = null
+    private var mRotateDetector: RotationGestureDetector? = null
+    private var mGestureDetector: GestureDetector? = null
+
+    private var mMidPntX: Float = 0f
+    private var mMidPntY: Float = 0f
+
+    private var mIsRotateEnabled: Boolean = true
+    private var mIsScaleEnabled: Boolean = true
+    private var mIsGestureEnabled: Boolean = true
+    private var mDoubleTapScaleSteps: Int = 5
+
+    fun setScaleEnabled(scaleEnabled: Boolean) {
+        mIsScaleEnabled = scaleEnabled
     }
 
-    public GestureCropImageView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    fun isScaleEnabled(): Boolean {
+        return mIsScaleEnabled
     }
 
-    public void setScaleEnabled(boolean scaleEnabled) {
-        mIsScaleEnabled = scaleEnabled;
+    fun setRotateEnabled(rotateEnabled: Boolean) {
+        mIsRotateEnabled = rotateEnabled
     }
 
-    public boolean isScaleEnabled() {
-        return mIsScaleEnabled;
+    fun isRotateEnabled(): Boolean {
+        return mIsRotateEnabled
     }
 
-    public void setRotateEnabled(boolean rotateEnabled) {
-        mIsRotateEnabled = rotateEnabled;
+    fun setGestureEnabled(gestureEnabled: Boolean) {
+        mIsGestureEnabled = gestureEnabled
     }
 
-    public boolean isRotateEnabled() {
-        return mIsRotateEnabled;
+    fun isGestureEnabled(): Boolean {
+        return mIsGestureEnabled
     }
 
-    public void setGestureEnabled(boolean gestureEnabled) {
-        mIsGestureEnabled = gestureEnabled;
+    fun setDoubleTapScaleSteps(doubleTapScaleSteps: Int) {
+        mDoubleTapScaleSteps = doubleTapScaleSteps
     }
 
-    public boolean isGestureEnabled() {
-        return mIsGestureEnabled;
-    }
-
-    public void setDoubleTapScaleSteps(int doubleTapScaleSteps) {
-        mDoubleTapScaleSteps = doubleTapScaleSteps;
-    }
-
-    public int getDoubleTapScaleSteps() {
-        return mDoubleTapScaleSteps;
+    fun getDoubleTapScaleSteps(): Int {
+        return mDoubleTapScaleSteps
     }
 
     /**
@@ -74,39 +71,37 @@ public class GestureCropImageView extends CropImageView {
      * If there are more than 2 fingers - update focal point coordinates.
      * Pass the event to the gesture detectors if those are enabled.
      */
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
-            cancelAllAnimations();
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if ((event.action and MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
+            cancelAllAnimations()
         }
 
-        if (event.getPointerCount() > 1) {
-            mMidPntX = (event.getX(0) + event.getX(1)) / 2;
-            mMidPntY = (event.getY(0) + event.getY(1)) / 2;
+        if (event.pointerCount > 1) {
+            mMidPntX = (event.getX(0) + event.getX(1)) / 2
+            mMidPntY = (event.getY(0) + event.getY(1)) / 2
         }
 
         if (mIsGestureEnabled) {
-            mGestureDetector.onTouchEvent(event);
+            mGestureDetector?.onTouchEvent(event)
         }
 
         if (mIsScaleEnabled) {
-            mScaleDetector.onTouchEvent(event);
+            mScaleDetector?.onTouchEvent(event)
         }
 
         if (mIsRotateEnabled) {
-            mRotateDetector.onTouchEvent(event);
+            mRotateDetector?.onTouchEvent(event)
         }
 
-        if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-            setImageToWrapCropBounds();
+        if ((event.action and MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+            setImageToWrapCropBounds()
         }
-        return true;
+        return true
     }
 
-    @Override
-    protected void init() {
-        super.init();
-        setupGestureListeners();
+    override fun init() {
+        super.init()
+        setupGestureListeners()
     }
 
     /**
@@ -114,49 +109,40 @@ public class GestureCropImageView extends CropImageView {
      * User is able to zoom the image from min scale value
      * to the max scale value with {@link #mDoubleTapScaleSteps} double taps.
      */
-    protected float getDoubleTapTargetScale() {
-        return getCurrentScale() * (float) Math.pow(getMaxScale() / getMinScale(), 1.0f / mDoubleTapScaleSteps);
+    protected fun getDoubleTapTargetScale(): Float {
+        return getCurrentScale() * (getMaxScale() / getMinScale()).pow(1.0f / mDoubleTapScaleSteps)
     }
 
-    private void setupGestureListeners() {
-        mGestureDetector = new GestureDetector(getContext(), new GestureListener(), null, true);
-        mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
-        mRotateDetector = new RotationGestureDetector(new RotateListener());
+    private fun setupGestureListeners() {
+        mGestureDetector = GestureDetector(context, GestureListener(), null, true)
+        mScaleDetector = ScaleGestureDetector(context, ScaleListener())
+        mRotateDetector = RotationGestureDetector(RotateListener())
     }
 
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            postScale(detector.getScaleFactor(), mMidPntX, mMidPntY);
-            return true;
+    private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            postScale(detector.scaleFactor, mMidPntX, mMidPntY)
+            return true
         }
     }
 
-    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
-
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            zoomImageToPosition(getDoubleTapTargetScale(), e.getX(), e.getY(), DOUBLE_TAP_ZOOM_DURATION);
-            return super.onDoubleTap(e);
+    private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            zoomImageToPosition(getDoubleTapTargetScale(), e.x, e.y, DOUBLE_TAP_ZOOM_DURATION.toLong())
+            return super.onDoubleTap(e)
         }
 
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            postTranslate(-distanceX, -distanceY);
-            return true;
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+            postTranslate(-distanceX, -distanceY)
+            return true
         }
-
     }
 
-    private class RotateListener extends RotationGestureDetector.SimpleOnRotationGestureListener {
-
-        @Override
-        public boolean onRotation(RotationGestureDetector rotationDetector) {
-            postRotate(rotationDetector.getAngle(), mMidPntX, mMidPntY);
-            return true;
+    private inner class RotateListener : RotationGestureDetector.SimpleOnRotationGestureListener() {
+        override fun onRotation(rotationDetector: RotationGestureDetector): Boolean {
+            postRotate(rotationDetector.angle, mMidPntX, mMidPntY)
+            return true
         }
-
     }
-
 }
+

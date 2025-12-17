@@ -1,29 +1,29 @@
-package com.yalantis.ucrop.view;
+package com.yalantis.ucrop.view
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.util.AttributeSet;
-
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.yalantis.ucrop.R;
-import com.yalantis.ucrop.callback.BitmapCropCallback;
-import com.yalantis.ucrop.callback.CropBoundsChangeListener;
-import com.yalantis.ucrop.model.CropParameters;
-import com.yalantis.ucrop.model.ImageState;
-import com.yalantis.ucrop.task.BitmapCropTask;
-import com.yalantis.ucrop.util.CubicEasing;
-import com.yalantis.ucrop.util.RectUtils;
-
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
+import android.content.Context
+import android.content.res.TypedArray
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.graphics.RectF
+import android.graphics.drawable.Drawable
+import android.os.AsyncTask
+import android.util.AttributeSet
+import androidx.annotation.IntRange
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import com.yalantis.ucrop.R
+import com.yalantis.ucrop.callback.BitmapCropCallback
+import com.yalantis.ucrop.callback.CropBoundsChangeListener
+import com.yalantis.ucrop.model.CropParameters
+import com.yalantis.ucrop.model.ExifInfo
+import com.yalantis.ucrop.model.ImageState
+import com.yalantis.ucrop.task.BitmapCropTask
+import com.yalantis.ucrop.util.CubicEasing
+import com.yalantis.ucrop.util.RectUtils
+import java.lang.ref.WeakReference
+import java.util.Arrays
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
@@ -31,85 +31,86 @@ import java.util.Arrays;
  * This class adds crop feature, methods to draw crop guidelines, and keep image in correct state.
  * Also it extends parent class methods to add checks for scale; animating zoom in/out.
  */
-public class CropImageView extends TransformImageView {
+open class CropImageView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyle: Int = 0
+) : TransformImageView(context, attrs, defStyle) {
 
-    public static final int DEFAULT_MAX_BITMAP_SIZE = 0;
-    public static final int DEFAULT_IMAGE_TO_CROP_BOUNDS_ANIM_DURATION = 500;
-    public static final float DEFAULT_MAX_SCALE_MULTIPLIER = 10.0f;
-    public static final float SOURCE_IMAGE_ASPECT_RATIO = 0f;
-    public static final float DEFAULT_ASPECT_RATIO = SOURCE_IMAGE_ASPECT_RATIO;
-
-    private final RectF mCropRect = new RectF();
-
-    private final Matrix mTempMatrix = new Matrix();
-
-    private float mTargetAspectRatio;
-    private float mMaxScaleMultiplier = DEFAULT_MAX_SCALE_MULTIPLIER;
-
-    private CropBoundsChangeListener mCropBoundsChangeListener;
-
-    private Runnable mWrapCropBoundsRunnable, mZoomImageToPositionRunnable = null;
-
-    private float mMaxScale, mMinScale;
-    private int mMaxResultImageSizeX = 0, mMaxResultImageSizeY = 0;
-    private long mImageToWrapCropBoundsAnimDuration = DEFAULT_IMAGE_TO_CROP_BOUNDS_ANIM_DURATION;
-
-    public CropImageView(Context context) {
-        this(context, null);
+    companion object {
+        const val DEFAULT_MAX_BITMAP_SIZE = 0
+        const val DEFAULT_IMAGE_TO_CROP_BOUNDS_ANIM_DURATION = 500
+        const val DEFAULT_MAX_SCALE_MULTIPLIER = 10.0f
+        const val SOURCE_IMAGE_ASPECT_RATIO = 0f
+        const val DEFAULT_ASPECT_RATIO = SOURCE_IMAGE_ASPECT_RATIO
     }
 
-    public CropImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
+    private val mCropRect = RectF()
 
-    public CropImageView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
+    private val mTempMatrix = Matrix()
+
+    private var mTargetAspectRatio: Float = 0f
+    private var mMaxScaleMultiplier: Float = DEFAULT_MAX_SCALE_MULTIPLIER
+
+    private var mCropBoundsChangeListener: CropBoundsChangeListener? = null
+
+    private var mWrapCropBoundsRunnable: Runnable? = null
+    private var mZoomImageToPositionRunnable: Runnable? = null
+
+    private var mMaxScale: Float = 0f
+    private var mMinScale: Float = 0f
+    private var mMaxResultImageSizeX: Int = 0
+    private var mMaxResultImageSizeY: Int = 0
+    private var mImageToWrapCropBoundsAnimDuration: Long = DEFAULT_IMAGE_TO_CROP_BOUNDS_ANIM_DURATION.toLong()
 
     /**
      * Cancels all current animations and sets image to fill crop area (without animation).
      * Then creates and executes {@link BitmapCropTask} with proper parameters.
      */
-    public void cropAndSaveImage(@NonNull Bitmap.CompressFormat compressFormat, int compressQuality,
-                                 @Nullable BitmapCropCallback cropCallback) {
-        cancelAllAnimations();
-        setImageToWrapCropBounds(false);
+    fun cropAndSaveImage(@NonNull compressFormat: Bitmap.CompressFormat, compressQuality: Int,
+                         @Nullable cropCallback: BitmapCropCallback?) {
+        cancelAllAnimations()
+        setImageToWrapCropBounds(false)
 
-        final ImageState imageState = new ImageState(
-                mCropRect, RectUtils.trapToRect(mCurrentImageCorners),
-                getCurrentScale(), getCurrentAngle());
+        val imageState = ImageState(
+            mCropRect, RectUtils.trapToRect(mCurrentImageCorners),
+            getCurrentScale(), getCurrentAngle())
 
-        final CropParameters cropParameters = new CropParameters(
-                mMaxResultImageSizeX, mMaxResultImageSizeY,
-                compressFormat, compressQuality,
-                getImageInputPath(), getImageOutputPath(), getExifInfo());
+        val inputPath = getImageInputPath() ?: ""
+        val outputPath = getImageOutputPath() ?: ""
+        val exifInfo = getExifInfo() ?: ExifInfo(0, 0, 0)
+        
+        val cropParameters = CropParameters(
+            mMaxResultImageSizeX, mMaxResultImageSizeY,
+            compressFormat, compressQuality,
+            inputPath, outputPath, exifInfo)
 
-        cropParameters.setContentImageInputUri(getImageInputUri());
-        cropParameters.setContentImageOutputUri(getImageOutputUri());
+        cropParameters.contentImageInputUri = getImageInputUri()
+        cropParameters.contentImageOutputUri = getImageOutputUri()
 
-        new BitmapCropTask(getContext(), getViewBitmap(), imageState, cropParameters, cropCallback)
-                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        BitmapCropTask(getContext(), getViewBitmap(), imageState, cropParameters, cropCallback)
+            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
     }
 
     /**
      * @return - maximum scale value for current image and crop ratio
      */
-    public float getMaxScale() {
-        return mMaxScale;
+    fun getMaxScale(): Float {
+        return mMaxScale
     }
 
     /**
      * @return - minimum scale value for current image and crop ratio
      */
-    public float getMinScale() {
-        return mMinScale;
+    fun getMinScale(): Float {
+        return mMinScale
     }
 
     /**
      * @return - aspect ratio for crop bounds
      */
-    public float getTargetAspectRatio() {
-        return mTargetAspectRatio;
+    fun getTargetAspectRatio(): Float {
+        return mTargetAspectRatio
     }
 
     /**
@@ -118,12 +119,12 @@ public class CropImageView extends TransformImageView {
      *
      * @param cropRect - new crop rectangle
      */
-    public void setCropRect(RectF cropRect) {
-        mTargetAspectRatio = cropRect.width() / cropRect.height();
-        mCropRect.set(cropRect.left - getPaddingLeft(), cropRect.top - getPaddingTop(),
-                cropRect.right - getPaddingRight(), cropRect.bottom - getPaddingBottom());
-        calculateImageScaleBounds();
-        setImageToWrapCropBounds();
+    fun setCropRect(cropRect: RectF) {
+        mTargetAspectRatio = cropRect.width() / cropRect.height()
+        mCropRect.set(cropRect.left - paddingLeft, cropRect.top - paddingTop,
+            cropRect.right - paddingRight, cropRect.bottom - paddingBottom)
+        calculateImageScaleBounds()
+        setImageToWrapCropBounds()
     }
 
     /**
@@ -133,31 +134,28 @@ public class CropImageView extends TransformImageView {
      *
      * @param targetAspectRatio - aspect ratio for image crop (e.g. 1.77(7) for 16:9)
      */
-    public void setTargetAspectRatio(float targetAspectRatio) {
-        final Drawable drawable = getDrawable();
-        if (drawable == null) {
-            mTargetAspectRatio = targetAspectRatio;
-            return;
+    fun setTargetAspectRatio(targetAspectRatio: Float) {
+        val drawable = drawable ?: run {
+            mTargetAspectRatio = targetAspectRatio
+            return
         }
 
-        if (targetAspectRatio == SOURCE_IMAGE_ASPECT_RATIO) {
-            mTargetAspectRatio = drawable.getIntrinsicWidth() / (float) drawable.getIntrinsicHeight();
+        mTargetAspectRatio = if (targetAspectRatio == SOURCE_IMAGE_ASPECT_RATIO) {
+            drawable.intrinsicWidth / drawable.intrinsicHeight.toFloat()
         } else {
-            mTargetAspectRatio = targetAspectRatio;
+            targetAspectRatio
         }
 
-        if (mCropBoundsChangeListener != null) {
-            mCropBoundsChangeListener.onCropAspectRatioChanged(mTargetAspectRatio);
-        }
+        mCropBoundsChangeListener?.onCropAspectRatioChanged(mTargetAspectRatio)
     }
 
     @Nullable
-    public CropBoundsChangeListener getCropBoundsChangeListener() {
-        return mCropBoundsChangeListener;
+    fun getCropBoundsChangeListener(): CropBoundsChangeListener? {
+        return mCropBoundsChangeListener
     }
 
-    public void setCropBoundsChangeListener(@Nullable CropBoundsChangeListener cropBoundsChangeListener) {
-        mCropBoundsChangeListener = cropBoundsChangeListener;
+    fun setCropBoundsChangeListener(@Nullable cropBoundsChangeListener: CropBoundsChangeListener?) {
+        mCropBoundsChangeListener = cropBoundsChangeListener
     }
 
     /**
@@ -165,8 +163,8 @@ public class CropImageView extends TransformImageView {
      *
      * @param maxResultImageSizeX - size in pixels
      */
-    public void setMaxResultImageSizeX(@IntRange(from = 10) int maxResultImageSizeX) {
-        mMaxResultImageSizeX = maxResultImageSizeX;
+    fun setMaxResultImageSizeX(@IntRange(from = 10) maxResultImageSizeX: Int) {
+        mMaxResultImageSizeX = maxResultImageSizeX
     }
 
     /**
@@ -174,8 +172,8 @@ public class CropImageView extends TransformImageView {
      *
      * @param maxResultImageSizeY - size in pixels
      */
-    public void setMaxResultImageSizeY(@IntRange(from = 10) int maxResultImageSizeY) {
-        mMaxResultImageSizeY = maxResultImageSizeY;
+    fun setMaxResultImageSizeY(@IntRange(from = 10) maxResultImageSizeY: Int) {
+        mMaxResultImageSizeY = maxResultImageSizeY
     }
 
     /**
@@ -183,11 +181,11 @@ public class CropImageView extends TransformImageView {
      *
      * @param imageToWrapCropBoundsAnimDuration - duration in milliseconds
      */
-    public void setImageToWrapCropBoundsAnimDuration(@IntRange(from = 100) long imageToWrapCropBoundsAnimDuration) {
+    fun setImageToWrapCropBoundsAnimDuration(@IntRange(from = 100) imageToWrapCropBoundsAnimDuration: Long) {
         if (imageToWrapCropBoundsAnimDuration > 0) {
-            mImageToWrapCropBoundsAnimDuration = imageToWrapCropBoundsAnimDuration;
+            mImageToWrapCropBoundsAnimDuration = imageToWrapCropBoundsAnimDuration
         } else {
-            throw new IllegalArgumentException("Animation duration cannot be negative value.");
+            throw IllegalArgumentException("Animation duration cannot be negative value.")
         }
     }
 
@@ -196,39 +194,39 @@ public class CropImageView extends TransformImageView {
      *
      * @param maxScaleMultiplier - (minScale * maxScaleMultiplier) = maxScale
      */
-    public void setMaxScaleMultiplier(float maxScaleMultiplier) {
-        mMaxScaleMultiplier = maxScaleMultiplier;
+    fun setMaxScaleMultiplier(maxScaleMultiplier: Float) {
+        mMaxScaleMultiplier = maxScaleMultiplier
     }
 
     /**
      * This method scales image down for given value related to image center.
      */
-    public void zoomOutImage(float deltaScale) {
-        zoomOutImage(deltaScale, mCropRect.centerX(), mCropRect.centerY());
+    fun zoomOutImage(deltaScale: Float) {
+        zoomOutImage(deltaScale, mCropRect.centerX(), mCropRect.centerY())
     }
 
     /**
      * This method scales image down for given value related given coords (x, y).
      */
-    public void zoomOutImage(float scale, float centerX, float centerY) {
+    fun zoomOutImage(scale: Float, centerX: Float, centerY: Float) {
         if (scale >= getMinScale()) {
-            postScale(scale / getCurrentScale(), centerX, centerY);
+            postScale(scale / getCurrentScale(), centerX, centerY)
         }
     }
 
     /**
      * This method scales image up for given value related to image center.
      */
-    public void zoomInImage(float deltaScale) {
-        zoomInImage(deltaScale, mCropRect.centerX(), mCropRect.centerY());
+    fun zoomInImage(deltaScale: Float) {
+        zoomInImage(deltaScale, mCropRect.centerX(), mCropRect.centerY())
     }
 
     /**
      * This method scales image up for given value related to given coords (x, y).
      */
-    public void zoomInImage(float scale, float centerX, float centerY) {
+    fun zoomInImage(scale: Float, centerX: Float, centerY: Float) {
         if (scale <= getMaxScale()) {
-            postScale(scale / getCurrentScale(), centerX, centerY);
+            postScale(scale / getCurrentScale(), centerX, centerY)
         }
     }
 
@@ -240,11 +238,11 @@ public class CropImageView extends TransformImageView {
      * @param px         - scale center X
      * @param py         - scale center Y
      */
-    public void postScale(float deltaScale, float px, float py) {
+    override fun postScale(deltaScale: Float, px: Float, py: Float) {
         if (deltaScale > 1 && getCurrentScale() * deltaScale <= getMaxScale()) {
-            super.postScale(deltaScale, px, py);
+            super.postScale(deltaScale, px, py)
         } else if (deltaScale < 1 && getCurrentScale() * deltaScale >= getMinScale()) {
-            super.postScale(deltaScale, px, py);
+            super.postScale(deltaScale, px, py)
         }
     }
 
@@ -253,20 +251,20 @@ public class CropImageView extends TransformImageView {
      *
      * @param deltaAngle - angle to rotate
      */
-    public void postRotate(float deltaAngle) {
-        postRotate(deltaAngle, mCropRect.centerX(), mCropRect.centerY());
+    fun postRotate(deltaAngle: Float) {
+        postRotate(deltaAngle, mCropRect.centerX(), mCropRect.centerY())
     }
 
     /**
      * This method cancels all current Runnable objects that represent animations.
      */
-    public void cancelAllAnimations() {
-        removeCallbacks(mWrapCropBoundsRunnable);
-        removeCallbacks(mZoomImageToPositionRunnable);
+    fun cancelAllAnimations() {
+        mWrapCropBoundsRunnable?.let { removeCallbacks(it) }
+        mZoomImageToPositionRunnable?.let { removeCallbacks(it) }
     }
 
-    public void setImageToWrapCropBounds() {
-        setImageToWrapCropBounds(true);
+    fun setImageToWrapCropBounds() {
+        setImageToWrapCropBounds(true)
     }
 
     /**
@@ -277,50 +275,51 @@ public class CropImageView extends TransformImageView {
      * Scale value must be calculated only if image won't fill the crop bounds after it's translated to the
      * crop bounds rectangle center. Using temporary variables this method checks this case.
      */
-    public void setImageToWrapCropBounds(boolean animate) {
+    fun setImageToWrapCropBounds(animate: Boolean) {
         if (mBitmapLaidOut && !isImageWrapCropBounds()) {
 
-            float currentX = mCurrentImageCenter[0];
-            float currentY = mCurrentImageCenter[1];
-            float currentScale = getCurrentScale();
+            val currentX = mCurrentImageCenter[0]
+            val currentY = mCurrentImageCenter[1]
+            val currentScale = getCurrentScale()
 
-            float deltaX = mCropRect.centerX() - currentX;
-            float deltaY = mCropRect.centerY() - currentY;
-            float deltaScale = 0;
+            var deltaX = mCropRect.centerX() - currentX
+            var deltaY = mCropRect.centerY() - currentY
+            var deltaScale = 0f
 
-            mTempMatrix.reset();
-            mTempMatrix.setTranslate(deltaX, deltaY);
+            mTempMatrix.reset()
+            mTempMatrix.setTranslate(deltaX, deltaY)
 
-            final float[] tempCurrentImageCorners = Arrays.copyOf(mCurrentImageCorners, mCurrentImageCorners.length);
-            mTempMatrix.mapPoints(tempCurrentImageCorners);
+            val tempCurrentImageCorners = Arrays.copyOf(mCurrentImageCorners, mCurrentImageCorners.size)
+            mTempMatrix.mapPoints(tempCurrentImageCorners)
 
-            boolean willImageWrapCropBoundsAfterTranslate = isImageWrapCropBounds(tempCurrentImageCorners);
+            val willImageWrapCropBoundsAfterTranslate = isImageWrapCropBounds(tempCurrentImageCorners)
 
             if (willImageWrapCropBoundsAfterTranslate) {
-                final float[] imageIndents = calculateImageIndents();
-                deltaX = -(imageIndents[0] + imageIndents[2]);
-                deltaY = -(imageIndents[1] + imageIndents[3]);
+                val imageIndents = calculateImageIndents()
+                deltaX = -(imageIndents[0] + imageIndents[2])
+                deltaY = -(imageIndents[1] + imageIndents[3])
             } else {
-                RectF tempCropRect = new RectF(mCropRect);
-                mTempMatrix.reset();
-                mTempMatrix.setRotate(getCurrentAngle());
-                mTempMatrix.mapRect(tempCropRect);
+                val tempCropRect = RectF(mCropRect)
+                mTempMatrix.reset()
+                mTempMatrix.setRotate(getCurrentAngle())
+                mTempMatrix.mapRect(tempCropRect)
 
-                final float[] currentImageSides = RectUtils.getRectSidesFromCorners(mCurrentImageCorners);
+                val currentImageSides = RectUtils.getRectSidesFromCorners(mCurrentImageCorners)
 
-                deltaScale = Math.max(tempCropRect.width() / currentImageSides[0],
-                        tempCropRect.height() / currentImageSides[1]);
-                deltaScale = deltaScale * currentScale - currentScale;
+                deltaScale = max(tempCropRect.width() / currentImageSides[0],
+                    tempCropRect.height() / currentImageSides[1])
+                deltaScale = deltaScale * currentScale - currentScale
             }
 
             if (animate) {
-                post(mWrapCropBoundsRunnable = new WrapCropBoundsRunnable(
-                        CropImageView.this, mImageToWrapCropBoundsAnimDuration, currentX, currentY, deltaX, deltaY,
-                        currentScale, deltaScale, willImageWrapCropBoundsAfterTranslate));
+                mWrapCropBoundsRunnable = WrapCropBoundsRunnable(
+                    this, mImageToWrapCropBoundsAnimDuration, currentX, currentY, deltaX, deltaY,
+                    currentScale, deltaScale, willImageWrapCropBoundsAfterTranslate)
+                post(mWrapCropBoundsRunnable!!)
             } else {
-                postTranslate(deltaX, deltaY);
+                postTranslate(deltaX, deltaY)
                 if (!willImageWrapCropBoundsAfterTranslate) {
-                    zoomInImage(currentScale + deltaScale, mCropRect.centerX(), mCropRect.centerY());
+                    zoomInImage(currentScale + deltaScale, mCropRect.centerX(), mCropRect.centerY())
                 }
             }
         }
@@ -334,82 +333,76 @@ public class CropImageView extends TransformImageView {
      *
      * @return - the float array of image indents (4 floats) - in this order [left, top, right, bottom]
      */
-    private float[] calculateImageIndents() {
-        mTempMatrix.reset();
-        mTempMatrix.setRotate(-getCurrentAngle());
+    private fun calculateImageIndents(): FloatArray {
+        mTempMatrix.reset()
+        mTempMatrix.setRotate(-getCurrentAngle())
 
-        float[] unrotatedImageCorners = Arrays.copyOf(mCurrentImageCorners, mCurrentImageCorners.length);
-        float[] unrotatedCropBoundsCorners = RectUtils.getCornersFromRect(mCropRect);
+        val unrotatedImageCorners = Arrays.copyOf(mCurrentImageCorners, mCurrentImageCorners.size)
+        val unrotatedCropBoundsCorners = RectUtils.getCornersFromRect(mCropRect)
 
-        mTempMatrix.mapPoints(unrotatedImageCorners);
-        mTempMatrix.mapPoints(unrotatedCropBoundsCorners);
+        mTempMatrix.mapPoints(unrotatedImageCorners)
+        mTempMatrix.mapPoints(unrotatedCropBoundsCorners)
 
-        RectF unrotatedImageRect = RectUtils.trapToRect(unrotatedImageCorners);
-        RectF unrotatedCropRect = RectUtils.trapToRect(unrotatedCropBoundsCorners);
+        val unrotatedImageRect = RectUtils.trapToRect(unrotatedImageCorners)
+        val unrotatedCropRect = RectUtils.trapToRect(unrotatedCropBoundsCorners)
 
-        float deltaLeft = unrotatedImageRect.left - unrotatedCropRect.left;
-        float deltaTop = unrotatedImageRect.top - unrotatedCropRect.top;
-        float deltaRight = unrotatedImageRect.right - unrotatedCropRect.right;
-        float deltaBottom = unrotatedImageRect.bottom - unrotatedCropRect.bottom;
+        val deltaLeft = unrotatedImageRect.left - unrotatedCropRect.left
+        val deltaTop = unrotatedImageRect.top - unrotatedCropRect.top
+        val deltaRight = unrotatedImageRect.right - unrotatedCropRect.right
+        val deltaBottom = unrotatedImageRect.bottom - unrotatedCropRect.bottom
 
-        float indents[] = new float[4];
-        indents[0] = (deltaLeft > 0) ? deltaLeft : 0;
-        indents[1] = (deltaTop > 0) ? deltaTop : 0;
-        indents[2] = (deltaRight < 0) ? deltaRight : 0;
-        indents[3] = (deltaBottom < 0) ? deltaBottom : 0;
+        val indents = FloatArray(4)
+        indents[0] = if (deltaLeft > 0) deltaLeft else 0f
+        indents[1] = if (deltaTop > 0) deltaTop else 0f
+        indents[2] = if (deltaRight < 0) deltaRight else 0f
+        indents[3] = if (deltaBottom < 0) deltaBottom else 0f
 
-        mTempMatrix.reset();
-        mTempMatrix.setRotate(getCurrentAngle());
-        mTempMatrix.mapPoints(indents);
+        mTempMatrix.reset()
+        mTempMatrix.setRotate(getCurrentAngle())
+        mTempMatrix.mapPoints(indents)
 
-        return indents;
+        return indents
     }
 
     /**
      * When image is laid out it must be centered properly to fit current crop bounds.
      */
-    @Override
-    protected void onImageLaidOut() {
-        super.onImageLaidOut();
-        final Drawable drawable = getDrawable();
-        if (drawable == null) {
-            return;
-        }
+    override fun onImageLaidOut() {
+        super.onImageLaidOut()
+        val drawable = drawable ?: return
 
-        float drawableWidth = drawable.getIntrinsicWidth();
-        float drawableHeight = drawable.getIntrinsicHeight();
+        val drawableWidth = drawable.intrinsicWidth.toFloat()
+        val drawableHeight = drawable.intrinsicHeight.toFloat()
 
         if (mTargetAspectRatio == SOURCE_IMAGE_ASPECT_RATIO) {
-            mTargetAspectRatio = drawableWidth / drawableHeight;
+            mTargetAspectRatio = drawableWidth / drawableHeight
         }
 
-        int height = (int) (mThisWidth / mTargetAspectRatio);
+        val height = (mThisWidth / mTargetAspectRatio).toInt()
         if (height > mThisHeight) {
-            int width = (int) (mThisHeight * mTargetAspectRatio);
-            int halfDiff = (mThisWidth - width) / 2;
-            mCropRect.set(halfDiff, 0, width + halfDiff, mThisHeight);
+            val width = (mThisHeight * mTargetAspectRatio).toInt()
+            val halfDiff = (mThisWidth - width) / 2
+            mCropRect.set(halfDiff.toFloat(), 0f, (width + halfDiff).toFloat(), mThisHeight.toFloat())
         } else {
-            int halfDiff = (mThisHeight - height) / 2;
-            mCropRect.set(0, halfDiff, mThisWidth, height + halfDiff);
+            val halfDiff = (mThisHeight - height) / 2
+            mCropRect.set(0f, halfDiff.toFloat(), mThisWidth.toFloat(), (height + halfDiff).toFloat())
         }
 
-        calculateImageScaleBounds(drawableWidth, drawableHeight);
-        setupInitialImagePosition(drawableWidth, drawableHeight);
+        calculateImageScaleBounds(drawableWidth, drawableHeight)
+        setupInitialImagePosition(drawableWidth, drawableHeight)
 
-        if (mCropBoundsChangeListener != null) {
-            mCropBoundsChangeListener.onCropAspectRatioChanged(mTargetAspectRatio);
-        }
-        if (mTransformImageListener != null) {
-            mTransformImageListener.onScale(getCurrentScale());
-            mTransformImageListener.onRotate(getCurrentAngle());
+        mCropBoundsChangeListener?.onCropAspectRatioChanged(mTargetAspectRatio)
+        mTransformImageListener?.let {
+            it.onScale(getCurrentScale())
+            it.onRotate(getCurrentAngle())
         }
     }
 
     /**
      * This method checks whether current image fills the crop bounds.
      */
-    protected boolean isImageWrapCropBounds() {
-        return isImageWrapCropBounds(mCurrentImageCorners);
+    protected fun isImageWrapCropBounds(): Boolean {
+        return isImageWrapCropBounds(mCurrentImageCorners)
     }
 
     /**
@@ -419,17 +412,17 @@ public class CropImageView extends TransformImageView {
      * @param imageCorners - corners of a rectangle
      * @return - true if it wraps crop bounds, false - otherwise
      */
-    protected boolean isImageWrapCropBounds(float[] imageCorners) {
-        mTempMatrix.reset();
-        mTempMatrix.setRotate(-getCurrentAngle());
+    protected fun isImageWrapCropBounds(imageCorners: FloatArray): Boolean {
+        mTempMatrix.reset()
+        mTempMatrix.setRotate(-getCurrentAngle())
 
-        float[] unrotatedImageCorners = Arrays.copyOf(imageCorners, imageCorners.length);
-        mTempMatrix.mapPoints(unrotatedImageCorners);
+        val unrotatedImageCorners = Arrays.copyOf(imageCorners, imageCorners.size)
+        mTempMatrix.mapPoints(unrotatedImageCorners)
 
-        float[] unrotatedCropBoundsCorners = RectUtils.getCornersFromRect(mCropRect);
-        mTempMatrix.mapPoints(unrotatedCropBoundsCorners);
+        val unrotatedCropBoundsCorners = RectUtils.getCornersFromRect(mCropRect)
+        mTempMatrix.mapPoints(unrotatedCropBoundsCorners)
 
-        return RectUtils.trapToRect(unrotatedImageCorners).contains(RectUtils.trapToRect(unrotatedCropBoundsCorners));
+        return RectUtils.trapToRect(unrotatedImageCorners).contains(RectUtils.trapToRect(unrotatedCropBoundsCorners))
     }
 
     /**
@@ -440,24 +433,25 @@ public class CropImageView extends TransformImageView {
      * @param centerY    - scale center Y
      * @param durationMs - zoom animation duration
      */
-    protected void zoomImageToPosition(float scale, float centerX, float centerY, long durationMs) {
-        if (scale > getMaxScale()) {
-            scale = getMaxScale();
+    protected fun zoomImageToPosition(scale: Float, centerX: Float, centerY: Float, durationMs: Long) {
+        val finalScale = if (scale > getMaxScale()) {
+            getMaxScale()
+        } else {
+            scale
         }
 
-        final float oldScale = getCurrentScale();
-        final float deltaScale = scale - oldScale;
+        val oldScale = getCurrentScale()
+        val deltaScale = finalScale - oldScale
 
-        post(mZoomImageToPositionRunnable = new ZoomImageToPosition(CropImageView.this,
-                durationMs, oldScale, deltaScale, centerX, centerY));
+        mZoomImageToPositionRunnable = ZoomImageToPosition(
+            this,
+            durationMs, oldScale, deltaScale, centerX, centerY)
+        post(mZoomImageToPositionRunnable!!)
     }
 
-    private void calculateImageScaleBounds() {
-        final Drawable drawable = getDrawable();
-        if (drawable == null) {
-            return;
-        }
-        calculateImageScaleBounds(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    private fun calculateImageScaleBounds() {
+        val drawable = drawable ?: return
+        calculateImageScaleBounds(drawable.intrinsicWidth.toFloat(), drawable.intrinsicHeight.toFloat())
     }
 
     /**
@@ -466,12 +460,12 @@ public class CropImageView extends TransformImageView {
      * @param drawableWidth  - image width
      * @param drawableHeight - image height
      */
-    private void calculateImageScaleBounds(float drawableWidth, float drawableHeight) {
-        float widthScale = Math.min(mCropRect.width() / drawableWidth, mCropRect.width() / drawableHeight);
-        float heightScale = Math.min(mCropRect.height() / drawableHeight, mCropRect.height() / drawableWidth);
+    private fun calculateImageScaleBounds(drawableWidth: Float, drawableHeight: Float) {
+        val widthScale = min(mCropRect.width() / drawableWidth, mCropRect.width() / drawableHeight)
+        val heightScale = min(mCropRect.height() / drawableHeight, mCropRect.height() / drawableWidth)
 
-        mMinScale = Math.min(widthScale, heightScale);
-        mMaxScale = mMinScale * mMaxScaleMultiplier;
+        mMinScale = min(widthScale, heightScale)
+        mMaxScale = mMinScale * mMaxScaleMultiplier
     }
 
     /**
@@ -481,37 +475,37 @@ public class CropImageView extends TransformImageView {
      * @param drawableWidth  - image width
      * @param drawableHeight - image height
      */
-    private void setupInitialImagePosition(float drawableWidth, float drawableHeight) {
-        float cropRectWidth = mCropRect.width();
-        float cropRectHeight = mCropRect.height();
+    private fun setupInitialImagePosition(drawableWidth: Float, drawableHeight: Float) {
+        val cropRectWidth = mCropRect.width()
+        val cropRectHeight = mCropRect.height()
 
-        float widthScale = mCropRect.width() / drawableWidth;
-        float heightScale = mCropRect.height() / drawableHeight;
+        val widthScale = mCropRect.width() / drawableWidth
+        val heightScale = mCropRect.height() / drawableHeight
 
-        float initialMinScale = Math.max(widthScale, heightScale);
+        val initialMinScale = max(widthScale, heightScale)
 
-        float tw = (cropRectWidth - drawableWidth * initialMinScale) / 2.0f + mCropRect.left;
-        float th = (cropRectHeight - drawableHeight * initialMinScale) / 2.0f + mCropRect.top;
+        val tw = (cropRectWidth - drawableWidth * initialMinScale) / 2.0f + mCropRect.left
+        val th = (cropRectHeight - drawableHeight * initialMinScale) / 2.0f + mCropRect.top
 
-        mCurrentImageMatrix.reset();
-        mCurrentImageMatrix.postScale(initialMinScale, initialMinScale);
-        mCurrentImageMatrix.postTranslate(tw, th);
-        setImageMatrix(mCurrentImageMatrix);
+        mCurrentImageMatrix.reset()
+        mCurrentImageMatrix.postScale(initialMinScale, initialMinScale)
+        mCurrentImageMatrix.postTranslate(tw, th)
+        setImageMatrix(mCurrentImageMatrix)
     }
 
     /**
      * This method extracts all needed values from the styled attributes.
      * Those are used to configure the view.
      */
-    @SuppressWarnings("deprecation")
-    protected void processStyledAttributes(@NonNull TypedArray a) {
-        float targetAspectRatioX = Math.abs(a.getFloat(R.styleable.ucrop_UCropView_ucrop_aspect_ratio_x, DEFAULT_ASPECT_RATIO));
-        float targetAspectRatioY = Math.abs(a.getFloat(R.styleable.ucrop_UCropView_ucrop_aspect_ratio_y, DEFAULT_ASPECT_RATIO));
+    @Suppress("DEPRECATION")
+    fun processStyledAttributes(@NonNull a: TypedArray) {
+        val targetAspectRatioX = kotlin.math.abs(a.getFloat(R.styleable.ucrop_UCropView_ucrop_aspect_ratio_x, DEFAULT_ASPECT_RATIO))
+        val targetAspectRatioY = kotlin.math.abs(a.getFloat(R.styleable.ucrop_UCropView_ucrop_aspect_ratio_y, DEFAULT_ASPECT_RATIO))
 
-        if (targetAspectRatioX == SOURCE_IMAGE_ASPECT_RATIO || targetAspectRatioY == SOURCE_IMAGE_ASPECT_RATIO) {
-            mTargetAspectRatio = SOURCE_IMAGE_ASPECT_RATIO;
+        mTargetAspectRatio = if (targetAspectRatioX == SOURCE_IMAGE_ASPECT_RATIO || targetAspectRatioY == SOURCE_IMAGE_ASPECT_RATIO) {
+            SOURCE_IMAGE_ASPECT_RATIO
         } else {
-            mTargetAspectRatio = targetAspectRatioX / targetAspectRatioY;
+            targetAspectRatioX / targetAspectRatioY
         }
     }
 
@@ -521,58 +515,38 @@ public class CropImageView extends TransformImageView {
      * Runnable can be terminated either vie {@link #cancelAllAnimations()} method
      * or when certain conditions inside {@link WrapCropBoundsRunnable#run()} method are triggered.
      */
-    private static class WrapCropBoundsRunnable implements Runnable {
+    private class WrapCropBoundsRunnable(
+        cropImageView: CropImageView,
+        private val mDurationMs: Long,
+        private val mOldX: Float,
+        private val mOldY: Float,
+        private val mCenterDiffX: Float,
+        private val mCenterDiffY: Float,
+        private val mOldScale: Float,
+        private val mDeltaScale: Float,
+        private val mWillBeImageInBoundsAfterTranslate: Boolean
+    ) : Runnable {
 
-        private final WeakReference<CropImageView> mCropImageView;
+        private val mCropImageView: WeakReference<CropImageView> = WeakReference(cropImageView)
+        private val mStartTime: Long = System.currentTimeMillis()
 
-        private final long mDurationMs, mStartTime;
-        private final float mOldX, mOldY;
-        private final float mCenterDiffX, mCenterDiffY;
-        private final float mOldScale;
-        private final float mDeltaScale;
-        private final boolean mWillBeImageInBoundsAfterTranslate;
+        override fun run() {
+            val cropImageView = mCropImageView.get() ?: return
 
-        public WrapCropBoundsRunnable(CropImageView cropImageView,
-                                      long durationMs,
-                                      float oldX, float oldY,
-                                      float centerDiffX, float centerDiffY,
-                                      float oldScale, float deltaScale,
-                                      boolean willBeImageInBoundsAfterTranslate) {
+            val now = System.currentTimeMillis()
+            val currentMs = min(mDurationMs.toFloat(), (now - mStartTime).toFloat())
 
-            mCropImageView = new WeakReference<>(cropImageView);
-
-            mDurationMs = durationMs;
-            mStartTime = System.currentTimeMillis();
-            mOldX = oldX;
-            mOldY = oldY;
-            mCenterDiffX = centerDiffX;
-            mCenterDiffY = centerDiffY;
-            mOldScale = oldScale;
-            mDeltaScale = deltaScale;
-            mWillBeImageInBoundsAfterTranslate = willBeImageInBoundsAfterTranslate;
-        }
-
-        @Override
-        public void run() {
-            CropImageView cropImageView = mCropImageView.get();
-            if (cropImageView == null) {
-                return;
-            }
-
-            long now = System.currentTimeMillis();
-            float currentMs = Math.min(mDurationMs, now - mStartTime);
-
-            float newX = CubicEasing.easeOut(currentMs, 0, mCenterDiffX, mDurationMs);
-            float newY = CubicEasing.easeOut(currentMs, 0, mCenterDiffY, mDurationMs);
-            float newScale = CubicEasing.easeInOut(currentMs, 0, mDeltaScale, mDurationMs);
+            val newX = CubicEasing.easeOut(currentMs, 0f, mCenterDiffX, mDurationMs.toFloat())
+            val newY = CubicEasing.easeOut(currentMs, 0f, mCenterDiffY, mDurationMs.toFloat())
+            val newScale = CubicEasing.easeInOut(currentMs, 0f, mDeltaScale, mDurationMs.toFloat())
 
             if (currentMs < mDurationMs) {
-                cropImageView.postTranslate(newX - (cropImageView.mCurrentImageCenter[0] - mOldX), newY - (cropImageView.mCurrentImageCenter[1] - mOldY));
+                cropImageView.postTranslate(newX - (cropImageView.mCurrentImageCenter[0] - mOldX), newY - (cropImageView.mCurrentImageCenter[1] - mOldY))
                 if (!mWillBeImageInBoundsAfterTranslate) {
-                    cropImageView.zoomInImage(mOldScale + newScale, cropImageView.mCropRect.centerX(), cropImageView.mCropRect.centerY());
+                    cropImageView.zoomInImage(mOldScale + newScale, cropImageView.mCropRect.centerX(), cropImageView.mCropRect.centerY())
                 }
                 if (!cropImageView.isImageWrapCropBounds()) {
-                    cropImageView.post(this);
+                    cropImageView.post(this)
                 }
             }
         }
@@ -584,50 +558,32 @@ public class CropImageView extends TransformImageView {
      * Runnable can be terminated either vie {@link #cancelAllAnimations()} method
      * or when certain conditions inside {@link ZoomImageToPosition#run()} method are triggered.
      */
-    private static class ZoomImageToPosition implements Runnable {
+    private class ZoomImageToPosition(
+        cropImageView: CropImageView,
+        private val mDurationMs: Long,
+        private val mOldScale: Float,
+        private val mDeltaScale: Float,
+        private val mDestX: Float,
+        private val mDestY: Float
+    ) : Runnable {
 
-        private final WeakReference<CropImageView> mCropImageView;
+        private val mCropImageView: WeakReference<CropImageView> = WeakReference(cropImageView)
+        private val mStartTime: Long = System.currentTimeMillis()
 
-        private final long mDurationMs, mStartTime;
-        private final float mOldScale;
-        private final float mDeltaScale;
-        private final float mDestX;
-        private final float mDestY;
+        override fun run() {
+            val cropImageView = mCropImageView.get() ?: return
 
-        public ZoomImageToPosition(CropImageView cropImageView,
-                                   long durationMs,
-                                   float oldScale, float deltaScale,
-                                   float destX, float destY) {
-
-            mCropImageView = new WeakReference<>(cropImageView);
-
-            mStartTime = System.currentTimeMillis();
-            mDurationMs = durationMs;
-            mOldScale = oldScale;
-            mDeltaScale = deltaScale;
-            mDestX = destX;
-            mDestY = destY;
-        }
-
-        @Override
-        public void run() {
-            CropImageView cropImageView = mCropImageView.get();
-            if (cropImageView == null) {
-                return;
-            }
-
-            long now = System.currentTimeMillis();
-            float currentMs = Math.min(mDurationMs, now - mStartTime);
-            float newScale = CubicEasing.easeInOut(currentMs, 0, mDeltaScale, mDurationMs);
+            val now = System.currentTimeMillis()
+            val currentMs = min(mDurationMs.toFloat(), (now - mStartTime).toFloat())
+            val newScale = CubicEasing.easeInOut(currentMs, 0f, mDeltaScale, mDurationMs.toFloat())
 
             if (currentMs < mDurationMs) {
-                cropImageView.zoomInImage(mOldScale + newScale, mDestX, mDestY);
-                cropImageView.post(this);
+                cropImageView.zoomInImage(mOldScale + newScale, mDestX, mDestY)
+                cropImageView.post(this)
             } else {
-                cropImageView.setImageToWrapCropBounds();
+                cropImageView.setImageToWrapCropBounds()
             }
         }
-
     }
-
 }
+
