@@ -1,5 +1,6 @@
 package com.yalantis.ucrop.view.widget
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.res.ColorStateList
@@ -13,6 +14,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import androidx.annotation.ColorInt
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.yalantis.ucrop.R
@@ -23,13 +25,15 @@ import java.util.Locale
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
  */
+@SuppressLint("CustomViewStyleable")
 class AspectRatioTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @SuppressLint("CustomViewStyleable")
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : this(context, attrs, defStyleAttr) {
         val a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView)
         init(a)
@@ -96,7 +100,7 @@ class AspectRatioTextView @JvmOverloads constructor(
     }
 
     @Suppress("deprecation")
-    private fun init(@NonNull a: TypedArray) {
+    private fun init(a: TypedArray) {
         gravity = Gravity.CENTER_HORIZONTAL
 
         mAspectRatioTitle = a.getString(R.styleable.ucrop_AspectRatioTextView_ucrop_artv_ratio_title)

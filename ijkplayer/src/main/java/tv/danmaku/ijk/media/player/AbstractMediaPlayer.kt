@@ -17,7 +17,13 @@
 
 package tv.danmaku.ijk.media.player
 
+import android.annotation.TargetApi
+import android.content.Context
+import android.net.Uri
+import android.os.Build
 import tv.danmaku.ijk.media.player.misc.IMediaDataSource
+import java.io.IOException
+import java.util.Map
 
 @Suppress("WeakerAccess")
 abstract class AbstractMediaPlayer : IMediaPlayer {
@@ -108,5 +114,9 @@ abstract class AbstractMediaPlayer : IMediaPlayer {
     override fun setDataSource(mediaDataSource: IMediaDataSource?) {
         throw UnsupportedOperationException()
     }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Throws(IOException::class, IllegalArgumentException::class, SecurityException::class, IllegalStateException::class)
+    abstract override fun setDataSource(context: Context, uri: Uri, headers: java.util.Map<String, String>?)
 }
 
