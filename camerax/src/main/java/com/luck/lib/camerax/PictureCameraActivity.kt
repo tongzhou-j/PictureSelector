@@ -119,7 +119,7 @@ class PictureCameraActivity : AppCompatActivity(), IObtainCameraView {
 
     override fun onConfigurationChanged(@NonNull newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        mCameraView.onConfigurationChanged(newConfig)
+        mCameraView.handleConfigurationChanged(newConfig)
     }
 
     override fun onBackPressed() {

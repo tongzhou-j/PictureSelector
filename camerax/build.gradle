@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'maven-publish'
     id 'org.jetbrains.kotlin.android'
 }
 
@@ -41,8 +42,6 @@ ext {
     PUBLISH_ARTIFACT_ID = "camerax"
 }
 
-apply from: '../publish.gradle'
-
 dependencies {
     def camerax_version = "1.2.1"
     api "androidx.camera:camera-core:${camerax_version}"
@@ -52,4 +51,18 @@ dependencies {
     implementation "androidx.appcompat:appcompat:${cfgs.version_appcompat}"
     implementation "androidx.transition:transition:${cfgs.transition}"
     implementation "androidx.concurrent:concurrent-futures:${cfgs.futures}"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.github.tongzhou-j'
+                artifactId = 'camerax'
+                version = '1.0.7'
+            }
+        }
+    }
 }

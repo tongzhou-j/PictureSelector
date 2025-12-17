@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'maven-publish'
     id 'org.jetbrains.kotlin.android'
 }
 
@@ -33,7 +34,25 @@ android {
     }
 }
 
+ext {
+    PUBLISH_ARTIFACT_ID = "ijkplayer"
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.github.tongzhou-j'
+                artifactId = 'ijkplayer'
+                version = '1.0.7'
+            }
+        }
+    }
 }
 

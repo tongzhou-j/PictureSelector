@@ -1,10 +1,6 @@
 jdk:
-  - openjdk17
-
+  - openjdk11
 before_install:
-  - ./gradlew --version
-
-# 跳过 app 模块的构建，只构建库模块
+  - ./gradlew clean
 install:
-  - ./gradlew clean :selector:assembleRelease :selector:publishToMavenLocal -PisJitpack=true -x test -x lint
-
+  - ./gradlew :camerax:assembleRelease :compress:assembleRelease :ijkplayer:assembleRelease :ucrop:assembleRelease

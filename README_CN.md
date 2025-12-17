@@ -1,5 +1,7 @@
 # PictureSelector 3.0
    一款针对Android平台下的图片选择器，支持从相册获取图片、视频、音频&拍照，支持裁剪(单图or多图裁剪)、压缩、主题自定义配置等功能，支持动态获取权限&适配Android 5.0+系统的开源图片选择框架。<br>
+   
+   **✨ 现已完全迁移至 Kotlin！** 所有模块（compress、camerax、ucrop、ijkplayer）已转换为 Kotlin，以获得更好的性能和现代化的 Android 开发体验。<br>
     
    [English🇺🇸](README.md)
 
@@ -33,45 +35,50 @@
 repositories {
   google()
   mavenCentral()
+  maven { url 'https://jitpack.io' }
 }
 
 dependencies {
   // PictureSelector 基础 (必须)
-  implementation 'io.github.tongzhou-j:pictureselector:v3.11.2'
+  implementation 'com.github.tongzhou-j:pictureselector:1.0.7'
 
   // 图片压缩 (按需引入)
-  implementation 'io.github.tongzhou-j:compress:v3.11.2'
+  implementation 'com.github.tongzhou-j:compress:1.0.7'
 
   // 图片裁剪 (按需引入)
   implementation 'io.github.tongzhou-j:ucrop:v3.11.2'
 
   // 自定义相机 (按需引入)
-  implementation 'io.github.tongzhou-j:camerax:v3.11.2'
+  implementation 'com.github.tongzhou-j:camerax:1.0.7'
+  
+  // 视频播放器 (按需引入)
+  implementation 'com.github.tongzhou-j:ijkplayer:1.0.7'
 }
 ```
 
-Kotlin版本[Demo](https://github.com/tongzhou-j/PictureSelector/tree/master)
-
-```sh
-dependencies {
-  // 请不要跨版本升级，请先查看Kotlin版Demo
-  implementation 'io.github.tongzhou-j:pictureselector:kotlin-v1.0.0-beta'
-}
-```
+**注意：** 本项目现已完全使用 Kotlin 编写。所有模块包括 compress、camerax、ucrop 和 ijkplayer 均已迁移至 Kotlin，以获得更好的性能和可维护性。
 
 或者Maven:
 
 ```sh
+<!-- 需要添加 JitPack 仓库 -->
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+
 <dependency>
-  <groupId>io.github.tongzhou-j</groupId>
-  <artifactId>pictureselector</artifactId>
-  <version>v3.11.2</version>
+  <groupId>com.github.tongzhou-j</groupId>
+  <artifactId>PictureSelector</artifactId>
+  <version>1.0.7</version>
 </dependency>
 
 <dependency>
-  <groupId>io.github.tongzhou-j</groupId>
+  <groupId>com.github.tongzhou-j</groupId>
   <artifactId>compress</artifactId>
-  <version>v3.11.2</version>
+  <version>1.0.7</version>
 </dependency>
 
 <dependency>
@@ -81,9 +88,15 @@ dependencies {
 </dependency>
 
 <dependency>
-  <groupId>io.github.tongzhou-j</groupId>
+  <groupId>com.github.tongzhou-j</groupId>
   <artifactId>camerax</artifactId>
-  <version>v3.11.2</version>
+  <version>1.0.7</version>
+</dependency>
+
+<dependency>
+  <groupId>com.github.tongzhou-j</groupId>
+  <artifactId>ijkplayer</artifactId>
+  <version>1.0.7</version>
 </dependency>
 ```
 
@@ -127,9 +140,9 @@ Android 11 使用相机，需要再AndroidManifest.xm 添加如下代码：
 ```
 
 ## ImageEngine
-[GlideEngine](https://github.com/tongzhou-j/PictureSelector/blob/version_component/app/src/main/java/com/luck/pictureselector/GlideEngine.java)<br> 
-[PicassoEngine](https://github.com/tongzhou-j/PictureSelector/blob/version_component/app/src/main/java/com/luck/pictureselector/PicassoEngine.java)<br>
-[CoilEngine](https://github.com/tongzhou-j/PictureSelector/blob/version_component/app/src/main/java/com/luck/pictureselector/CoilEngine.java)<br>
+[GlideEngine](https://github.com/tongzhou-j/PictureSelector/blob/master/app/src/main/java/com/luck/pictureselector/GlideEngine.kt)<br> 
+[PicassoEngine](https://github.com/tongzhou-j/PictureSelector/blob/master/app/src/main/java/com/luck/pictureselector/PicassoEngine.kt)<br>
+[CoilEngine](https://github.com/tongzhou-j/PictureSelector/blob/master/app/src/main/java/com/luck/pictureselector/CoilEngine.kt)<br>
 
 
 ## 进阶使用

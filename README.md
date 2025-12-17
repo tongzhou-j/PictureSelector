@@ -1,5 +1,7 @@
 # PictureSelector 3.0 
-   A PictureSelector for Android platform, which supports obtaining pictures, videos, audio & photos from photo albums, cutting (single picture or multi picture cutting), compression, theme custom configuration and other functions, and supports dynamic access & an open source picture selection framework suitable for Android 5.0 + system<br> 
+   A PictureSelector for Android platform, which supports obtaining pictures, videos, audio & photos from photo albums, cutting (single picture or multi picture cutting), compression, theme custom configuration and other functions, and supports dynamic access & an open source picture selection framework suitable for Android 5.0 + system.<br>
+   
+   **✨ Now fully migrated to Kotlin!** All modules (compress, camerax, ucrop, ijkplayer) have been converted to Kotlin for better performance and modern Android development.<br> 
    
    [简体中文🇨🇳](README_CN.md)
 
@@ -31,45 +33,50 @@ Use Gradle
 repositories {
   google()
   mavenCentral()
+  maven { url 'https://jitpack.io' }
 }
 
 dependencies {
   // PictureSelector basic (Necessary)
-  implementation 'com.github.tongzhou-j:pictureselector:v1.0.6'
+  implementation 'com.github.tongzhou-j:pictureselector:1.0.7'
 
   // image compress library (Not necessary)
-  implementation 'io.github.tongzhou-j:compress:v3.11.2'
+  implementation 'com.github.tongzhou-j:compress:1.0.7'
 
   // uCrop library (Not necessary)
   implementation 'io.github.tongzhou-j:ucrop:v3.11.2'
 
   // simple camerax library (Not necessary)
-  implementation 'io.github.tongzhou-j:camerax:v3.11.2'
+  implementation 'com.github.tongzhou-j:camerax:1.0.7'
+  
+  // video player library (Not necessary)
+  implementation 'com.github.tongzhou-j:ijkplayer:1.0.7'
 }
 ```
 
-Kotlin Version [Demo](https://github.com/tongzhou-j/PictureSelector/tree/master)
-
-```sh
-dependencies {
-  // Please do not upgrade across versions, please check the Kotlin version demo first
-  implementation 'io.github.tongzhou-j:pictureselector:kotlin-v1.0.0-beta'
-}
-```
+**Note:** This project is now fully written in Kotlin. All modules including compress, camerax, ucrop, and ijkplayer have been migrated to Kotlin for better performance and maintainability.
 
 Or Maven:
 
 ```sh
+<!-- Add JitPack repository -->
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+
 <dependency>
-  <groupId>io.github.tongzhou-j</groupId>
-  <artifactId>pictureselector</artifactId>
-  <version>v1.0.6</version>
+  <groupId>com.github.tongzhou-j</groupId>
+  <artifactId>PictureSelector</artifactId>
+  <version>1.0.7</version>
 </dependency>
 
 <dependency>
-  <groupId>io.github.tongzhou-j</groupId>
+  <groupId>com.github.tongzhou-j</groupId>
   <artifactId>compress</artifactId>
-  <version>v3.11.2</version>
+  <version>1.0.7</version>
 </dependency>
 
 <dependency>
@@ -79,9 +86,15 @@ Or Maven:
 </dependency>
 
 <dependency>
-  <groupId>io.github.tongzhou-j</groupId>
+  <groupId>com.github.tongzhou-j</groupId>
   <artifactId>camerax</artifactId>
-  <version>v3.11.2</version>
+  <version>1.0.7</version>
+</dependency>
+
+<dependency>
+  <groupId>com.github.tongzhou-j</groupId>
+  <artifactId>ijkplayer</artifactId>
+  <version>1.0.7</version>
 </dependency>
 ```
 
@@ -125,9 +138,9 @@ Android 11 use camera，AndroidManifest.xm add the code：
 ```
 
 ## ImageEngine
-[GlideEngine](https://github.com/tongzhou-j/PictureSelector/blob/version_component/app/src/main/java/com/luck/pictureselector/GlideEngine.java)<br> 
-[PicassoEngine](https://github.com/tongzhou-j/PictureSelector/blob/version_component/app/src/main/java/com/luck/pictureselector/PicassoEngine.java)<br>
-[CoilEngine](https://github.com/tongzhou-j/PictureSelector/blob/version_component/app/src/main/java/com/luck/pictureselector/CoilEngine.java)<br>
+[GlideEngine](https://github.com/tongzhou-j/PictureSelector/blob/master/app/src/main/java/com/luck/pictureselector/GlideEngine.kt)<br> 
+[PicassoEngine](https://github.com/tongzhou-j/PictureSelector/blob/master/app/src/main/java/com/luck/pictureselector/PicassoEngine.kt)<br>
+[CoilEngine](https://github.com/tongzhou-j/PictureSelector/blob/master/app/src/main/java/com/luck/pictureselector/CoilEngine.kt)<br>
 
 ## Usage
 For more features, see [documentation](https://github.com/tongzhou-j/PictureSelector/wiki/PictureSelector-3.0-%E5%8A%9F%E8%83%BDapi%E8%AF%B4%E6%98%8E)
