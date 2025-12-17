@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'maven-publish'
     id 'org.jetbrains.kotlin.android'
 }
 
@@ -46,8 +47,6 @@ ext {
     PUBLISH_ARTIFACT_ID = "ucrop"
 }
 
-apply from: '../publish.gradle'
-
 dependencies {
     implementation "androidx.appcompat:appcompat:${cfgs.version_appcompat}"
     implementation "androidx.exifinterface:exifinterface:${cfgs.exifinterface_version}"
@@ -55,4 +54,18 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:${cfgs.okhttp}"
     implementation "androidx.recyclerview:recyclerview:${cfgs.version_recyclerview}"
     implementation "com.google.code.gson:gson:${cfgs.gson}"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'com.github.tongzhou-j'
+                artifactId = 'ucrop'
+                version = '1.0.7'
+            }
+        }
+    }
 }

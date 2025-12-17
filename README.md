@@ -44,7 +44,7 @@ dependencies {
   implementation 'com.github.tongzhou-j:compress:1.0.7'
 
   // uCrop library (Not necessary)
-  implementation 'io.github.tongzhou-j:ucrop:v3.11.2'
+  implementation 'com.github.tongzhou-j:ucrop:1.0.7'
 
   // simple camerax library (Not necessary)
   implementation 'com.github.tongzhou-j:camerax:1.0.7'
@@ -80,9 +80,9 @@ Or Maven:
 </dependency>
 
 <dependency>
-  <groupId>io.github.tongzhou-j</groupId>
+  <groupId>com.github.tongzhou-j</groupId>
   <artifactId>ucrop</artifactId>
-  <version>v3.11.2</version>
+  <version>1.0.7</version>
 </dependency>
 
 <dependency>
